@@ -1,0 +1,198 @@
+#!/usr/bin/env bash
+#set -x
+
+STATEFILE=/var/lib/imatest/.state
+
+function logit()
+{
+  local output=$1
+  shift
+
+  if [ "${output}" == "-" ] || [ -z "${output}" ]; then
+    echo $@
+  else
+    echo $@ >> ${output}
+  fi
+
+}
+
+function bannerit()
+{
+  local output=$1
+
+  if [ -z "$(type -p banner)" ]; then
+    logit $@
+  else
+    shift
+    if [ "${output}" == "-" ] || [ -z "${output}" ]; then
+      banner "$@"
+    else
+      banner "$@" >> ${output}
+    fi
+  fi
+}
+
+function run_testcase()
+{
+  local testcasefile="$1"
+  local output="$2"
+
+  local rc
+
+  if [ "${output}" == "-" ] || [ -z "${output}" ]; then
+    ./${testcasefile}
+    rc=$?
+  else
+    ./${testcasefile} >> ${output} 2>&1
+    rc=$?
+  fi
+
+  return $rc
+} # run_testcase
+
+function imatest()
+{
+  local statefile=$1
+  local testcases=$2
+  local logfile=$3
+
+  local testcasedir=$(dirname ${testcases})
+  local line=0 is_retry=0
+  local testcases_lines=$(wc -l < ${testcases})
+  local testcase rc
+
+  export SUCCESS=0
+  export FAIL=1
+  export SUCCESS_NEEDS_REBOOT=2
+  export SKIP=3
+  export RETRY_AFTER_REBOOT=4
+
+  if [ -f ${statefile} ]; then
+    source ${statefile}
+  else
+    logit "${logfile}" ""
+    logit "${logfile}" "================================================================================="
+    bannerit "${logfile}" "New test"
+    logit "${logfile}" "$(date): Starting a new test run"
+  fi
+  [ -z "$line" ] && line=0
+
+  while :; do
+    if [ "${line}" == "end" ] || \
+       [ ${line} -gt ${testcases_lines} ]; then
+      echo "line=end" > ${statefile}
+      break
+    fi
+    pushd ${testcasedir} &>/dev/null
+
+    line=$((line + 1))
+    echo "line=${line}" > ${statefile}
+
+    testcase=$(sed -n ${line}p ${testcases})
+    if [ -n "$(echo ${testcase} | tr -d " ")" ]; then
+      local testcase_dir=$(dirname ${testcase})
+
+      if [ -d ${testcase_dir} ]; then
+        local testcasefile=$(basename ${testcase})
+        pushd ${testcase_dir} &>/dev/null
+        logit "${logfile}" "---------------------------------------------------------------------------------"
+        logit "${logfile}" "Running testcase ${testcase} on $(uname -sr)"
+
+        run_testcase "${testcasefile}" "${logfile}"
+        rc=$?
+
+        logit "${logfile}" "Result from ${testcase}: $rc"
+
+        case "$rc" in
+        ${SUCCESS})
+          logit "${logfile}" "  Test completed successfully"
+          ;;
+        ${SKIP})
+          logit "${logfile}" "  Skipping test"
+          ;;
+        ${SUCCESS_NEEDS_REBOOT})
+          logit "${logfile}" "  Test completed successfully (trying next test before rebooting)"
+          ;;
+        ${FAIL})
+          logit "${logfile}" "  Test failed."
+          ;;
+        ${RETRY_AFTER_REBOOT})
+          if [ $is_retry -ne 0 ]; then
+            logit "${logfile}" "  Not retrying test after reboot since this is already a retry."
+          else
+            logit "${logfile}" "  Retrying test after reboot"
+            line=$((line-1))
+            if [ ${line} -ge 0 ]; then
+              echo "line=${line}" > ${statefile}
+            else
+              rm -f ${statefile}
+            fi
+            echo "is_retry=1" >> ${statefile}
+            reboot
+          fi
+          ;;
+        *) logit "${logfile}" ">>>>>>>>> Unhandled return code";;
+        esac
+
+        popd &>/dev/null
+      fi
+      is_retry=0
+
+    fi
+    popd &>/dev/null
+  done
+}
+
+function usage()
+{
+  cat <<_EOF_
+Usage: $1 --testcases <testcases> --logfile <logfile>
+The following options are supported:
+--testcases <testcase>  : Run the given test cases
+--logfile <logfile>     : Logfile for output of test case runs
+--clear                 : Remove previous state
+--help|-h               : Display this help screen and exit
+_EOF_
+}
+
+function main()
+{
+  local statedir=$(dirname ${STATEFILE})
+  local testcases=""
+  local clear=0
+
+  while [ $# -gt 0 ]; do
+    case "$1" in
+    --testcases) shift 1; testcases=$1;;
+    --logfile) shift 1; logfile=$1;;
+    --clear) clear=1;;
+    --help) usage $0; exit 0;;
+    *) echo "Unknown option: $1"; exit 1;;
+    esac
+    shift
+  done
+
+  if [ -z "${testcases}" ]; then
+    echo "Error: Missing testcases file."
+    exit 1
+  fi
+
+  if [ ! -r "${testcases}" ]; then
+    echo "Error: Cannot read testcases file ${testcases}."
+    exit 1
+  fi
+
+  mkdir -p ${statedir}
+  if [ $? -ne 0 ]; then
+    echo "Error: Could not create statefile dir ${statdir}."
+    exit 1
+  fi
+
+  if [ $clear -ne 0 ]; then
+    rm -f ${STATEFILE}
+  fi
+
+  imatest "${STATEFILE}" "${testcases}" "${logfile}"
+}
+
+main "$@"

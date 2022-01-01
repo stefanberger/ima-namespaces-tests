@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+
+# shellcheck disable=SC1091
+#set -x
+
+DIR="$(dirname "$0")"
+ROOT="${DIR}/.."
+
+source "${ROOT}/common.sh"
+
+check_root
+
+check_ima_support
+
+check_auditd
+
+setup_busybox_container \
+	"${ROOT}/ns-common.sh" \
+	"${DIR}/audit.sh" \
+	"${DIR}/reaudit.sh"
+
+# Test auditing caused by executable run in namespace
+
+# Accomodate the case where we have a host audit rule
+num_extra=0
+ctr=$(grep -c -E '^audit.*func=BPRM_CHECK .*MAY_EXEC' /sys/kernel/security/ima/policy)
+[ "${ctr}" -ne 0 ] && num_extra=1
+
+before=$(grep -c "rootfs/bin/busybox2" "${AUDITLOG}")
+
+echo "INFO: Testing auditing caused by executable in container"
+
+run_busybox_container ./audit.sh
+rc=$?
+if [ "${rc}" -ne 0 ] ; then
+  echo " Error: Test failed in IMA namespace."
+  exit "${rc}"
+fi
+
+expected=$((before + 1 + num_extra))
+after=$(wait_num_entries "${AUDITLOG}" "rootfs/bin/busybox2" $((expected)) 30)
+if [ $((expected)) -ne "${after}" ]; then
+  echo " Error: Wrong number of busybox2 entries in audit log."
+  echo "        Expected $((expected)), found ${after}."
+  exit "${FAIL:-1}"
+fi
+
+echo "INFO: Pass test 1"
+
+# Test re-auditing using modified executable run in namespace
+
+before="${after}"
+
+echo "INFO: Testing re-auditing caused by executable in container"
+
+run_busybox_container ./reaudit.sh
+rc=$?
+if [ ${rc} -ne 0 ] ; then
+  echo " Error: Test failed in IMA namespace."
+  exit "${rc}"
+fi
+
+expected=$((before + 2 + num_extra))
+after=$(wait_num_entries "${AUDITLOG}" "rootfs/bin/busybox2" $((expected)) 30)
+if [ $((expected)) -ne "${after}" ]; then
+  echo " Error: Wrong number of busybox2 entries in audit log."
+  echo "        Expected $((expected)), found ${after}."
+  exit "${FAIL:-1}"
+fi
+
+echo "INFO: Pass test 2"
+
+exit "${SUCCESS:-0}"

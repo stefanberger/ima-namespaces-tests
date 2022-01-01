@@ -1,0 +1,10 @@
+[Unit]
+Description=IMA test suite
+After=auditd.service
+
+[Service]
+Type=forking
+ExecStart=/bin/imatest --testcases /usr/share/imatest/testcases --logfile /var/log/imatest.log
+
+[Install]
+WantedBy=multi-user.target
