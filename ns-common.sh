@@ -27,3 +27,13 @@ mnt_securityfs()
 
   return 0
 }
+
+# Get the name of the template from the measurement log at the given
+# mountpoint
+get_template_from_log()
+{
+  local mntdir="$1"
+
+  grep boot_aggregate < "${mntdir}/ima/ascii_runtime_measurements" | \
+    busybox cut -d" " -f3
+}

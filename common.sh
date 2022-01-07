@@ -134,7 +134,7 @@ function run_busybox_container()
   rootfs="$(get_busybox_container_root)"
 
   SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
-  PATH=/bin \
+  PATH=/bin:/usr/bin \
   unshare --user --map-root-user --mount-proc --pid --fork \
     --root "${rootfs}" "${executable}"
   return $?

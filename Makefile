@@ -2,6 +2,7 @@
 INSTDIR ?= /usr/share/imatest
 
 TESTDIRS = \
+	appraise-1 \
 	audit-1 \
 	audit+measure-1 \
 	measure-1
@@ -15,8 +16,12 @@ $(INSTDIR)/% : % .FORCE
 .FORCE:
 
 all:
+	make -C keys all
 
-install: $(DESTS)
+clean:
+	make -C keys clean
+
+install: all $(DESTS)
 	install -m 755 imatest /usr/bin/imatest
 	install -m 644 imatest.service /usr/lib/systemd/system/imatest.service
 	install -m 644 testcases $(INSTDIR)
