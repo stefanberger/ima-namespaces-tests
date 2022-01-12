@@ -166,3 +166,22 @@ function wait_num_entries()
   echo "${ctr}"
   return 1
 }
+
+# Wait for a file to appear
+# @param1: Name of the file
+# @param2: Number of times to try with 0.1s waits in betwen
+function wait_for_file()
+{
+  local file="$1"
+  local retries="$2"
+
+  local c
+
+  for ((c = 0; c < retries; c++)); do
+    if [ -f "${file}" ]; then
+       return 0
+    fi
+    sleep 0.1
+  done
+  return 1
+}

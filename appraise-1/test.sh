@@ -14,6 +14,7 @@ setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
 	"${DIR}/appraise.sh" \
 	"${DIR}/reappraise.sh" \
+	"${DIR}/reappraise-after-host-file-modification.sh" \
 	"${ROOT}/keys/rsakey.pem" \
 	"${ROOT}/keys/rsa.crt"
 
@@ -45,5 +46,40 @@ if [ $rc -ne 0 ] ; then
 fi
 
 echo "INFO: Pass test 2"
+
+# Test re-appraisal after we modify a file appraised by the namespace from the host
+# Synchronization of this script and namespace is via shared files
+echo "INFO: Testing re-appraisal of file inside container after file modification by host"
+
+rootfs="$(get_busybox_container_root)"
+SYNCFILE=syncfile
+syncfile="${rootfs}/${SYNCFILE}"
+
+TESTEXE=/bin/busybox2
+testexe="${rootfs}/${TESTEXE}"
+
+TESTEXE="${TESTEXE}" SYNCFILE="${SYNCFILE}" \
+  run_busybox_container ./reappraise-after-host-file-modification.sh &
+pid=$!
+
+# Wait until namespace wants us to modify the file
+if ! wait_for_file "${syncfile}" 40; then
+  echo " Error: Syncfile did not appear!"
+else
+  # modify the file
+  echo >> "${testexe}"
+  # tell namespace to proceed
+  rm -f "${syncfile}"
+fi
+
+wait "${pid}"
+rc=$?
+
+if [ $rc -ne 0 ]; then
+  echo " Error: Test failed in IMA namespace."
+  exit "$rc"
+fi
+
+echo "INFO: Pass test 3"
 
 exit "${SUCCESS:-0}"
