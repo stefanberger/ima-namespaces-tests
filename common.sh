@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Shellcheck: ignore=SC2032
+
 AUDITLOG=/var/log/audit/audit.log
 
 if [ "$(id -u)" -ne 0 ] && [ -n "${HOME}" ]; then
@@ -12,6 +14,25 @@ function check_root()
 {
   if [ "$(id -u)" -ne 0 ]; then
     echo " Error: Need to be root to run this test."
+    exit "${SKIP:-3}"
+  fi
+}
+
+# Check whether running as root or otherwise if password-less sudo is
+# possible if it is allowed
+function check_root_or_sudo()
+{
+  if [ "$(id -u)" -eq 0 ]; then
+    return 0
+  fi
+  # not root; check sudo usage if allowed
+  if [ -n "${IMA_TEST_ALLOW_SUDO}" ]; then
+    if ! sudo -v -n &>/dev/null; then
+      echo " Error: Password-less sudo does NOT work."
+      exit "${SKIP:-3}"
+    fi
+  else
+    echo " Error: Did not test whether password-less sudo works. Need env. var. IMA_TEST_ALLOW_SUDO to be set."
     exit "${SKIP:-3}"
   fi
 }

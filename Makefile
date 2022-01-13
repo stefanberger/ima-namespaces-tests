@@ -3,6 +3,7 @@ INSTDIR ?= /usr/share/imatest
 
 TESTDIRS = \
 	appraise-1 \
+	appraise-2 \
 	audit-1 \
 	audit+measure-1 \
 	measure-1
