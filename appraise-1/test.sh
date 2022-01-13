@@ -15,8 +15,10 @@ setup_busybox_container \
 	"${DIR}/appraise.sh" \
 	"${DIR}/reappraise.sh" \
 	"${DIR}/reappraise-after-host-file-modification.sh" \
+	"${DIR}/reappraise-after-sign-with-unknown-key.sh" \
 	"${ROOT}/keys/rsakey.pem" \
-	"${ROOT}/keys/rsa.crt"
+	"${ROOT}/keys/rsa.crt" \
+	"${ROOT}/keys/rsakey2.pem"
 
 copy_elf_busybox_container "$(type -P keyctl)"
 copy_elf_busybox_container "$(type -P evmctl)"
@@ -81,5 +83,18 @@ if [ $rc -ne 0 ]; then
 fi
 
 echo "INFO: Pass test 3"
+
+# Test re-appraisal inside container involving an application signed with a
+# key unknown to the kernel and then re-signed
+echo "INFO: Testing re-appraisal inside container after signing with unknown key"
+
+run_busybox_container ./reappraise-after-sign-with-unknown-key.sh
+rc=$?
+if [ $rc -ne 0 ] ; then
+  echo " Error: Test failed in IMA namespace."
+  exit "$rc"
+fi
+
+echo "INFO: Pass test 4"
 
 exit "${SUCCESS:-0}"
