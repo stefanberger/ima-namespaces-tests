@@ -101,7 +101,9 @@ function setup_busybox_container()
 
   cp "${busybox}" "${rootfs}/bin"
   pushd "${rootfs}/bin" 1>/dev/null || exit "${FAIL:-1}"
-  for prg in mount echo ls cat env grep sh sleep which; do
+  for prg in \
+      cat chmod cut cp echo env grep ls mkdir mount rm \
+      sh sha1sum sha256sum sha384sum sha512sum sleep sync tail which; do
     ln -s busybox ${prg}
   done
   popd 1>/dev/null || exit "${FAIL:-1}"
@@ -148,6 +150,21 @@ function copy_elf_busybox_container()
 # Run the given executable or script in the busybox container
 function run_busybox_container()
 {
+  local rootfs
+
+  rootfs="$(get_busybox_container_root)"
+
+  SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
+  PATH=/bin:/usr/bin \
+  unshare --user --map-root-user --mount-proc --pid --fork \
+    --root "${rootfs}" "$@"
+  return $?
+}
+
+# Run the given executable or script in the busybox container and create a key
+# session. Filter out output from 'keyctl session' starting with 'Joined session'.
+function run_busybox_container_key_session()
+{
   local executable="$1"
 
   local rootfs
@@ -157,8 +174,31 @@ function run_busybox_container()
   SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
   PATH=/bin:/usr/bin \
   unshare --user --map-root-user --mount-proc --pid --fork \
-    --root "${rootfs}" "${executable}"
+    --root "${rootfs}" keyctl session - "${executable}" \
+    2> >(sed '/^Joined session.*/d')
   return $?
+}
+
+
+# Run the given executable or script in the busybox container
+# and allow nested creation of user namespaces
+function run_busybox_container_nested()
+{
+  local executable="$1"
+
+  local rootfs
+
+  rootfs="$(get_busybox_container_root)"
+
+  pushd "${rootfs}" 1>/dev/null || exit "${FAIL:-1}"
+
+  SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
+  PATH="${rootfs}"/bin:"${rootfs}"/usr/bin \
+  unshare --user --map-root-user --mount-proc --pid --fork \
+    --mount "${executable}"
+  rc=$?
+  popd 1>/dev/null || exit "${FAIL:-1}"
+  return "$rc"
 }
 
 # Wait for the given number of entries in the file that may not
@@ -205,4 +245,32 @@ function wait_for_file()
     sleep 0.1
   done
   return 1
+}
+
+# Get maximum number of keys
+function get_max_number_keys()
+{
+  if [ "$(id -u)" -eq 0 ]; then
+    cat /proc/sys/kernel/keys/root_maxkeys
+  else
+    cat /proc/sys/kernel/keys/maxkeys
+  fi
+}
+
+# Check whether the namespace has IMA-audit support
+function check_ns_audit_support()
+{
+  run_busybox_container ./check.sh audit
+}
+
+# Check whether the namespace has IMA-measure support
+function check_ns_measure_support()
+{
+  run_busybox_container ./check.sh measure
+}
+
+# Check whether the namespace has IMA-appraise support
+function check_ns_appraise_support()
+{
+  run_busybox_container ./check.sh appraise
 }

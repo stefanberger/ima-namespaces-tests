@@ -7,6 +7,8 @@
 # SYNCFILE: path to the syncfile that this script needs to create
 # TESTEXE:  path to the test executable, e.g., bin/busybox2
 
+SYNCFILE=${SYNCFILE:-syncfile} # keep shellcheck happy
+
 . ./ns-common.sh
 
 mnt_securityfs "/mnt"

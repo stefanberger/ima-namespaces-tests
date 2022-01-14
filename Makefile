@@ -4,9 +4,16 @@ INSTDIR ?= /usr/share/imatest
 TESTDIRS = \
 	appraise-1 \
 	appraise-2 \
+	appraise-many-1 \
+	appraise-many-2 \
 	audit-1 \
+	audit-many-1 \
 	audit+measure-1 \
-	measure-1
+	measure-1 \
+	measure-many-1 \
+	measure-many-2 \
+	measure-many-3 \
+	measure-many-4
 
 DESTS := $(patsubst %,$(INSTDIR)/%,$(TESTDIRS))
 
