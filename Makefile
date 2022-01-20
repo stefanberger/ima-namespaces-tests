@@ -5,6 +5,7 @@ TESTDIRS = \
 	appraise-1 \
 	appraise-2 \
 	appraise-3 \
+	appraise-4 \
 	appraise-many-1 \
 	appraise-many-2 \
 	audit-1 \
