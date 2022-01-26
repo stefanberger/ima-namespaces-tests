@@ -7,6 +7,7 @@ appraise-3/test.sh
 appraise-many-1/test.sh
 appraise-many-2/test.sh
 audit-many-1/test.sh
+audit-many-2/test.sh
 measure-many-1/test.sh
 measure-many-2/test.sh
 measure-many-3/test.sh

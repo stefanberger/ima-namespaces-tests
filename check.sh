@@ -15,7 +15,7 @@ MNT=_mnt
 # Check whether IMA-ns is available at all
 if [ "${rc}" -eq 0 ]; then
   case "$1" in
-  securitfs|audit|measure|appraise) # securityfs is needed by all
+  securitfs|audit|measure|appraise|selinux) # securityfs is needed by all
     mkdir "${MNT}"
     if ! msg=$(mount -t securityfs "${MNT}" "${MNT}" 2>&1); then
       rc=1
@@ -50,6 +50,7 @@ if [ "${rc}" -eq 0 ]; then
 fi
 
 # Check whether IMA-ns support audit or measure(+audit) or appraise+(measure+audit)
+# and SELinux labels
 if [ "${rc}" -eq 0 ]; then
   case "$1" in
   securitfs) ;;
@@ -68,6 +69,10 @@ if [ "${rc}" -eq 0 ]; then
       rc=1
     fi
     ;;
+  selinux)
+    if ! printf "audit func=BPRM_CHECK subj_type=bin_t\n" > "${MNT}/ima/policy"; then
+      rc=1
+    fi
   esac
 fi
 

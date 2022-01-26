@@ -1,16 +1,10 @@
 #!/bin/env sh
 
-# shellcheck disable=SC2059
+# shellcheck disable=SC2059,SC2143
 
 . ./ns-common.sh
 
 mnt_securityfs "/mnt"
-
-KEY=./rsakey.pem
-CERT=./rsa.crt
-
-keyctl newring _ima @s >/dev/null 2>&1
-keyctl padd asymmetric "" %keyring:_ima < "${CERT}" >/dev/null 2>&1
 
 policy='hash func=FILE_CHECK mask=MAY_READ \n'
 
