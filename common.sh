@@ -274,3 +274,9 @@ function check_ns_appraise_support()
 {
   run_busybox_container ./check.sh appraise
 }
+
+# Check whether there is SELinux support
+function check_ns_selinux_support()
+{
+  run_busybox_container ./check.sh selinux
+}
