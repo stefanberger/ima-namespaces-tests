@@ -1,5 +1,7 @@
 #!/bin/env sh
 
+# SPDX-License-Identifier: BSD-2-Clause
+
 # shellcheck disable=SC2059,SC2143
 
 . ./ns-common.sh
