@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# SPDX-License-Identifier: BSD-2-Clause
+
 #set -x
 
 SYNCFILE=${SYNCFILE:-syncfile}  #make shellcheck happy

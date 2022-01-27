@@ -1,5 +1,7 @@
 #!/bin/env sh
 
+# SPDX-License-Identifier: BSD-2-Clause
+
 # Run this script in a user namespace to detect which features of
 # IMA-ns, if any, are supported. Using parameters 'securityfs',
 # 'audit' (IMA-audit), 'measure' (IMA-measure), and 'appraise'

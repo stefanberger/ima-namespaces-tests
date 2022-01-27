@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# SPDX-License-Identifier: BSD-2-Clause
+
 # Shellcheck: ignore=SC2032
 
 AUDITLOG=/var/log/audit/audit.log
