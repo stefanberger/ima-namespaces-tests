@@ -88,7 +88,7 @@ if [ ${rc} -ne 0 ] ; then
   exit "${rc}"
 fi
 
-expected=$((before + 2 + num_extra))
+expected=$((before + 2))
 after=$(wait_num_entries "${AUDITLOG}" "${search}" "${expected}" 30)
 if [ "${expected}" -ne "${after}" ]; then
   echo " Error: Wrong number of '${search}' entries in audit log."
@@ -112,7 +112,7 @@ if [ ${rc} -ne 0 ] ; then
   exit "${rc}"
 fi
 
-expected=$((before + 1))
+expected=$((before + 2 - num_extra))
 after=$(wait_num_entries "${AUDITLOG}" "${search}" "${expected}" 30)
 if [ "${expected}" -ne "${after}" ]; then
   echo " Error: Wrong number of '${search}' entries in audit log."
