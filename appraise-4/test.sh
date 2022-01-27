@@ -10,6 +10,12 @@ ROOT="${DIR}/.."
 
 source "${ROOT}/common.sh"
 
+# FIXME: Check why dd circumvents the check on O_DIRECT
+if [ "$(id -u)" -eq 0 ]; then
+  echo " Error: Cannot run this test as root"
+  exit "${SKIP:-3}"
+fi
+
 check_ima_support
 
 setup_busybox_container \
@@ -27,7 +33,7 @@ copy_elf_busybox_container "$(type -P dd)"
 
 echo "INFO: Testing O_DIRECT usage and appraisal inside container"
 
-run_busybox_container ./odirect.sh
+run_busybox_container_key_session ./odirect.sh
 rc=$?
 if [ $rc -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."
