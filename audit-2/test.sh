@@ -39,12 +39,23 @@ syncfile="${rootfs}/${SYNCFILE}"
 FAILFILE="failfile"
 failfile="${rootfs}/${FAILFILE}"
 
+# Unique id for the command line; ignored by the script
+id="${RANDOM}abc${RANDOM}"
+
 sudo -u "${TEST_USER}" \
   env PATH=/bin:/usr/bin SYNCFILE=${SYNCFILE} FAILFILE=${FAILFILE} \
   unshare --user --map-root-user --mount-proc \
-    --pid --fork --root "${rootfs}" bin/sh ./setpolicy.sh &
+    --pid --fork --root "${rootfs}" bin/sh ./setpolicy.sh "${id}" &
 SUDO_PID=$!
-SHELL_PID=$((SUDO_PID + 4))
+for ((i = 0; i < 10; i++)); do
+  SHELL_PID=$(ps aux |
+    grep -E "^${TEST_USER}" |
+    grep "0:00 bin/sh ./setpolicy.sh ${id}" |
+    tr -s " " |
+    cut -d " " -f2)
+  [ -n "${SHELL_PID}" ] && break
+  sleep 0.1
+done
 
 if ! wait_for_file "${syncfile}" 30; then
   echo " Error: Syncfile did not appear in time"
