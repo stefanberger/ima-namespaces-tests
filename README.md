@@ -6,14 +6,15 @@ several hundred IMA namespaces/containers in parallel to test the locking and ot
 aspects of IMA namespaces.
 
 The test suite is based on several commonly available tools:
-- unshare from util-linux 2.36.2 (2.34 seems too old)
+- unshare from util-linux 2.36.2
 - busybox
 - keyctrl
 - getfattr/setfattr
 - ldd
 
-Some of the tests use features of the unshare tool that seem to be susceptible to the version
-of the unshare tool being used. Please use the recommended version.
+Some of the tests use features of the unshare tool that seem to be susceptible
+to the version of the unshare tool being used. Please use the recommended
+version, or one that is not too far away from it.
 
 Some of the results of the tests are dependent on the IMA compile time options. Until we
 figure out how to get a handle on all of them and deal with different results, please use

@@ -7,7 +7,7 @@ AUDITLOG=/var/log/audit/audit.log
 if [ "$(id -u)" -ne 0 ] && [ -n "${HOME}" ]; then
  WORKDIR="${HOME}/.imatest"
 else
- WORKDIR="/var/run/imatest"
+ WORKDIR="/var/lib/imatest"
 fi
 
 function check_root()
