@@ -13,7 +13,11 @@ ROOT="${DIR}/.."
 
 source "${ROOT}/common.sh"
 
+check_allow_expensive_test
+
 check_root
+
+check_selinux_enabled
 
 if ! type -p semodule | grep -q ^; then
   echo " Error: semodule tool is not installed"

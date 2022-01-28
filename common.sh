@@ -59,6 +59,27 @@ function check_ima_support()
   fi
 }
 
+function check_selinux_enabled()
+{
+  if ! type -p selinuxenabled | grep -q ^; then
+    echo " Error: selinuxenabled tool is not installed"
+    exit "${SKIP:-3}"
+  fi
+
+  if ! selinuxenabled; then
+    echo " Error: SELinux is not enabled on this machine"
+    exit "${SKIP:-3}"
+  fi
+}
+
+function check_allow_expensive_test()
+{
+  if [ -z "${IMA_TEST_EXPENSIVE}" ]; then
+    echo " IMA_TEST_EXPENSIVE environment variable must be set for this test"
+    exit "${SKIP:-3}"
+  fi
+}
+
 function create_workdir()
 {
    rm -rf "${WORKDIR}"
