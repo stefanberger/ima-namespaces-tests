@@ -187,7 +187,7 @@ function main()
   local testcases=""
   local clear=0
 
-  statdir=$(dirname "${STATEFILE}")
+  statedir=$(dirname "${STATEFILE}")
 
   while [ $# -gt 0 ]; do
     case "$1" in
@@ -210,8 +210,8 @@ function main()
     exit 1
   fi
 
-  if ! mkdir -p "${statdir}"; then
-    echo "Error: Could not create statefile dir ${statdir}."
+  if ! mkdir -p "${statedir}"; then
+    echo "Error: Could not create statefile dir ${statedir}."
     exit 1
   fi
 
