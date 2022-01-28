@@ -2,6 +2,8 @@
 
 # SPDX-License-Identifier: BSD-2-Clause
 
+# shellcheck disable=SC2009
+
 #set -x
 
 DIR="$(dirname "$0")"
@@ -46,7 +48,6 @@ sudo -u "${TEST_USER}" \
   env PATH=/bin:/usr/bin SYNCFILE=${SYNCFILE} FAILFILE=${FAILFILE} \
   unshare --user --map-root-user --mount-proc \
     --pid --fork --root "${rootfs}" bin/sh ./setpolicy.sh "${id}" &
-SUDO_PID=$!
 for ((i = 0; i < 10; i++)); do
   SHELL_PID=$(ps aux |
     grep -E "^${TEST_USER}" |
