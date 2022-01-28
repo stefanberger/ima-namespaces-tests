@@ -50,6 +50,6 @@ check: install
 	reboot
 
 syntax-check:
-	shellcheck *.sh */*.sh
+	shellcheck *.sh */*.sh imatest
 
 .PHONY: .FORCE

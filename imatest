@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+
+# shellcheck disable=SC1090
 #set -x
 
 STATEFILE=/var/lib/imatest/.state
@@ -9,9 +11,9 @@ function logit()
   shift
 
   if [ "${output}" == "-" ] || [ -z "${output}" ]; then
-    echo $@
+    echo "$@"
   else
-    echo $@ >> ${output}
+    echo "$@" >> "${output}"
   fi
 
 }
@@ -21,13 +23,13 @@ function bannerit()
   local output=$1
 
   if [ -z "$(type -p banner)" ]; then
-    logit $@
+    logit "$@"
   else
     shift
     if [ "${output}" == "-" ] || [ -z "${output}" ]; then
       banner "$@"
     else
-      banner "$@" >> ${output}
+      banner "$@" >> "${output}"
     fi
   fi
 }
@@ -40,10 +42,10 @@ function run_testcase()
   local rc
 
   if [ "${output}" == "-" ] || [ -z "${output}" ]; then
-    ./${testcasefile}
+    ./"${testcasefile}"
     rc=$?
   else
-    ./${testcasefile} >> ${output} 2>&1
+    ./"${testcasefile}" >> "${output}" 2>&1
     rc=$?
   fi
 
@@ -56,11 +58,14 @@ function imatest()
   local testcases=$2
   local logfile=$3
 
-  local testcasedir=$(dirname ${testcases})
+  local testcasedir
   local line=0 is_retry=0
-  local testcases_lines=$(wc -l < ${testcases})
+  local testcases_lines
   local testcase rc
   local stats_pass=0 stats_fail=0 stats_skip=0
+
+  testcases_lines=$(wc -l < "${testcases}")
+  testcasedir=$(dirname "${testcases}")
 
   export SUCCESS=0
   export FAIL=1
@@ -68,8 +73,8 @@ function imatest()
   export SKIP=3
   export RETRY_AFTER_REBOOT=4
 
-  if [ -f ${statefile} ]; then
-    source ${statefile}
+  if [ -f "${statefile}" ]; then
+    source "${statefile}"
   else
     logit "${logfile}" ""
     logit "${logfile}" "================================================================================="
@@ -80,22 +85,27 @@ function imatest()
 
   while :; do
     if [ "${line}" == "end" ] || \
-       [ ${line} -gt ${testcases_lines} ]; then
-      echo "line=end" > ${statefile}
+       [ "${line}" -gt "${testcases_lines}" ]; then
+      echo "line=end" > "${statefile}"
       break
     fi
-    pushd ${testcasedir} &>/dev/null
+    pushd "${testcasedir}" &>/dev/null || exit 1
 
     line=$((line + 1))
-    echo "line=${line}" > ${statefile}
+    echo "line=${line}" > "${statefile}"
 
-    testcase=$(sed -n ${line}p ${testcases})
-    if [ -n "$(echo ${testcase} | tr -d " ")" ]; then
-      local testcase_dir=$(dirname ${testcase})
+    testcase=$(sed -n "${line}p" "${testcases}")
+    if [ -n "$(echo "${testcase}" | tr -d " ")" ]; then
+      local testcase_dir
 
-      if [ -d ${testcase_dir} ]; then
-        local testcasefile=$(basename ${testcase})
-        pushd ${testcase_dir} &>/dev/null
+      testcase_dir=$(dirname "${testcase}")
+
+      if [ -d "${testcase_dir}" ]; then
+        local testcasefile
+
+        testcasefile=$(basename "${testcase}")
+
+        pushd "${testcase_dir}" &>/dev/null || exit 1
         logit "${logfile}" "---------------------------------------------------------------------------------"
         logit "${logfile}" "Running testcase ${testcase} on $(uname -sr)"
 
@@ -105,48 +115,50 @@ function imatest()
         logit "${logfile}" "Result from ${testcase}: $rc"
 
         case "$rc" in
-        ${SUCCESS})
+        "${SUCCESS}")
           logit "${logfile}" "  Test completed successfully"
           stats_pass=$((stats_pass + 1))
           ;;
-        ${SKIP})
+        "${SKIP}")
           logit "${logfile}" "  Skipping test"
           stats_skip=$((stats_skip + 1))
           ;;
-        ${SUCCESS_NEEDS_REBOOT})
+        "${SUCCESS_NEEDS_REBOOT}")
           logit "${logfile}" "  Test completed successfully (trying next test before rebooting)"
           ;;
-        ${FAIL})
+        "${FAIL}")
           logit "${logfile}" "  Test failed."
           stats_fail=$((stats_fail + 1))
           ;;
-        ${RETRY_AFTER_REBOOT})
+        "${RETRY_AFTER_REBOOT}")
           if [ $is_retry -ne 0 ]; then
             logit "${logfile}" "  Not retrying test after reboot since this is already a retry."
           else
             logit "${logfile}" "  Retrying test after reboot"
             line=$((line-1))
             if [ ${line} -ge 0 ]; then
-              echo "line=${line}" > ${statefile}
+              echo "line=${line}" > "${statefile}"
             else
-              rm -f ${statefile}
+              rm -f "${statefile}"
             fi
-            echo "is_retry=1" >> ${statefile}
-            echo "stats_fail=${stats_fail}" >> ${statefile}
-            echo "stats_pass=${stats_pass}" >> ${statefile}
-            echo "stats_skip=${stats_skip}" >> ${statefile}
+            {
+              echo "is_retry=1"
+              echo "stats_fail=${stats_fail}"
+              echo "stats_pass=${stats_pass}"
+              echo "stats_skip=${stats_skip}"
+            } >> "${statefile}"
             reboot
           fi
           ;;
         *) logit "${logfile}" ">>>>>>>>> Unhandled return code";;
         esac
 
-        popd &>/dev/null
+        popd &>/dev/null || exit 1
       fi
       is_retry=0
 
     fi
-    popd &>/dev/null
+    popd &>/dev/null || exit 1
   done
 
   logit "${logfile}" "================================================================================="
@@ -171,16 +183,18 @@ _EOF_
 
 function main()
 {
-  local statedir=$(dirname ${STATEFILE})
+  local statedir
   local testcases=""
   local clear=0
+
+  statdir=$(dirname "${STATEFILE}")
 
   while [ $# -gt 0 ]; do
     case "$1" in
     --testcases) shift 1; testcases=$1;;
     --logfile) shift 1; logfile=$1;;
     --clear) clear=1;;
-    --help) usage $0; exit 0;;
+    --help) usage "$0"; exit 0;;
     *) echo "Unknown option: $1"; exit 1;;
     esac
     shift
@@ -196,14 +210,13 @@ function main()
     exit 1
   fi
 
-  mkdir -p ${statedir}
-  if [ $? -ne 0 ]; then
+  if ! mkdir -p "${statdir}"; then
     echo "Error: Could not create statefile dir ${statdir}."
     exit 1
   fi
 
   if [ $clear -ne 0 ]; then
-    rm -f ${STATEFILE}
+    rm -f "${STATEFILE}"
   fi
 
   imatest "${STATEFILE}" "${testcases}" "${logfile}"
