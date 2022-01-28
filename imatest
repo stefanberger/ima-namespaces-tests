@@ -60,6 +60,7 @@ function imatest()
   local line=0 is_retry=0
   local testcases_lines=$(wc -l < ${testcases})
   local testcase rc
+  local stats_pass=0 stats_fail=0 stats_skip=0
 
   export SUCCESS=0
   export FAIL=1
@@ -106,15 +107,18 @@ function imatest()
         case "$rc" in
         ${SUCCESS})
           logit "${logfile}" "  Test completed successfully"
+          stats_pass=$((stats_pass + 1))
           ;;
         ${SKIP})
           logit "${logfile}" "  Skipping test"
+          stats_skip=$((stats_skip + 1))
           ;;
         ${SUCCESS_NEEDS_REBOOT})
           logit "${logfile}" "  Test completed successfully (trying next test before rebooting)"
           ;;
         ${FAIL})
           logit "${logfile}" "  Test failed."
+          stats_fail=$((stats_fail + 1))
           ;;
         ${RETRY_AFTER_REBOOT})
           if [ $is_retry -ne 0 ]; then
@@ -128,6 +132,9 @@ function imatest()
               rm -f ${statefile}
             fi
             echo "is_retry=1" >> ${statefile}
+            echo "stats_fail=${stats_fail}" >> ${statefile}
+            echo "stats_pass=${stats_pass}" >> ${statefile}
+            echo "stats_skip=${stats_skip}" >> ${statefile}
             reboot
           fi
           ;;
@@ -141,6 +148,13 @@ function imatest()
     fi
     popd &>/dev/null
   done
+
+  logit "${logfile}" "================================================================================="
+  logit "${logfile}" "Statistics:"
+  logit "${logfile}" "Fail: ${stats_fail}"
+  logit "${logfile}" "Pass: ${stats_pass}"
+  logit "${logfile}" "Skip: ${stats_skip}"
+  logit "${logfile}" "================================================================================="
 }
 
 function usage()
