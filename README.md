@@ -110,6 +110,7 @@ Concerns for the testing are:
 | appraise-3      | Execution of unsigned file fails in container if parent container has appraise policy and succeeds once file is signed |
 | appraise-4      | O_DIRECT usage and policy rule with missing or avaiable permit_directio |
 | appraise-5      | Only signed policy accepted after POLICY_CHECK rule has been set |
+| appraise-6      | Testing of proper enforcement of appraisal policy rule with SETXATTR_CHECK and varying set of allowed hash algos |
 | appraise-many-1 | Concurrently running IMA namespaces with own keyrings appraise executables |
 | appraise-many-2 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications |
 | audit-1         | Simple setting of audit policy rule and verifying that audit log gets messages from IMA namespace. Modification of executable causes new audit message. |
