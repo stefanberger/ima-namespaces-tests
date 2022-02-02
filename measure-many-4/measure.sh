@@ -22,7 +22,7 @@ echo "${policy}" > /mnt/ima/policy || {
 
 testfile="testfile"
 
-imahash="$(determine_file_hash_from_log /mnt/ima/ascii_runtime_measurements)"
+imahash="$(determine_file_hash_from_log "/mnt")"
 
 reported=0
 
