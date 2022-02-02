@@ -92,12 +92,25 @@ determine_file_hash_from_log()
 {
   local mntdir="$1"
 
-  local imahash
+  local imahash line template
 
-  imahash=$(tail -n1 < "${mntdir}/ima/ascii_runtime_measurements" | cut -d" " -f4 | cut -d":" -f1)
+  line=$(head -n1 < "${mntdir}/ima/ascii_runtime_measurements")
+  template=$(echo "${line}" | cut -d" " -f3)
+
+  if [ "${template}" = "ima" ]; then
+    imahash=$(echo "${line}" | cut -d" " -f4)
+    case "${#imahash}" in
+    32) imahash="md5";;
+    40) imahash="sha1";;
+    esac
+  else
+    imahash=$(echo "${line}" | cut -d" " -f4 | cut -d":" -f1)
+  fi
 
   case "${imahash}" in
+  md5) ;;
   sha1) ;;
+  sha224) ;;
   sha256) ;;
   sha384) ;;
   sha512) ;;
@@ -118,11 +131,11 @@ hash_file()
   local tool
 
   case "${hashtouse}" in
+  md5) tool=md5sum;;
   sha1) tool=sha1sum;;
   sha256) tool=sha256sum;;
-  sha384) tool=sha384sum;;
   sha512) tool=sha512sum;;
-  *) echo "unknown hash: ${hashtouse}"; return;;
+  sha384|sha224|*) echo "unsupported hash: ${hashtouse}"; return;;
   esac
   "${tool}" "${filename}" 2>/dev/null | cut -d" " -f1
 }
