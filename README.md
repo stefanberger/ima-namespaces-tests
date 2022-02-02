@@ -121,6 +121,7 @@ Concerns for the testing are:
 | audit+measure-1 | Measuring and auditing of file; re-measuring and re-auditing of file after file modifcation; cuasing of open_writes and ToMToU audit message |
 | hash-1          | Ensuring that a hash is generated on a file following hash policy rule |
 | measure-1       | Measuring of an executed file and re-measuring after modification of the file|
+| measure-2       | Configure namespace with hash algorithm and template |
 | measure-many-1  | Concurrently running IMA namespaces measure an executable |
 | measure-many-2  | Measurements taken in nested containers up to 32 user spaces deep; executable run in one container is also measured in parent containers|
 | measure-many-3  | Concurrently running IMA namespaces measure many generated scripts and check log |
