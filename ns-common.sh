@@ -87,13 +87,14 @@ open_cage()
 }
 
 # Determine the hash being used by ima for hashing a file
+# @param1: securityfs mount point
 determine_file_hash_from_log()
 {
-  local logfile="$1"
+  local mntdir="$1"
 
   local imahash
 
-  imahash=$(tail -n1 < "${logfile}" | cut -d" " -f4 | cut -d":" -f1)
+  imahash=$(tail -n1 < "${mntdir}/ima/ascii_runtime_measurements" | cut -d" " -f4 | cut -d":" -f1)
 
   case "${imahash}" in
   sha1) ;;
