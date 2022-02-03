@@ -10,14 +10,17 @@
 
 . ./ns-common.sh
 
+SYNCFILE=${SYNCFILE:-syncfile}
+
 mnt_securityfs "/mnt"
 
-policy='audit func=BPRM_CHECK mask=MAY_EXEC uid=0 '
+# Wait until host has setup the policy now
+if ! wait_file_gone "${SYNCFILE}" 20; then
+  echo " Error: Syncfile did not disappear in time"
+  exit "${FAIL:-1}"
+fi
 
-echo "${policy}" > /mnt/ima/policy || {
-  echo " Error: Could not set measure policy. Does IMA-ns support IMA-measurement?"
-  exit "${SKIP:-3}"
-}
+policy='audit func=BPRM_CHECK mask=MAY_EXEC uid=0 '
 
 nspolicy=$(busybox2 cat /mnt/ima/policy)
 

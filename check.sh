@@ -57,9 +57,7 @@ if [ "${rc}" -eq 0 ]; then
   case "$1" in
   securitfs) ;;
   audit)
-    if ! printf "audit func=BPRM_CHECK\n" > "${MNT}/ima/policy"; then
-      rc=1
-    fi
+    # Audit was supported first
     ;;
   measure)
     if ! printf "measure func=BPRM_CHECK\n" > "${MNT}/ima/policy"; then
