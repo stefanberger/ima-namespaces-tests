@@ -33,12 +33,15 @@ setup_busybox_container \
 	"${ROOT}/check.sh" \
 	"${DIR}/setpolicy.sh"
 
-if ! check_ns_audit_support; then
-  echo " Error: IMA-ns does not support IMA-audit"
+# Requires check.sh
+if ! check_ns_measure_support; then
+  echo " Error: IMA-ns does not support IMA-measure"
   exit "${SKIP:-3}"
 fi
 
 rootfs=$(get_busybox_container_root)
+
+echo "INFO: Testing translation of uid and gid values when viewed from other user namespace"
 
 chown -R "${TEST_USER}:${TEST_USER}" "${rootfs}"
 
@@ -101,3 +104,5 @@ fi
 wait
 
 echo "INFO: Pass"
+
+exit "${SUCCESS:-0}"

@@ -10,9 +10,9 @@ SYNCFILE=${SYNCFILE:-syncfile}  #make shellcheck happy
 
 mnt_securityfs /mnt
 
-policy="audit func=BPRM_CHECK uid=0 gid=0"
+policy="measure func=BPRM_CHECK uid=0 gid=0"
 echo "${policy}" > /mnt/ima/policy || {
-  echo " Error: Could not set audit policy."
+  echo " Error: Could not set measure policy."
   echo > "${FAILFILE}"
 }
 
