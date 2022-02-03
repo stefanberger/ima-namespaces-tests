@@ -38,7 +38,10 @@ before=$(grep -c "rootfs/bin/busybox2" "${AUDITLOG}")
 
 echo "INFO: Testing auditing caused by executable in container"
 
-run_busybox_container ./audit.sh
+policy="audit func=BPRM_CHECK mask=MAY_EXEC uid=0 "
+
+SYNCFILE="syncfile" POLICY=${policy} \
+  run_busybox_container_set_policy "/mnt" "${policy}" ./audit.sh
 rc=$?
 if [ "${rc}" -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."
@@ -49,7 +52,7 @@ expected=$((before + 1 + num_extra))
 after=$(wait_num_entries "${AUDITLOG}" "rootfs/bin/busybox2" $((expected)) 30)
 if [ $((expected)) -ne "${after}" ]; then
   echo " Error: Wrong number of busybox2 entries in audit log."
-  echo "        Expected $((expected)), found ${after}."
+  echo "        Expected $((expected - before)) more log entries. Expected ${expected}, found ${after}."
   exit "${FAIL:-1}"
 fi
 
@@ -61,7 +64,10 @@ before="${after}"
 
 echo "INFO: Testing re-auditing caused by executable in container"
 
-run_busybox_container ./reaudit.sh
+policy="audit func=BPRM_CHECK mask=MAY_EXEC uid=0 "
+
+SYNCFILE="syncfile" POLICY=${policy} \
+  run_busybox_container_set_policy "/mnt" "${policy}" ./reaudit.sh
 rc=$?
 if [ ${rc} -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."
@@ -72,7 +78,7 @@ expected=$((before + 2 + num_extra))
 after=$(wait_num_entries "${AUDITLOG}" "rootfs/bin/busybox2" $((expected)) 30)
 if [ $((expected)) -ne "${after}" ]; then
   echo " Error: Wrong number of busybox2 entries in audit log."
-  echo "        Expected $((expected)), found ${after}."
+  echo "        Expected $((expected - before)) more log entries. Expected ${expected}, found ${after}."
   exit "${FAIL:-1}"
 fi
 
