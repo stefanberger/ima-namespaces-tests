@@ -131,7 +131,7 @@ function setup_busybox_container()
   fi
   pushd "${rootfs}/bin" 1>/dev/null || exit "${FAIL:-1}"
   for prg in \
-      cat chmod cut cp echo env find grep head ls mkdir mount rm \
+      cat chmod cut cp echo env find grep head ls mkdir mount printf rm \
       sh sha1sum sha256sum sha384sum sha512sum sleep sync tail which; do
     ln -s busybox ${prg}
   done
@@ -193,6 +193,99 @@ function run_busybox_container()
   PATH=/bin:/usr/bin \
   unshare --user --map-root-user --mount-proc --pid --fork \
     --root "${rootfs}" "$@"
+  return $?
+}
+
+# Run the given executable or script in the busybox container
+# and set the policy via nsenter.
+# The test script inside the container must set securityfs and then
+# has to wait for teh SYNCFILE to disappear
+#
+# @param1: Mount point of securityfs inside container
+# @param2: The policy to set
+# @param3... : Executable and parameters
+#
+# environment variables:
+# SYNCFILE: syncfile to use to synchronize with container
+# FAILFILE: optional failfile to write in case an error occurrs
+function run_busybox_container_set_policy()
+{
+  local mnt="${1}"
+  local policy="${2}"
+  shift 2
+
+  local rootfs unsharepid childpid c rc policyfile failfile
+
+  rootfs="$(get_busybox_container_root)"
+  failfile="${rootfs}/${FAILFILE}"
+
+  [ -n "${FAILFILE}" ] && rm -f "${failfile}"
+
+  if [ -z "${SYNCFILE}" ]; then
+    echo " Error: Missing SYNCFILE env. variable"
+    return "${FAIL:-1}"
+  fi
+  echo > "${rootfs}/${SYNCFILE}"
+
+  SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
+  PATH=/bin:/usr/bin \
+  unshare --user --map-root-user --mount-proc --pid --fork \
+    --root "${rootfs}" "$@" &
+  unsharepid=$!
+
+  if ! wait_for_file "/proc/${unsharepid}/task/${unsharepid}/children" 30; then
+    echo " Error: Proc file with children did not appear. Did child process die?"
+    [ -n "${FAILFILE}" ] && echo > "${failfile}"
+    return "${FAIL:-1}"
+  fi
+  # kernel memory leak detection (CONFIG_DEBUG_KMEMLEAK) makes unshare+fork very slow
+  for ((c = 0; c < 100; c++)); do
+    childpid=$(head -n1 "/proc/${unsharepid}/task/${unsharepid}/children" | tr -d " ")
+    [ -n "${childpid}" ] && break
+    sleep 0.1
+  done
+  if [ -z "${childpid}" ]; then
+    echo " Error: Could not get pid of children of unshared process ${unsharepid}"
+    [ -n "${FAILFILE}" ] && echo > "${failfile}"
+    return "${FAIL:-1}"
+  fi
+
+  activefile="${rootfs}${mnt}/ima/active"
+  # wait until the active file is there
+  for ((c = 0; c < 30; c++)); do
+    if nsenter --mount -t "${childpid}" /bin/sh -c "[ ! -f ${activefile} ] && exit 1 || exit 0"; then
+      break
+    fi
+    sleep 0.1
+  done
+  # wait until the active file has '1' in it
+  for ((c = 0; c < 30; c++)); do
+    active=$(nsenter --mount -t "${childpid}" cat "${activefile}")
+    [ "${active}" = "1" ] && break
+    sleep 0.1
+  done
+
+  if [ "${active}" != "1" ]; then
+    echo " Error: IMA namespace has not been set active"
+    [ -n "${FAILFILE}" ] && echo > "${failfile}"
+    return "${FAIL:-1}"
+  fi
+
+  policyfile="${rootfs}${mnt}/ima/policy"
+  nsenter --mount -t "${childpid}" /bin/sh -c "busybox printf '${policy}' > ${policyfile}"
+  rc=$?
+  if [ "${rc}" -ne 0 ]; then
+    echo " Error: Could not set policy in container using nsenter"
+    [ -n "${FAILFILE}" ] && echo > "${failfile}"
+    return "${FAIL:-1}"
+  fi
+
+  # echo -n "policy in namespace: "; nsenter --mount -t "${childpid}" cat "${policyfile}"
+
+  rm -f "${rootfs}/${SYNCFILE}"
+
+  wait "${unsharepid}"
+
   return $?
 }
 
@@ -265,7 +358,7 @@ function wait_num_entries()
 
 # Wait for a file to appear
 # @param1: Name of the file
-# @param2: Number of times to try with 0.1s waits in betwen
+# @param2: Number of times to try with 0.1s waits in between
 function wait_for_file()
 {
   local file="$1"
