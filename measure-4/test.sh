@@ -11,8 +11,6 @@ ROOT="${DIR}/.."
 
 source "${ROOT}/common.sh"
 
-check_root
-
 check_ima_support
 
 setup_busybox_container \
@@ -28,7 +26,7 @@ fi
 # hardcoded limit number of rules in kernel: 1024
 LIMIT_RULES=1024
 
-before=$(grep -c "cause=too-many-rules" "${AUDITLOG}")
+echo "INFO: Testing number of rules settable in IMA namespace is limited"
 
 LIMIT_RULES=${LIMIT_RULES} NUM_RULES_STEP=15 \
   run_busybox_container ./feed-many-rules.sh
@@ -36,14 +34,6 @@ rc=$?
 if [ "${rc}" -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."
   exit "${rc}"
-fi
-
-after=$(grep -c "cause=too-many-rules" "${AUDITLOG}")
-expected=$((before + 1))
-if [ "${expected}" -ne "${after}" ]; then
-  echo " Error: Wrong number of 'cause=too-many-rules' entries in audit log."
-  echo "        Expected ${expected}, found ${after}."
-  exit "${FAIL:-1}"
 fi
 
 echo "INFO: Pass test 1"
