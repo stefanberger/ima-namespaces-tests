@@ -139,3 +139,25 @@ hash_file()
   esac
   "${tool}" "${filename}" 2>/dev/null | cut -d" " -f1
 }
+
+# Wait for a file to disappear
+# @param1: Name of the fil
+# @param2: Number of times to try with 0.1s wait in between
+wait_file_gone()
+{
+  local file="$1"
+  local retries="$2"
+
+  local c
+
+  c=0
+  while [ "${c}" -lt "${retries}" ]; do
+    if [ ! -f "${file}" ]; then
+       return 0
+    fi
+    c=$((c+1))
+    sleep 0.1
+  done
+
+  return 1
+}

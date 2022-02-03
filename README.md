@@ -7,6 +7,7 @@ aspects of IMA namespaces.
 
 The test suite is based on several commonly available tools:
 - unshare from util-linux 2.36.2
+- nsenter
 - busybox
 - keyctrl
 - getfattr/setfattr
@@ -118,6 +119,7 @@ Concerns for the testing are:
 | audit-1         | Simple setting of audit policy rule and verifying that audit log gets messages from IMA namespace. Modification of executable causes new audit message. |
 | audit-2         | Non-root users cannot set audit policy rules |
 | audit-3         | Ensuring that number of rules allowed by container is limited |
+| audit-4         | Ensuring that host root can nsenter mount namespace and set and audit rule there |
 | audit-many-1    | Concurrently running IMA namespaces auditing execution of a program and check host audit log for number of expected entries |
 | audit-many-2    | Concurrently running IMA namespaces test disabling and enabling of SELinux labels |
 | audit+measure-1 | Measuring and auditing of file; re-measuring and re-auditing of file after file modifcation; cuasing of open_writes and ToMToU audit message |
