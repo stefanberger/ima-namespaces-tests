@@ -116,6 +116,7 @@ Concerns for the testing are:
 | appraise-many-1 | Concurrently running IMA namespaces with own keyrings appraise executables |
 | appraise-many-2 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications |
 | audit-1         | Simple setting of audit policy rule and verifying that audit log gets messages from IMA namespace. Modification of executable causes new audit message. |
+| audit-2         | Non-root users cannot set audit policy rules |
 | audit-3         | Ensuring that number of rules allowed by container is limited |
 | audit-many-1    | Concurrently running IMA namespaces auditing execution of a program and check host audit log for number of expected entries |
 | audit-many-2    | Concurrently running IMA namespaces test disabling and enabling of SELinux labels |
