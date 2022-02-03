@@ -11,7 +11,7 @@
 mnt_securityfs /mnt
 
 num_rules=0
-rule="audit func=FILE_CHECK mask=MAY_READ \n"
+rule="measure func=FILE_CHECK mask=MAY_READ \n"
 policy=""
 
 while [ "${num_rules}" -lt "${NUM_RULES_STEP}" ]; do
