@@ -51,9 +51,11 @@ while :; do
   FAILFILE="failfile"
   failfile="${rootfs}/${FAILFILE}"
 
+  policy='audit func=BPRM_CHECK mask=MAY_EXEC uid=0 '
+
   for ((i = 0; i < "${num}"; i++)); do
-    NSID="${i}" FAILFILE="${FAILFILE}" \
-      run_busybox_container ./audit.sh &
+    NSID="${i}" FAILFILE="${FAILFILE}" SYNCFILE="syncfile-${i}" \
+      run_busybox_container_set_policy "/mnt" "${policy}" ./audit.sh &
   done
 
   # Wait for all child processes
