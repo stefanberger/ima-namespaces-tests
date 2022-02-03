@@ -40,7 +40,11 @@ before=$(grep -c "rootfs/bin/busybox2" "${AUDITLOG}")
 
 echo "INFO: Testing auditing and measurements inside container"
 
-run_busybox_container ./measure+audit.sh
+policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
+'audit func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
+
+SYNCFILE="syncfile" POLICY="${policy}" \
+  run_busybox_container_set_policy "/mnt" "${policy}" ./measure+audit.sh
 rc=$?
 if [ $rc -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."
@@ -51,7 +55,7 @@ expected=$((before + 1 + num_extra))
 after=$(wait_num_entries "${AUDITLOG}" "rootfs/bin/busybox2" "${expected}" 30)
 if [ "${expected}" -ne "${after}" ]; then
   echo " Error: Wrong number of busybox2 entries in audit log."
-  echo "        Expected ${expected}, found ${after}."
+  echo "        Expected $((expected - before)) more log entries. Expected ${expected}, found ${after}."
   exit "${FAIL:-1}"
 fi
 
@@ -63,7 +67,11 @@ before="${after}"
 
 echo "INFO: Testing re-auditing and re-measurement caused by executable in container"
 
-run_busybox_container ./remeasure+reaudit.sh
+policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
+'audit func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
+
+SYNCFILE="syncfile" POLICY=${policy} \
+  run_busybox_container_set_policy "/mnt" "${policy}" ./remeasure+reaudit.sh
 rc=$?
 if [ ${rc} -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."
@@ -74,55 +82,69 @@ expected=$((before + 2 + num_extra))
 after=$(wait_num_entries "${AUDITLOG}" "rootfs/bin/busybox2" "${expected}" 30)
 if [ "${expected}" -ne "${after}" ]; then
   echo " Error: Wrong number of busybox2 entries in audit log."
-  echo "        Expected ${expected}, found ${after}."
+  echo "        Expected $((expected - before)) more log entries. Expected ${expected}, found ${after}."
   exit "${FAIL:-1}"
 fi
 
 echo "INFO: Pass test 2"
 
-# Cause a TomToU violation in the container
+# Cause a TomToU violation from within the container that MUST NOT be audited
 
 search=" cause=ToMToU .*rootfs/testfile"
 before=$(grep -c "${search}" "${AUDITLOG}")
 
-echo "INFO: Testing TomToU violation inside container"
+echo "INFO: Testing that TomToU violation inside container is NOT audited"
 
-run_busybox_container ./tomtou.sh
+policy='audit func=FILE_CHECK mask=MAY_READ uid=0 \n'\
+'measure func=FILE_CHECK mask=MAY_READ uid=0 \n'
+
+# Number of ToMToU audit log entries is influenced by measure rules on the host
+num_extra_measure=0
+ctr=$(grep -c -E '^measure.*func=FILE_CHECK .*MAY_READ' /sys/kernel/security/ima/policy)
+[ "${ctr}" -ne 0 ] && num_extra_measure=1
+
+SYNCFILE="syncfile" POLICY=${policy} \
+  run_busybox_container_set_policy "/mnt" "${policy}" ./tomtou.sh
 rc=$?
 if [ ${rc} -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."
   exit "${rc}"
 fi
 
-expected=$((before + 2))
+expected=$((before + num_extra_measure))
 after=$(wait_num_entries "${AUDITLOG}" "${search}" "${expected}" 30)
 if [ "${expected}" -ne "${after}" ]; then
   echo " Error: Wrong number of '${search}' entries in audit log."
-  echo "        Expected ${expected}, found ${after}."
+  echo "        Expected $((expected - before)) more log entries. Expected ${expected}, found ${after}."
   exit "${FAIL:-1}"
 fi
 
 echo "INFO: Pass test 3"
-
 # Cause a open_writers violation in the container
 
 search=" cause=open_writers .*rootfs/testfile"
 before=$(grep -c "${search}" "${AUDITLOG}")
 
-echo "INFO: Testing open_writers violation inside container"
+echo "INFO: Testing that open_writers violation inside container is NOT audited"
 
-run_busybox_container ./open_writers.sh
+policy='audit func=FILE_CHECK mask=MAY_READ uid=0 \n'\
+'measure func=FILE_CHECK mask=MAY_READ uid=0 \n'
+
+SYNCFILE="syncfile" POLICY=${policy} \
+  run_busybox_container_set_policy "/mnt" "${policy}" ./open_writers.sh
 rc=$?
 if [ ${rc} -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."
   exit "${rc}"
 fi
 
-expected=$((before + 2 - num_extra))
+# The host will emit an audit message if there's a measuring rule
+# https://elixir.bootlin.com/linux/v5.16.5/source/security/integrity/ima/ima_main.c#L138
+expected=$((before + num_extra_measure))
 after=$(wait_num_entries "${AUDITLOG}" "${search}" "${expected}" 30)
 if [ "${expected}" -ne "${after}" ]; then
   echo " Error: Wrong number of '${search}' entries in audit log."
-  echo "        Expected ${expected}, found ${after}."
+  echo "        Expected $((expected - before)) more log entries. Expected ${expected}, found ${after}."
   exit "${FAIL:-1}"
 fi
 
