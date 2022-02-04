@@ -18,10 +18,16 @@ check_auditd
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
+	"${ROOT}/check.sh" \
 	"${DIR}/measure+audit.sh" \
 	"${DIR}/remeasure+reaudit.sh" \
 	"${DIR}/tomtou.sh" \
 	"${DIR}/open_writers.sh"
+
+if ! check_ns_measure_support; then
+  echo " Error: IMA-ns does not support IMA-measure"
+  exit "${SKIP:-3}"
+fi
 
 # Test auditing + measurements caused by executable run in namespace
 

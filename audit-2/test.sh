@@ -30,7 +30,13 @@ fi
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
+	"${ROOT}/check.sh" \
 	"${DIR}/setpolicy.sh"
+
+if ! check_ns_audit_support; then
+  echo " Error: IMA-ns does not support IMA-audit"
+  exit "${SKIP:-3}"
+fi
 
 rootfs=$(get_busybox_container_root)
 

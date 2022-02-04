@@ -13,11 +13,17 @@ source "${ROOT}/common.sh"
 check_ima_support
 
 setup_busybox_container \
+	"${ROOT}/check.sh" \
 	"${DIR}/child.sh" \
 	"${DIR}/parent.sh" \
 	"${ROOT}/ns-common.sh" \
 	"${ROOT}/keys/rsakey.pem" \
 	"${ROOT}/keys/rsa.crt"
+
+if ! check_ns_appraise_support; then
+  echo " Error: IMA-ns does not support IMA-appraise"
+  exit "${SKIP:-3}"
+fi
 
 copy_elf_busybox_container "$(type -P unshare)"
 copy_elf_busybox_container "$(type -P keyctl)"
