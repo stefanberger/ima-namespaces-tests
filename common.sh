@@ -118,11 +118,17 @@ function setup_busybox_container()
   mkdir -p "${rootfs}"/{bin,mnt,proc,dev}
 
   while [ $# -ne 0 ]; do
-    cp "$1" "${rootfs}"
+    if ! cp "$1" "${rootfs}"; then
+      echo "Error: Failed to copy ${1} to ${rootfs}"
+      exit "${FAIL:-1}"
+    fi
     shift
   done
 
-  cp "${busybox}" "${rootfs}/bin"
+  if ! cp "${busybox}" "${rootfs}/bin"; then
+    echo "Error: Failed to copy ${busybox} to ${rootfs}/bin"
+    exit "${FAIL:-1}"
+  fi
   pushd "${rootfs}/bin" 1>/dev/null || exit "${FAIL:-1}"
   for prg in \
       cat chmod cut cp echo env find grep head ls mkdir mount rm \
@@ -131,7 +137,10 @@ function setup_busybox_container()
   done
   popd 1>/dev/null || exit "${FAIL:-1}"
 
-  cp "${busybox}" "${rootfs}/bin/busybox2"
+  if ! cp "${busybox}" "${rootfs}/bin/busybox2"; then
+    echo "Error: Failed to copy ${busybox} to ${rootfs}/bin/busybox2"
+    exit "${FAIL:-1}"
+  fi
   echo >> "${rootfs}/bin/busybox2"
 }
 
@@ -157,7 +166,10 @@ function copy_elf_busybox_container()
 
   #echo "Installing $1 to ${destfile}"
   mkdir -p "${destdir}"
-  cp "${executable}" "${destfile}"
+  if ! cp "${executable}" "${destfile}"; then
+    echo "Error: Failed to copy ${executable} to ${destfile}"
+    exit "${FAIL:-1}"
+  fi
 
   for dep in \
     $(ldd "${executable}" |
