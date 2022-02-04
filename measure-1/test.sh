@@ -14,8 +14,14 @@ check_ima_support
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
+	"${ROOT}/check.sh" \
 	"${DIR}/measure.sh" \
 	"${DIR}/remeasure.sh"
+
+if ! check_ns_measure_support; then
+  echo " Error: IMA-ns does not support IMA-measure"
+  exit "${SKIP:-3}"
+fi
 
 # Test measurements caused by executable run in namespace
 

@@ -14,7 +14,13 @@ check_ima_support
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
+	"${ROOT}/check.sh" \
 	"${DIR}/measure.sh"
+
+if ! check_ns_measure_support; then
+  echo " Error: IMA-ns does not support IMA-measure"
+  exit "${SKIP:-3}"
+fi
 
 copy_elf_busybox_container "$(type -P unshare)"
 
