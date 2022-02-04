@@ -14,6 +14,7 @@ check_ima_support
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
+	"${ROOT}/check.sh" \
 	"${DIR}/appraise.sh" \
 	"${DIR}/reappraise.sh" \
 	"${DIR}/reappraise-after-host-file-modification.sh" \
@@ -21,6 +22,11 @@ setup_busybox_container \
 	"${ROOT}/keys/rsakey.pem" \
 	"${ROOT}/keys/rsa.crt" \
 	"${ROOT}/keys/rsakey2.pem"
+
+if ! check_ns_appraise_support; then
+  echo " Error: IMA-ns does not support IMA-appraise"
+  exit "${SKIP:-3}"
+fi
 
 copy_elf_busybox_container "$(type -P keyctl)"
 copy_elf_busybox_container "$(type -P evmctl)"

@@ -17,7 +17,13 @@ check_ima_support
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
+	"${ROOT}/check.sh" \
 	"${DIR}/feed-many-rules.sh"
+
+if ! check_ns_audit_support; then
+  echo " Error: IMA-ns does not support IMA-audit"
+  exit "${SKIP:-3}"
+fi
 
 # hardcoded limit number of rules in kernel: 1024
 LIMIT_RULES=1024

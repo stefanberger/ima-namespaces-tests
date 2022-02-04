@@ -10,15 +10,21 @@ ROOT="${DIR}/.."
 
 source "${ROOT}/common.sh"
 
-check_root_or_sudo
-
 check_ima_support
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
+	"${ROOT}/check.sh" \
 	"${DIR}/reappraise-after-host-file-signing.sh" \
 	"${ROOT}/keys/rsakey.pem" \
 	"${ROOT}/keys/rsa.crt"
+
+if ! check_ns_appraise_support; then
+  echo " Error: IMA-ns does not support IMA-appraise"
+  exit "${SKIP:-3}"
+fi
+
+check_root_or_sudo
 
 copy_elf_busybox_container "$(type -P keyctl)"
 copy_elf_busybox_container "$(type -P evmctl)"

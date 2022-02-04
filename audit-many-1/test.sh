@@ -23,7 +23,7 @@ setup_busybox_container \
 
 # requires check.sh
 if ! check_ns_audit_support; then
-  echo " Error: IMA-ns does not support IMA-measure"
+  echo " Error: IMA-ns does not support IMA-audit"
   exit "${SKIP:-3}"
 fi
 
