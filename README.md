@@ -73,8 +73,8 @@ ima_policy=tcb ima_template=ima-sig
 To run the tests do the following:
 
 ```
-  make
-  sudo ./imatest --testcases testcases --logfile /var/log/imatest.log --clear
+make
+sudo ./imatest --testcases testcases --logfile /var/log/imatest.log --clear
 ```
 
 Afer a test run have a look at the output file `/var/log/imatest.log`. Depending on the
@@ -90,6 +90,8 @@ To run tests individually have a look at the entries in the `testcases` file.
 An example for running a test individually is the following:
 
 ```
+# You have to run make once
+make
 ./measure-1/test.sh
 ```
 
