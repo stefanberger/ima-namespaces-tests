@@ -310,6 +310,12 @@ function check_ns_appraise_support()
   run_busybox_container ./check.sh appraise
 }
 
+# Check whether the namespace has IMA-appraise hash support
+function check_ns_hash_support()
+{
+  run_busybox_container ./check.sh hash
+}
+
 # Check whether there is SELinux support
 function check_ns_selinux_support()
 {
