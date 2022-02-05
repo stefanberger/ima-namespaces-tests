@@ -131,3 +131,4 @@ Concerns for the testing are:
 | measure-many-2  | Measurements taken in nested containers up to 32 user spaces deep; executable run in one container is also measured in parent containers|
 | measure-many-3  | Concurrently running IMA namespaces measure many generated scripts and check log |
 | measure-many-4  | One control container modifies a file that other containers are running and expecting new measurements in containers every time |
+| measure-many-5  | Concurrently running IMA namespaces with different hash and template configurations repeatedly run an executable that's being modified |
