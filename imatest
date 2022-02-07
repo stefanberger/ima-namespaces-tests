@@ -80,6 +80,11 @@ function imatest()
     logit "${logfile}" "================================================================================="
     bannerit "${logfile}" "New test"
     logit "${logfile}" "$(date): Starting a new test run"
+    if [ -r /sys/kernel/security/ima/policy ]; then
+      logit "${logfile}" "---------------------------------------------------------------------------------"
+      logit "${logfile}" "IMA policy on host:"
+      logit "${logfile}" "$(cat /sys/kernel/security/ima/policy)"
+    fi
   fi
   [ -z "$line" ] && line=0
 
