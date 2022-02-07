@@ -75,7 +75,7 @@ if [ "${rc}" -eq 0 ]; then
     fi
     ;;
   selinux)
-    if ! printf "audit func=BPRM_CHECK subj_type=bin_t\n" > "${MNT}/ima/policy"; then
+    if ! printf "measure func=BPRM_CHECK subj_type=bin_t\n" > "${MNT}/ima/policy"; then
       rc=1
     fi
   esac

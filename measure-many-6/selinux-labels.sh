@@ -20,8 +20,8 @@ get_policy_string()
   local selinux_rules=""
 
   if [ "${p1}" -eq 1 ]; then
-    selinux_rules="audit func=BPRM_CHECK mask=MAY_EXEC subj_type=${SELINUX_LABEL} \n"
-    selinux_rules="${selinux_rules}audit func=FILE_CHECK mask=MAY_READ obj_type=${SELINUX_LABEL} "
+    selinux_rules="measure func=BPRM_CHECK mask=MAY_EXEC subj_type=${SELINUX_LABEL} \n"
+    selinux_rules="${selinux_rules}measure func=FILE_CHECK mask=MAY_READ obj_type=${SELINUX_LABEL} "
   fi
   echo "${selinux_rules}"
 }
@@ -77,8 +77,8 @@ while [ "${stage}" -lt 5 ]; do
     case "${stage}" in
     1) cmd="create-imans";;
     2) cmd="set-policy";;
-    3) cmd="check-policy-no-label";echo "disabling module";/usr/sbin/semodule -d "${SELINUX_MODULE}";;
-    4) cmd="check-policy-has-label";echo "enabling module";/usr/sbin/semodule -e "${SELINUX_MODULE}";;
+    3) cmd="check-policy-no-label";echo "disabling module";time /usr/sbin/semodule -d "${SELINUX_MODULE}";;
+    4) cmd="check-policy-has-label";echo "enabling module";time /usr/sbin/semodule -e "${SELINUX_MODULE}";;
     esac
 
     [ -f "${FAILFILE}" ] && {

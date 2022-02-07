@@ -10,7 +10,6 @@ audit-1/test.sh
 audit-2/test.sh
 audit-4/test.sh
 audit-many-1/test.sh
-audit-many-2/test.sh
 audit+measure-1/test.sh
 measure-1/test.sh
 measure-2/test.sh
@@ -21,4 +20,5 @@ measure-many-2/test.sh
 measure-many-3/test.sh
 measure-many-4/test.sh
 measure-many-5/test.sh
+measure-many-6/test.sh
 hash-1/test.sh
