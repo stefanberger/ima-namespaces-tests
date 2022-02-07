@@ -39,9 +39,6 @@ setup_busybox_container \
 	"${ROOT}/check.sh" \
 	"${DIR}/selinux-labels.sh"
 
-#copy_elf_busybox_container \
-#	"$(which semodule)"
-
 # requires check.sh
 if ! check_ns_selinux_support; then
   echo " Error: IMA does not support SELinux labels"

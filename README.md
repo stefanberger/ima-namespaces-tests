@@ -120,7 +120,6 @@ Concerns for the testing are:
 | audit-2         | Non-root users cannot set audit policy rules |
 | audit-4         | Ensuring that host root can nsenter mount namespace and set and audit rule there |
 | audit-many-1    | Concurrently running IMA namespaces auditing execution of a program and check host audit log for number of expected entries |
-| audit-many-2    | Concurrently running IMA namespaces test disabling and enabling of SELinux labels |
 | audit+measure-1 | Measuring and auditing of file; re-measuring and re-auditing of file after file modifcation; cuasing of open_writes and ToMToU audit message |
 | hash-1          | Ensuring that a hash is generated on a file following hash policy rule |
 | measure-1       | Measuring of an executed file and re-measuring after modification of the file|
@@ -132,3 +131,4 @@ Concerns for the testing are:
 | measure-many-3  | Concurrently running IMA namespaces measure many generated scripts and check log |
 | measure-many-4  | One control container modifies a file that other containers are running and expecting new measurements in containers every time |
 | measure-many-5  | Concurrently running IMA namespaces with different hash and template configurations repeatedly run an executable that's being modified |
+| measure-many-6  | Concurrently running IMA namespaces test disabling and enabling of SELinux labels |
