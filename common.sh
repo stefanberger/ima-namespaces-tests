@@ -131,7 +131,7 @@ function setup_busybox_container()
   fi
   pushd "${rootfs}/bin" 1>/dev/null || exit "${FAIL:-1}"
   for prg in \
-      cat chmod cut cp echo env find grep head ls mkdir mount mv printf rm \
+      cat chmod cut cp dirname echo env find grep head ls mkdir mount mv printf rm \
       sh sha1sum sha256sum sha384sum sha512sum sleep sync \
       tail time which; do
     ln -s busybox ${prg}

@@ -6,6 +6,7 @@ appraise-5/test.sh
 appraise-6/test.sh
 appraise-many-1/test.sh
 appraise-many-2/test.sh
+appraise-many-3/test.sh
 audit-1/test.sh
 audit-2/test.sh
 audit-4/test.sh
