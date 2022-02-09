@@ -45,6 +45,7 @@ KEY=./rsakey.pem
 CERT=./rsa.crt
 KEY2=./rsakey2.pem
 CERT2=./rsa2.crt
+BUSYBOX2=$(which busybox2)
 
 if [ "${NSID}" -eq 0 ]; then
   evmctl ima_sign --imasig --key "${KEY}" -a sha256 "$(which busybox)"  >/dev/null 2>&1
@@ -53,7 +54,7 @@ fi
 
 stage="0"
 
-while [ "${stage}" -le 13 ]; do
+while [ "${stage}" -le 14 ]; do
   syncfile="syncfile-${stage}"
   cmdfile="cmdfile-${stage}"
 
@@ -68,16 +69,28 @@ while [ "${stage}" -le 13 ]; do
     2) cmd="load-policy";;
     3) cmd="execute-fail";; # running busybox2 must fail
     4) cmd="execute-pass"   # now that it's signed, it must run
-       evmctl ima_sign --imasig --key "${KEY}" -a sha256 "$(which busybox2)"  >/dev/null 2>&1
+       if ! msg=$(evmctl ima_sign --imasig --key "${KEY}" -a sha256 "${BUSYBOX2}" 2>&1); then
+         echo " Error: Could not sign ${BUSYBOX2} with ${KEY}"
+         echo "${msg}"
+         echo > "${FAILFILE}"
+       fi
        ;;
     5) cmd="execute-fail"   # modified busybox2 must fail to run
        echo >> "$(which busybox2)"
        ;;
     6) cmd="execute-pass"   # now that it's signed, it must run
-       evmctl ima_sign --imasig --key "${KEY}" -a sha256 "$(which busybox2)"  >/dev/null 2>&1
+       if ! msg=$(evmctl ima_sign --imasig --key "${KEY}" -a sha256 "${BUSYBOX2}" 2>&1); then
+         echo " Error: Could not sign ${BUSYBOX2} with ${KEY}"
+         echo "${msg}"
+         echo > "${FAILFILE}"
+       fi
        ;;
     7) cmd="execute-fail"   # now that it's signed with an unknown key, it must fail
-       evmctl ima_sign --imasig --key "${KEY2}" -a sha256 "$(which busybox2)"  >/dev/null 2>&1
+       if ! msg=$(evmctl ima_sign --imasig --key "${KEY2}" -a sha256 "${BUSYBOX2}" 2>&1); then
+         echo " Error: Could not sign ${BUSYBOX2} with ${KEY2}"
+         echo "${msg}"
+         echo > "${FAILFILE}"
+       fi
        ;;
     8) cmd="load-key2";;    # load unknown key now
     9) cmd="execute-pass";; # with 2nd key loaded it must pass
@@ -85,11 +98,24 @@ while [ "${stage}" -le 13 ]; do
         echo >> "$(which busybox2)"
         ;;
     11) cmd="execute-pass"  # after re-signing it must pass
-        evmctl ima_sign --imasig --key "${KEY}" -a sha256 "$(which busybox2)"  >/dev/null 2>&1
+        if ! msg=$(evmctl ima_sign --imasig --key "${KEY2}" -a sha256 "${BUSYBOX2}" 2>&1); then
+          echo " Error: Could not sign ${BUSYBOX2} with ${KEY2}"
+          echo "${msg}"
+          echo > "${FAILFILE}"
+        fi
         ;;
     12) cmd="unload-key2"
+        # FIXME: Keys are being cached, so unloading them and expecting execution to fail
+        # is not currently supported...
         ;;
-    13) cmd="execute-fail";; # running busybox2 must fail with unknown (=unloaded) key
+    13) cmd="execute-pass";; # even though the key is unloaded, the execution should pass
+    14) cmd="execute-fail"   # signing with the unloaded key should trigger a failure
+        if ! msg=$(evmctl ima_sign --imasig --key "${KEY2}" -a sha256 "${BUSYBOX2}" 2>&1); then
+          echo " Error: Could not sign ${BUSYBOX2} with ${KEY2}"
+          echo "${msg}"
+          echo > "${FAILFILE}"
+        fi
+        ;;
     esac
 
     printf "${cmd}" > "${cmdfile}"
@@ -126,8 +152,15 @@ while [ "${stage}" -le 13 ]; do
       fi
       ;;
     execute-pass)
-      if "${BUSYBOX2}" echo >/dev/null 2>/dev/null; then
+      expected="123"
+      if ! msg=$("${BUSYBOX2}" echo "${expected}" 2>/dev/null); then
         echo " Error: Could not execute signed ${BUSYBOX2}"
+        echo > "${FAILFILE}"
+      fi
+      if [ "${msg}" != "${expected}" ]; then
+        echo " Error: msg varaible does not have expected value"
+        echo " expected: ${expected}"
+        echo " actual  : ${msg}"
         echo > "${FAILFILE}"
       fi
       ;;
