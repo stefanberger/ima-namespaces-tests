@@ -116,6 +116,7 @@ Concerns for the testing are:
 | appraise-6      | Testing of proper enforcement of appraisal policy rule with SETXATTR_CHECK and varying set of allowed hash algos |
 | appraise-many-1 | Concurrently running IMA namespaces with own keyrings appraise executables |
 | appraise-many-2 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications |
+| appraise-many-3 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications and signing with their own private key |
 | audit-1         | Simple setting of audit policy rule and verifying that audit log gets messages from IMA namespace. Modification of executable causes new audit message. |
 | audit-2         | Non-root users cannot set audit policy rules |
 | audit-4         | Ensuring that host root can nsenter mount namespace and set and audit rule there |
