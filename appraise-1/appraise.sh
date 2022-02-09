@@ -13,9 +13,25 @@ CERT=./rsa.crt
 
 keyctl newring _ima @s >/dev/null 2>&1
 
-# We want to see a measurement of the key when it gets loaded
-prepolicy="measure func=KEY_CHECK \n"
-printf "${prepolicy}" > /mnt/ima/policy || {
+# There should be no measurement of the key when it gets loaded due to 'foobar' keyring
+prepolicy1="measure func=KEY_CHECK keyrings=foobar \n"
+printf "${prepolicy1}" > /mnt/ima/policy || {
+  echo " Error: Could not set key measurement policy. Does IMA-ns support IMA-measure?"
+  exit "${SKIP:-3}"
+}
+
+keyctl padd asymmetric "" %keyring:_ima < "${CERT}" >/dev/null 2>&1
+
+# Expecting NO measurement of key
+ctr=$(grep -c " _ima " /mnt/ima/ascii_runtime_measurements)
+if [ "${ctr}" -ne 0 ]; then
+  echo " Error: Could find measurement of key in container's measurement list even though none should be there"
+  exit "${FAIL:-1}"
+fi
+
+# This time there must be a measurement of the key when it gets loaded
+prepolicy2="measure func=KEY_CHECK \n"
+printf "${prepolicy2}" > /mnt/ima/policy || {
   echo " Error: Could not set key measurement policy. Does IMA-ns support IMA-measure?"
   exit "${SKIP:-3}"
 }
@@ -60,7 +76,7 @@ template=$(get_template_from_log "/mnt")
 before=$(grep -c busybox2 /mnt/ima/ascii_runtime_measurements)
 
 nspolicy=$(busybox2 cat /mnt/ima/policy)
-policy="${prepolicy}${policy}"
+policy="${prepolicy1}${prepolicy2}${policy}"
 if [ "$(printf "${policy}")" != "${nspolicy}" ]; then
   echo " Error: Bad policy in namespace."
   echo "expected: |$(printf "${policy}")|"
