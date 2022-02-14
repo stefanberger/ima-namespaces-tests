@@ -119,9 +119,12 @@ Concerns for the testing are:
 | appraise-many-3 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications and signing with their own private key |
 | audit-1         | Simple setting of audit policy rule and verifying that audit log gets messages from IMA namespace. Modification of executable causes new audit message. |
 | audit-2         | Non-root users cannot set audit policy rules |
+| audit-3         | Host modifies file that namespace must re-audit |
 | audit-4         | Ensuring that host root can nsenter mount namespace and set and audit rule there |
 | audit-many-1    | Concurrently running IMA namespaces auditing execution of a program and check host audit log for number of expected entries |
 | audit+measure-1 | Measuring and auditing of file; re-measuring and re-auditing of file after file modifcation; cuasing of open_writes and ToMToU audit message |
+| audit+measure-2 | Host modifies file that namespace must re-audit and re-measure |
+| au+me+app-1     | Host modifies file that namespace must re-audit and re-measure and re-appraise |
 | hash-1          | Ensuring that a hash is generated on a file following hash policy rule |
 | measure-1       | Measuring of an executed file and re-measuring after modification of the file|
 | measure-2       | Configure namespace with hash algorithm and template |
