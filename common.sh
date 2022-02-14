@@ -376,6 +376,22 @@ function wait_for_file()
   return 1
 }
 
+# Wait for the child to exit and exit with its error code unless
+# it reports success.
+function wait_child_exit_with_child_failure()
+{
+  local childpid="$1"
+
+  local rc
+
+  wait "${childpid}"
+  rc=$?
+  if [ "${rc}" -ne 0 ]; then
+    echo " Error: Child returned exit code ${rc}"
+    exit "${rc}"
+  fi
+}
+
 # Get maximum number of keys
 function get_max_number_keys()
 {
