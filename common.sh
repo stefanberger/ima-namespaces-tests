@@ -431,3 +431,21 @@ function check_ns_selinux_support()
 {
   run_busybox_container ./check.sh selinux
 }
+
+# Ensure that the host does not have a rule like the given one
+# @param1: 'grep -E' type of pattern describing rule to grep for
+function check_host_ima_has_no_rule_like()
+{
+  local pattern="${1}"
+
+  local imapolicy="/sys/kernel/security/ima/policy"
+
+  check_root_or_sudo
+
+  if [ "$(sudo grep -c -E "${pattern}" "${imapolicy}")" -ne 0 ]; then
+    echo "Error: Host policy has a rule matching '${pattern}'"
+    exit "${SKIP:-3}"
+  fi
+
+  return 0
+}
