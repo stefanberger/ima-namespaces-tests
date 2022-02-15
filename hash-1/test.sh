@@ -15,10 +15,7 @@ check_ima_support
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
 	"${ROOT}/check.sh" \
-	"${DIR}/hash.sh" \
-	"${ROOT}/keys/rsakey.pem" \
-	"${ROOT}/keys/rsa.crt" \
-	"${ROOT}/keys/rsakey2.pem"
+	"${DIR}/hash.sh"
 
 if ! check_ns_hash_support; then
   echo " Error: IMA-ns does not support IMA-appraise hash rules"
