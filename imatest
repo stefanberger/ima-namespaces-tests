@@ -3,7 +3,7 @@
 # shellcheck disable=SC1090
 #set -x
 
-STATEFILE=/var/lib/imatest/.state
+STATEFILE=${IMA_TEST_WORKDIR:-/var/lib/imatest}/.state
 
 function logit()
 {
