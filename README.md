@@ -19,7 +19,7 @@ version, or one that is not too far away from it.
 
 Some of the results of the tests are dependent on the IMA compile time options. Until we
 figure out how to get a handle on all of them and deal with different results, please use
-the following Linx kernel compile time options. Some of them may remain requirements in the
+the following Linux kernel compile time options. Some of them may remain requirements in the
 future for the testing to make any sense. If you know of one compile time option that
 'doesn't matter' whether it is set, let me know and we can mark it as such.
 
@@ -111,7 +111,7 @@ Concerns for the testing are:
 |                 | o Re-appraisal of file in container signing with unknown key |
 | appraise-2      | Re-appraisal of file in container after host signed file with key unknown to container |
 | appraise-3      | Execution of unsigned file fails in container if parent container has appraise policy and succeeds once file is signed |
-| appraise-4      | O_DIRECT usage and policy rule with missing or avaiable permit_directio |
+| appraise-4      | O_DIRECT usage and policy rule with missing or available permit_directio |
 | appraise-5      | Only signed policy accepted after POLICY_CHECK rule has been set |
 | appraise-6      | Testing of proper enforcement of appraisal policy rule with SETXATTR_CHECK and varying set of allowed hash algos |
 | appraise-many-1 | Concurrently running IMA namespaces with own keyrings appraise executables |
@@ -122,7 +122,7 @@ Concerns for the testing are:
 | audit-3         | Host modifies file that namespace must re-audit |
 | audit-4         | Ensuring that host root can nsenter mount namespace and set and audit rule there |
 | audit-many-1    | Concurrently running IMA namespaces auditing execution of a program and check host audit log for number of expected entries |
-| audit+measure-1 | Measuring and auditing of file; re-measuring and re-auditing of file after file modifcation; cuasing of open_writes and ToMToU audit message |
+| audit+measure-1 | Measuring and auditing of file; re-measuring and re-auditing of file after file modification; causing of open_writes and ToMToU audit message |
 | audit+measure-2 | Host modifies file that namespace must re-audit and re-measure |
 | au+me+app-1     | Host modifies file that namespace must re-audit and re-measure and re-appraise |
 | hash-1          | Ensuring that a xattr hash is generated on a file following hash policy rule |
