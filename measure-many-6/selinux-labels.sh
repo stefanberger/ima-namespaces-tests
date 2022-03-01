@@ -66,9 +66,45 @@ set_policy()
   check_policy_has_label
 }
 
+# Create a file (to be different for each namespace) and execute it
+# while modifying it so that the policy in IMA needs to be accessed every time.
+# Do this until a file with a given filename appears.
+measure_loop()
+{
+  local donefile="$1"
+  local create_file="$2"
+
+  local myfile limit
+
+  # only a subset does measurements
+  limit=10
+  [ "${NUM_CONTAINERS}" -gt "${limit}" ] && limit=$((NUM_CONTAINERS/20))
+
+  myfile="myfile-${NSID}"
+
+  # create the file with the SELinux label (module must be enabled)
+  if [ "${create_file}" -eq 1 ] && [ "${NSID}" -le "${limit}" ]; then
+    printf "#!/bin/sh\n echo " > "${myfile}"
+    chmod 777 "${myfile}"
+    setfattr -n security.selinux \
+             -v "system_u:object_r:${SELINUX_LABEL}:s0" \
+             "${myfile}"
+  fi
+
+  while [ ! -f "${donefile}" ]; do
+    cat "/mnt/ima/policy" >/dev/null
+    if [ "${NSID}" -le "${limit}" ]; then
+      "./${myfile}" >/dev/null
+      printf "a" >> "${myfile}"
+    fi
+    sleep 0.2
+  done
+}
+
 stage=1
-while [ "${stage}" -lt 5 ]; do
+while [ "${stage}" -le 6 ]; do
   syncfile="${SYNCFILE}-${stage}"
+  donefile="done"
 
   if [ "${NSID}" = "0" ]; then
     # control container
@@ -77,8 +113,10 @@ while [ "${stage}" -lt 5 ]; do
     case "${stage}" in
     1) cmd="create-imans";;
     2) cmd="set-policy";;
-    3) cmd="check-policy-no-label";echo "disabling module";time /usr/sbin/semodule -d "${SELINUX_MODULE}";;
-    4) cmd="check-policy-has-label";echo "enabling module";time /usr/sbin/semodule -e "${SELINUX_MODULE}";;
+    3) cmd="disabling-module"; rm -f "${donefile}";;
+    4) cmd="check-policy-no-label";;
+    5) cmd="enabling-module"; rm -f "${donefile}";;
+    6) cmd="check-policy-has-label";;
     esac
 
     [ -f "${FAILFILE}" ] && {
@@ -90,6 +128,21 @@ while [ "${stage}" -lt 5 ]; do
 
     printf "${cmd}" > "${CMDFILE}"
     open_cage "${syncfile}"
+
+    case "${cmd}" in
+    disabling-module)
+      echo "disabling module"
+      time /usr/sbin/semodule -d "${SELINUX_MODULE}"
+      sleep 1
+      echo > "${donefile}"
+      ;;
+    enabling-module)
+      echo "enabling module"
+      time /usr/sbin/semodule -e "${SELINUX_MODULE}"
+      sleep 1
+      echo > "${donefile}"
+      ;;
+    esac
   else
     # testing container
     wait_in_cage "${NSID}" "${syncfile}"
@@ -100,6 +153,14 @@ while [ "${stage}" -lt 5 ]; do
     case "${cmd}" in
     create-imans)           create_imans;;
     set-policy)             set_policy;;
+    disabling-module)
+                            measure_loop \
+                             "${donefile}" \
+                             "1";;
+    enabling-module)
+                            measure_loop \
+                             "${donefile}" \
+                             "0";;
     check-policy-no-label)  check_policy_no_label;;
     check-policy-has-label) check_policy_has_label;;
     end)                    break;;
