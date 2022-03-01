@@ -45,6 +45,8 @@ if ! check_ns_selinux_support; then
   exit "${SKIP:-3}"
 fi
 
+copy_elf_busybox_container "$(type -P setfattr)"
+
 rootfs="$(get_busybox_container_root)"
 
 # First container is just running the script on the host
@@ -75,6 +77,7 @@ while [ "${testcase}" -le 3 ]; do
 
   for ((i=1; i<=num; i++)); do
     NSID=${i} \
+      NUM_CONTAINERS=$((1+num)) \
       CMDFILE=${CMDFILE} \
       SYNCFILE=${SYNCFILE} \
       FAILFILE=${FAILFILE} \
