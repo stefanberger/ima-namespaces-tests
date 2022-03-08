@@ -33,7 +33,8 @@ num_extra=0
 ctr=$(grep -c -E '^audit.*func=BPRM_CHECK .*MAY_EXEC' /sys/kernel/security/ima/policy)
 [ "${ctr}" -ne 0 ] && num_extra=1
 
-before=$(grep -c "type=INTEGRITY_RULE .*rootfs/bin/busybox2" "${AUDITLOG}")
+rootfs=$(get_busybox_container_root)
+before=$(grep -c "type=INTEGRITY_RULE .* file=\"${rootfs}/bin/busybox2\"" "${AUDITLOG}")
 
 echo "INFO: Testing auditing+measuring caused by executable in container and re-auditing+re-measuring after file modification by host"
 
@@ -50,7 +51,7 @@ if [ "${rc}" -ne 0 ] ; then
 fi
 
 expected=$((before + 1 + num_extra))
-after=$(wait_num_entries "${AUDITLOG}" "type=INTEGRITY_RULE .*rootfs/bin/busybox2" $((expected)) 30)
+after=$(wait_num_entries "${AUDITLOG}" "type=INTEGRITY_RULE .* file=\"${rootfs}/bin/busybox2\"" $((expected)) 30)
 if [ $((expected)) -ne "${after}" ]; then
   wait_child_exit_with_child_failure "${childpid}"
   echo " Error: Wrong number of busybox2 entries in audit log."
@@ -58,7 +59,6 @@ if [ $((expected)) -ne "${after}" ]; then
   exit "${FAIL:-1}"
 fi
 
-rootfs=$(get_busybox_container_root)
 syncfile="${rootfs}/syncfile"
 
 if ! wait_for_file "${syncfile}" 20; then
@@ -78,7 +78,7 @@ if ! wait_for_file "${syncfile}" 20; then
 fi
 
 expected=$((before + 2 + num_extra))
-after=$(wait_num_entries "${AUDITLOG}" "type=INTEGRITY_RULE .*rootfs/bin/busybox2" $((expected)) 30)
+after=$(wait_num_entries "${AUDITLOG}" "type=INTEGRITY_RULE .* file=\"${rootfs}/bin/busybox2\"" $((expected)) 30)
 if [ $((expected)) -ne "${after}" ]; then
   wait_child_exit_with_child_failure "${childpid}"
   echo " Error: Wrong number of busybox2 entries in audit log."
