@@ -36,7 +36,8 @@ num_extra=0
 ctr=$(grep -c -E '^audit.*func=BPRM_CHECK .*MAY_EXEC' /sys/kernel/security/ima/policy)
 [ "${ctr}" -ne 0 ] && num_extra=1
 
-before=$(grep -c "rootfs/bin/busybox2" "${AUDITLOG}")
+rootfs=$(get_busybox_container_root)
+before=$(grep -c "file=\"${rootfs}/bin/busybox2\"" "${AUDITLOG}")
 
 echo "INFO: Testing auditing and measurements inside container"
 
@@ -52,7 +53,7 @@ if [ $rc -ne 0 ] ; then
 fi
 
 expected=$((before + 1 + num_extra))
-after=$(wait_num_entries "${AUDITLOG}" "rootfs/bin/busybox2" "${expected}" 30)
+after=$(wait_num_entries "${AUDITLOG}" "file=\"${rootfs}/bin/busybox2\"" "${expected}" 30)
 if [ "${expected}" -ne "${after}" ]; then
   echo " Error: Wrong number of busybox2 entries in audit log."
   echo "        Expected $((expected - before)) more log entries. Expected ${expected}, found ${after}."
@@ -79,7 +80,7 @@ if [ ${rc} -ne 0 ] ; then
 fi
 
 expected=$((before + 2 + num_extra))
-after=$(wait_num_entries "${AUDITLOG}" "rootfs/bin/busybox2" "${expected}" 30)
+after=$(wait_num_entries "${AUDITLOG}" "file=\"${rootfs}/bin/busybox2\"" "${expected}" 30)
 if [ "${expected}" -ne "${after}" ]; then
   echo " Error: Wrong number of busybox2 entries in audit log."
   echo "        Expected $((expected - before)) more log entries. Expected ${expected}, found ${after}."
@@ -90,7 +91,7 @@ echo "INFO: Pass test 2"
 
 # Cause a TomToU violation from within the container that MUST NOT be audited
 
-search=" cause=ToMToU .*rootfs/testfile"
+search=" cause=ToMToU .* name=\"${rootfs}/testfile\""
 before=$(grep -c "${search}" "${AUDITLOG}")
 
 echo "INFO: Testing that TomToU violation inside container is NOT audited"
@@ -122,7 +123,7 @@ fi
 echo "INFO: Pass test 3"
 # Cause a open_writers violation in the container
 
-search=" cause=open_writers .*rootfs/testfile"
+search=" cause=open_writers .* name=\"${rootfs}/testfile\""
 before=$(grep -c "${search}" "${AUDITLOG}")
 
 echo "INFO: Testing that open_writers violation inside container is NOT audited"

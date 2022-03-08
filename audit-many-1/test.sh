@@ -27,8 +27,6 @@ if ! check_ns_audit_support; then
   exit "${SKIP:-3}"
 fi
 
-before=$(grep -c "rootfs/bin/busybox2" "${AUDITLOG}")
-
 # Test auditing caused by executable run in many namespaces
 
 # Reduce likleyhood of log rotation by not creating too many...
@@ -37,6 +35,9 @@ num=$(( $(nproc) * 1 ))
 echo "INFO: Testing audit messages caused by executable in ${num} containers"
 
 while :; do
+  rootfs=$(get_busybox_container_root)
+  before=$(grep -c "file=\"${rootfs}/bin/busybox2\"" "${AUDITLOG}")
+
   # Accomodate the case where we have a host audit rule
   num_extra=0
   ctr=$(grep -c -E '^audit.*func=BPRM_CHECK .*MAY_EXEC' /sys/kernel/security/ima/policy)
@@ -44,8 +45,6 @@ while :; do
 
   # Count lines in audit log for log rotation detection
   numlines1=$(grep -c ^ "${AUDITLOG}")
-
-  rootfs="$(get_busybox_container_root)"
 
   # Children indicate failure by creating the failfile
   FAILFILE="failfile"
@@ -73,7 +72,7 @@ while :; do
   fi
 
   expected=$((before + num + num_extra))
-  after=$(wait_num_entries "${AUDITLOG}" "rootfs/bin/busybox2" $((expected)) 30)
+  after=$(wait_num_entries "${AUDITLOG}" "file=\"${rootfs}/bin/busybox2\"" $((expected)) 30)
   if [ "${expected}" -ne "${after}" ]; then
     echo " Error: Wrong number of busybox2 entries in audit log."
     echo "        Expected $((expected)), found ${after}."
@@ -83,4 +82,3 @@ while :; do
   echo "INFO: Pass test 1"
   exit "${SUCCESS:-0}"
 done
-
