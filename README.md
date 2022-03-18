@@ -114,6 +114,7 @@ Concerns for the testing are:
 | appraise-4      | O_DIRECT usage and policy rule with missing or available permit_directio |
 | appraise-5      | Only signed policy accepted after POLICY_CHECK rule has been set |
 | appraise-6      | Testing of proper enforcement of appraisal policy rule with SETXATTR_CHECK and varying set of allowed hash algos |
+| appraise-7      | Testing of setxattr success on files with proper ownership in namespace, failures on files without proper ownership in namespace |
 | appraise-many-1 | Concurrently running IMA namespaces with own keyrings appraise executables |
 | appraise-many-2 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications |
 | appraise-many-3 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications and signing with their own private key |
