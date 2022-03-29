@@ -87,11 +87,11 @@ fi
 
 # Expecting 2 more audit log entries now
 expected=$((before + 1 + num_extra + 2))
-after=$(wait_num_entries "${AUDITLOG}" "type=INTEGRITY_RULE .*rootfs/bin/busybox2" $((expected)) 30)
+after=$(wait_num_entries "${AUDITLOG}" "type=INTEGRITY_RULE .* file=\"${rootfs}/bin/busybox2\"" $((expected)) 30)
 if [ $((expected)) -ne "${after}" ]; then
-  wait_child_exit_with_child_failure "${childpid}"
   echo " Error: Wrong number of busybox2 entries in audit log."
   echo "        Expected $((expected - before)) more log entries. Expected ${expected}, found ${after}."
+  wait_child_exit_with_child_failure "${childpid}"
   exit "${FAIL:-1}"
 fi
 
@@ -112,7 +112,7 @@ fi
 
 # Expecting 2 more audit log entries now
 expected=$((before + 1 + num_extra + 2 + 2))
-after=$(wait_num_entries "${AUDITLOG}" "type=INTEGRITY_RULE .*rootfs/bin/busybox2" $((expected)) 30)
+after=$(wait_num_entries "${AUDITLOG}" "type=INTEGRITY_RULE .* file=\"${rootfs}/bin/busybox2\"" $((expected)) 30)
 if [ $((expected)) -ne "${after}" ]; then
   wait_child_exit_with_child_failure "${childpid}"
   echo " Error: Wrong number of busybox2 entries in audit log."
