@@ -90,7 +90,10 @@ fi
 "${EVMCTL}" ima_sign --imasig --key "${KEY}" -a sha256 "${BUSYBOX}"  >/dev/null 2>&1
 
 template=$(PATH=${BINDIR} get_template_from_log "/mnt")
-[ "${template}" = "ima-sig" ] && num_extra=1 || num_extra=0
+case "${template}" in
+ima-sig|ima-ns) num_extra=1;;
+*) num_extra=0;;
+esac
 
 before=$("${BUSYBOX}" grep -c "${BUSYBOX2}" /mnt/ima/ascii_runtime_measurements)
 

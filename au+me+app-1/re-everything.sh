@@ -75,9 +75,16 @@ if ! ${BUSYBOX2} cat /mnt/ima/policy 1>/dev/null; then
   exit "${FAIL:-1}"
 fi
 
-# Expecting 2 measurements
+# Expecting 2 or 3 measurements depending on template being used
+template=$(get_template_from_log "/mnt")
+case "${template}" in
+ima-sig|ima-ns) num_extra=1;;
+*) num_extra=0;;
+esac
+
 ctr=$(grep -c "${BUSYBOX2}" /mnt/ima/ascii_runtime_measurements)
-if [ "${ctr}" -ne 2 ]; then
+exp=$((2 + num_extra))
+if [ "${ctr}" -ne "${exp}" ]; then
   echo " Error: Could not find 2 measurement of busybox2 in container, found ${ctr}."
   exit "${FAIL:-1}"
 fi
