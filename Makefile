@@ -27,6 +27,7 @@ $(INSTDIR)/% : % .FORCE
 
 all:
 	make -C keys all
+	make -C vtpm-exec all
 
 clean:
 	make -C keys clean

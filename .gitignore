@@ -1,3 +1,4 @@
 *~
 keys/*.crt
 keys/*.pem
+vtpm-exec/vtpm-exec
