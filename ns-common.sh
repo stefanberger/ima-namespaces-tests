@@ -97,15 +97,21 @@ determine_file_hash_from_log()
   line=$(head -n1 < "${mntdir}/ima/ascii_runtime_measurements")
   template=$(echo "${line}" | cut -d" " -f3)
 
-  if [ "${template}" = "ima" ]; then
+  case "${template}" in
+  ima)
     imahash=$(echo "${line}" | cut -d" " -f4)
     case "${#imahash}" in
     32) imahash="md5";;
     40) imahash="sha1";;
     esac
-  else
+    ;;
+  ima-ns)
+    imahash=$(echo "${line}" | cut -d" " -f5 | cut -d":" -f1)
+    ;;
+  *)
     imahash=$(echo "${line}" | cut -d" " -f4 | cut -d":" -f1)
-  fi
+    ;;
+  esac
 
   case "${imahash}" in
   md5) ;;
