@@ -39,6 +39,16 @@ function check_root_or_sudo()
   fi
 }
 
+function check_vtpm_proxy_device
+{
+  if [ ! -c /dev/vtpmx ]; then
+    if ! modprobe tpm_vtpm_proxy; then
+      echo " Error: Could not run 'modprobe tpm_vtpm_proxy'. VTPM proxy device not available."
+      exit "${SKIP:-3}"
+    fi
+  fi
+}
+
 function check_auditd()
 {
   if ! systemctl status auditd &>/dev/null; then
@@ -70,6 +80,40 @@ function check_selinux_enabled()
     echo " Error: SELinux is not enabled on this machine"
     exit "${SKIP:-3}"
   fi
+}
+
+# Check whether swtpm support tpm-1.2 or tpm-2.0
+function __check_swtpm_tpmXX_support()
+{
+  local searchkey="$1"
+
+  local tmp
+
+  if ! type -P swtpm >/dev/null; then
+    echo " Error: swtpm seems to not be installed"
+    exit "${SKIP:-3}"
+  fi
+
+  tmp="$(swtpm socket --print-capabilities)"
+  # tpm-1.2 was printed starting when the 'version' field appeared
+  if [ -n "$(echo "${tmp}" | sed -n 's/.*"version": "\([0-9\.]*\)".*/\1/p')" ]; then
+    if ! echo "${tmp}" | grep -q "\"${searchkey}\""; then
+      echo " Error: swtpm does not support TPM 1.2"
+      exit "${SKIP:-3}"
+    fi
+  fi
+}
+
+# Check whether swtpm support tpm-1.2
+function check_swtpm_tpm12_support()
+{
+   __check_swtpm_tpmXX_support "tpm-1.2"
+}
+
+# Check whether swtpm support tpm-2.0
+function check_swtpm_tpm2_support()
+{
+   __check_swtpm_tpmXX_support "tpm-2.0"
 }
 
 function check_allow_expensive_test()
@@ -147,15 +191,25 @@ function setup_busybox_container()
 
 # Copy the given executable and all its libraries into the busybox
 # container
+# @param1: The full path to the executable
+# @param2: Optional directory to install the executable in; if omitted it
+#          will be installed under the same path the executable was found
+#          (/sbin/foobar will be installed to /sbin/foobar in container)
 function copy_elf_busybox_container()
 {
   local executable="$1"
+  local destdir="$2"  # optional
 
-  local destdir destfile dep rootfs
+  local destfile dep rootfs
 
   rootfs="$(get_busybox_container_root)"
-  destdir="${rootfs}/$(dirname "${executable}")"
-  destfile="${rootfs}/${executable}"
+  if [ -z "${destdir}" ]; then
+    destdir="${rootfs}/$(dirname "${executable}")"
+    destfile="${rootfs}/${executable}"
+  else
+    destdir="${rootfs}/${destdir}"
+    destfile="${destdir}/$(basename "${executable}")"
+  fi
 
   if [ -f "${destfile}" ]; then
      return
@@ -194,6 +248,27 @@ function run_busybox_container()
   PATH=/bin:/usr/bin \
   unshare --user --map-root-user --mount-proc --pid --fork \
     --root "${rootfs}" "$@"
+  return $?
+}
+
+# Run the given executable or script in the busybox container and
+# setup a vTPM
+# @param2...: Executable to run and its parameters
+function run_busybox_container_vtpm()
+{
+  local tpm2="$1"; shift 1
+
+  local rootfs opt
+
+  [ "${tpm2}" -eq 1 ] && opt="--create-tpm2-device" || opt="--create-tpm1.2-device"
+
+  rootfs="$(get_busybox_container_root)"
+
+  SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
+  PATH=/bin:/usr/bin \
+  ${VTPM_EXEC} "${opt}" -- \
+    unshare --user --map-root-user --mount-proc --pid --fork \
+      --root "${rootfs}" "$@"
   return $?
 }
 
@@ -428,6 +503,12 @@ function check_ns_hash_support()
 function check_ns_selinux_support()
 {
   run_busybox_container ./check.sh selinux
+}
+
+# Check whether there is vtpm support
+function check_ns_vtpm_support()
+{
+  run_busybox_container_vtpm "1" ./check.sh vtpm
 }
 
 # Ensure that the host does not have a rule like the given one
