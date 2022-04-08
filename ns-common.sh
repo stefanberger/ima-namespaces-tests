@@ -25,6 +25,10 @@ mnt_securityfs()
     exit "${SKIP:-3}"
   fi
 
+  if [ -n "${VTPM_DEVICE_FD}" ]; then
+      vtpm-exec --connect-to-ima-ns "${VTPM_DEVICE_FD}"
+  fi
+
   echo 1 > "${mntdir}/ima/active"
 
   return 0
@@ -41,7 +45,7 @@ get_template_from_log()
     busybox cut -d" " -f3
 }
 
-# Let container run into the cage and have it wait
+# Let container run into the cage and have it wait - woof!
 # @param1: id of container
 # @parma2: syncfile
 wait_in_cage()
@@ -78,7 +82,7 @@ wait_cage_full()
   done
 }
 
-# Let the containers of out the cage
+# Let the containers of out the cage - woof! woof!
 open_cage()
 {
   local syncfile="$1"
@@ -166,4 +170,27 @@ wait_file_gone()
   done
 
   return 1
+}
+
+start_swtpm_chardev()
+{
+  local nsid="$1"
+  local fd="$2"
+
+  shift 2
+
+  mkdir -p "/swtpm-${nsid}"
+
+  swtpm chardev \
+    --tpmstate "dir=/swtpm-${nsid}" \
+    --ctrl "type=unixio,path=/swtpm-${nsid}/ctrl" \
+    --fd "${fd}" \
+    --locality allow-set-locality \
+    --flags not-need-init,startup-clear \
+    "$@" &
+}
+
+stop_swtpm()
+{
+  swtpm_ioctl -s --unix "/swtpm-${nsid}/ctrl"
 }

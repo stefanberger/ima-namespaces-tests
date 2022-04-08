@@ -138,3 +138,7 @@ Concerns for the testing are:
 | measure-many-4  | One control container modifies a file that other containers are running and expecting new measurements in containers every time |
 | measure-many-5  | Concurrently running IMA namespaces with different hash and template configurations repeatedly run an executable that's being modified |
 | measure-many-6  | Concurrently running IMA namespaces test disabling and enabling of SELinux labels |
+| vtpm-1          | Check IMA measurement list against PCR_Extends; use TPM 1.2 (swtpm) |
+| vtpm-2          | Check IMA measurement list against PCR_Extends; use TPM 2 (swtpm) |
+| vtpm-many-1     | Concurrently running IMA namespaces with measurement policy; check IMA measurement list against PCR_Extends; use TPM 1.2 (swtpm) |
+| vtpm-many-2     | Concurrently running IMA namespaces with measurement policy; check IMA measurement list against PCR_Extends; use TPM 2 (swtpm) |

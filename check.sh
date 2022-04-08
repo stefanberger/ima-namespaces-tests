@@ -48,6 +48,17 @@ if [ "${rc}" -eq 0 ]; then
 
     fi
     ;;
+  vtpm)
+    mkdir "${MNT}" 2>/dev/null
+    if ! msg=$(mount -t securityfs "${MNT}" "${MNT}" 2>&1); then
+      rc=1
+    else
+      start_swtpm_chardev "0" "${VTPM_DEVICE_FD}" --tpm2
+      if ! vtpm-exec --connect-to-ima-ns "${VTPM_DEVICE_FD}" 2>/dev/null; then
+        rc=1
+      fi
+    fi
+    ;;
   esac
 fi
 
@@ -78,6 +89,7 @@ if [ "${rc}" -eq 0 ]; then
     if ! printf "measure func=BPRM_CHECK subj_type=bin_t\n" > "${MNT}/ima/policy"; then
       rc=1
     fi
+    ;;
   esac
 fi
 
