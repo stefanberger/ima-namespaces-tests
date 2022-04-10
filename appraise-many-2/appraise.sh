@@ -10,6 +10,7 @@
 # NSID: distinct namespace id number
 # FAILFILE: name of file to create upon failure
 # NUM_CONTAINERS: The number of containers started
+NSID=${NSID:-0}
 
 load_key()
 {

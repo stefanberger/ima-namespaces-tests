@@ -8,6 +8,7 @@
 # NSID: distinct namespace id number
 # FAILFILE: name of file to create upon failure
 # NUM_CONTAINERS: number of containers running
+NSID=${NSID:-0}
 
 # Get a hash name given a number's lowest 2 bits
 # Use only sha1, sha256, sha512 that busybox likely supports
