@@ -4,9 +4,10 @@
 
 # shellcheck disable=SC2059,SC3043
 #set -x
+NSID=${NSID:-0}
+SYNCFILE=${SYNCFILE:-syncfile}
 
 . ./ns-common.sh
-SYNCFILE=${SYNCFILE:-syncfile}
 
 create_imans()
 {

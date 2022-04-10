@@ -8,6 +8,7 @@
 # NSID: distinct namespace id number
 # FAILFILE: name of file to create upon failure
 # NUM_CONTAINERS: number of containers running
+NSID=${NSID:-0}
 
 . ./ns-common.sh
 
@@ -30,7 +31,7 @@ i=1
 while [ "${i}" -lt 20 ]; do
   syncfile="syncfile-${i}"
 
-  if [ "$NSID" -eq "0" ]; then
+  if [ "${NSID}" -eq "0" ]; then
     # wait for all containers to be in the cage
     wait_cage_full "${NSID}" "${syncfile}" "${NUM_CONTAINERS}"
 

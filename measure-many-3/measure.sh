@@ -8,6 +8,7 @@
 # NSID: distinct namespace id number
 # NUMFILES: how many files to create
 # FAILFILE: name of file to create upon failure
+NSID=${NSID:-0}
 
 . ./ns-common.sh
 
