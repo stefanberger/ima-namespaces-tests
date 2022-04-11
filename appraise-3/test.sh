@@ -34,7 +34,9 @@ copy_elf_busybox_container "$(type -P setfattr)"
 # Test that appraisal policy in parent container prevents execution in child container
 echo "INFO: Testing appraisal policy in parent prevents execution of unsigned files in child"
 
-run_busybox_container_nested ./parent.sh
+run_busybox_container_nested \
+  keyctl session - ./parent.sh \
+    2> >(sed '/^Joined session.*/d')
 rc=$?
 if [ $rc -ne 0 ]; then
   echo " Error: Test failed in IMA namespace."

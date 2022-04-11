@@ -44,7 +44,7 @@ TESTEXE=/bin/busybox2
 testexe="${rootfs}/${TESTEXE}"
 
 TESTEXE="${TESTEXE}" SYNCFILE="${SYNCFILE}" \
-  run_busybox_container ./reappraise-after-host-file-signing.sh &
+  run_busybox_container_key_session ./reappraise-after-host-file-signing.sh &
 pid=$!
 
 # Wait until namespace wants us to modify the file
