@@ -37,7 +37,7 @@ copy_elf_busybox_container "$(type -P setfattr)"
 
 echo "INFO: Testing appraisal inside container"
 
-run_busybox_container ./appraise.sh
+run_busybox_container_key_session ./appraise.sh
 rc=$?
 if [ $rc -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."
@@ -48,7 +48,7 @@ echo "INFO: Pass test 1"
 
 echo "INFO: Testing re-appraisal inside container"
 
-run_busybox_container ./reappraise.sh
+run_busybox_container_key_session ./reappraise.sh
 rc=$?
 if [ $rc -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."
@@ -69,7 +69,7 @@ TESTEXE=/bin/busybox2
 testexe="${rootfs}/${TESTEXE}"
 
 TESTEXE="${TESTEXE}" SYNCFILE="${SYNCFILE}" \
-  run_busybox_container ./reappraise-after-host-file-modification.sh &
+  run_busybox_container_key_session ./reappraise-after-host-file-modification.sh &
 pid=$!
 
 # Wait until namespace wants us to modify the file
@@ -96,7 +96,7 @@ echo "INFO: Pass test 3"
 # key unknown to the kernel and then re-signed
 echo "INFO: Testing re-appraisal inside container after signing with unknown key"
 
-run_busybox_container ./reappraise-after-sign-with-unknown-key.sh
+run_busybox_container_key_session ./reappraise-after-sign-with-unknown-key.sh
 rc=$?
 if [ $rc -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."

@@ -313,8 +313,6 @@ function run_busybox_container_key_session()
 # and allow nested creation of user namespaces
 function run_busybox_container_nested()
 {
-  local executable="$1"
-
   local rootfs
 
   rootfs="$(get_busybox_container_root)"
@@ -324,7 +322,7 @@ function run_busybox_container_nested()
   SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
   PATH="${rootfs}"/bin:"${rootfs}"/usr/bin \
   unshare --user --map-root-user --mount-proc --pid --fork \
-    --mount "${executable}"
+    --mount "$@"
   rc=$?
   popd 1>/dev/null || exit "${FAIL:-1}"
   return "$rc"

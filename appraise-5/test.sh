@@ -31,7 +31,7 @@ copy_elf_busybox_container "$(type -P evmctl)"
 
 echo "INFO: Testing signed policy usage and policy appraisal inside container"
 
-run_busybox_container ./signed-policy.sh
+run_busybox_container_key_session ./signed-policy.sh
 rc=$?
 if [ $rc -ne 0 ] ; then
   echo " Error: Test failed in IMA namespace."
