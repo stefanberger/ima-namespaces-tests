@@ -60,14 +60,17 @@ CONFIG_EVM_LOAD_X509=y
 CONFIG_EVM_X509_PATH="/etc/keys/x509_evm.der"
 ```
 
-Also, please don't set any policies on the host except for the built-in ones.
-Other policies may interfere with the test results.
+Also, for now, please don't set any policies on the host except for the
+built-in ones. Other policies may interfere with the test results for
+example in the number of results in the audit log.
 
 The test suite works with the following boot command line parameters:
 
 ```
 ima_policy=tcb ima_template=ima-sig
 ```
+
+Other command lines may also work.
 
 ## Running the Tests
 
@@ -82,7 +85,7 @@ Afer a test run have a look at the output file `/var/log/imatest.log`. Depending
 IMA namespacing support of IMA-audit, IMA-measure etc., various tests may have been skipped.
 
 Some of the tests, particularly those related to auditing that check the contents of the
-audit log require root rights. This is the reason for the `sudo` in the above command.
+audit log, require root rights. This is the reason for the `sudo` in the above command.
 Many tests can be run as normal user.
 
 ## Running Individual Tests
