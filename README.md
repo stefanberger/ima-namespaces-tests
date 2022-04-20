@@ -155,6 +155,7 @@ Concerns for the testing are:
 | appraise-many-1 | Concurrently running IMA namespaces with own keyrings appraise executables |
 | appraise-many-2 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications |
 | appraise-many-3 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications and signing with their own private key |
+| appraise-many-4 | Concurrently running IMA namespaces test BPRM_CHECK AND MMAP_CHECK using different templates for logging; test removal and restoring of signature on library |
 | audit-1         | Simple setting of audit policy rule and verifying that audit log gets messages from IMA namespace. Modification of executable causes new audit message. |
 | audit-2         | Non-root users cannot set audit policy rules |
 | audit-3         | Host modifies file that namespace must re-audit |
