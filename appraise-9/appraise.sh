@@ -119,18 +119,21 @@ ctr=$(grep " ima-sig " /mnt/ima/ascii_runtime_measurements |grep -c -E "${libima
 exp=2
 if [ "${ctr}" -ne "${exp}" ]; then
   echo " Error: Expected ${exp} ima-sig log entries of ${libimaevm} but found ${ctr}."
+  exit "${FAIL:-1}"
 fi
 
 ctr=$(grep " ima-sig " /mnt/ima/ascii_runtime_measurements |grep -c -E "${libimaevm} ")
 exp=2
 if [ "${ctr}" -ne "${exp}" ]; then
   echo " Error: Expected ${exp} ima-sig log entries of ${libimaevm} but found ${ctr}."
+  exit "${FAIL:-1}"
 fi
 
 ctr=$(grep " 030204" /mnt/ima/ascii_runtime_measurements |grep -c -E "${libimaevm} ")
 exp=1
 if [ "${ctr}" -ne "${exp}" ]; then
   echo " Error: Expected ${exp} ima-sig log entries of ${libimaevm} with signature but found ${ctr}."
+  exit "${FAIL:-1}"
 fi
 
 exit "${SUCCESS:-0}"
