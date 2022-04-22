@@ -22,6 +22,7 @@ measure-1/test.sh
 measure-2/test.sh
 measure-3/test.sh
 measure-4/test.sh
+measure-5/test.sh
 measure-many-1/test.sh
 measure-many-2/test.sh
 measure-many-3/test.sh
