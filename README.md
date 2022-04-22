@@ -119,6 +119,7 @@ Concerns for the testing are:
 | appraise-6      | Testing of proper enforcement of appraisal policy rule with SETXATTR_CHECK and varying set of allowed hash algos |
 | appraise-7      | Testing of setxattr success on files with proper ownership in namespace, failures on files without proper ownership in namespace |
 | appraise-8      | Testing of BPRM_CHECK and MMAP_CHECK; test removal and restoring of signature on library |
+| appraise-9      | Testing of BPRM_CHECK and MMAP_CHECK using different templates for logging |
 | appraise-many-1 | Concurrently running IMA namespaces with own keyrings appraise executables |
 | appraise-many-2 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications |
 | appraise-many-3 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications and signing with their own private key |
