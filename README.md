@@ -135,6 +135,7 @@ Concerns for the testing are:
 | measure-2       | Configure namespace with hash algorithm and template |
 | measure-3       | Verification that uid/gid values when viewed from another user namespace are showing expected values relative to that user namespace |
 | measure-4       | Ensuring that number of rules allowed by container is limited |
+| measure-5       | Testing of BPRM_CHECK and MMAP_CHECK using different templates for logging |
 | measure-many-1  | Concurrently running IMA namespaces measure an executable |
 | measure-many-2  | Measurements taken in nested containers up to 32 user spaces deep; executable run in one container is also measured in parent containers|
 | measure-many-3  | Concurrently running IMA namespaces measure many generated scripts and check log |
