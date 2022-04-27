@@ -39,7 +39,7 @@ before=$(grep -c "file=\"${rootfs}/bin/busybox2\"" "${AUDITLOG}")
 
 echo "INFO: Testing auditing caused by executable in container"
 
-policy="audit func=BPRM_CHECK mask=MAY_EXEC uid=0 "
+policy="audit func=BPRM_CHECK mask=MAY_EXEC uid=0 gid=0 fowner=0 fgroup=0 "
 
 SYNCFILE="syncfile" POLICY=${policy} \
   run_busybox_container_set_policy "/mnt" "${policy}" ./audit.sh

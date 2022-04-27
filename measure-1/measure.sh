@@ -6,7 +6,7 @@
 
 mnt_securityfs "/mnt"
 
-policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0'
+policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 fowner=0'
 
 echo "${policy}" > /mnt/ima/policy || {
   echo " Error: Could not set measure policy. Does IMA-ns support IMA-measurement?"

@@ -48,7 +48,7 @@ failfile="${rootfs}/${FAILFILE}"
 id="${RANDOM}abc${RANDOM}"
 
 # The expected policy
-policy="audit func=BPRM_CHECK mask=MAY_EXEC uid=0 gid=0 "
+policy="audit func=BPRM_CHECK mask=MAY_EXEC uid=0 gid=0 fowner=0 fgroup=0 "
 
 sudo -u "${TEST_USER}" \
   env PATH=/bin:/usr/bin SYNCFILE=${SYNCFILE} FAILFILE=${FAILFILE} \
@@ -77,7 +77,7 @@ if [ "${rc}" -ne 0 ]; then
   exit "${FAIL:-1}"
 fi
 
-policy_exp="audit func=BPRM_CHECK mask=MAY_EXEC uid=${TEST_USER_UID} gid=${TEST_USER_GID} "
+policy_exp="audit func=BPRM_CHECK mask=MAY_EXEC uid=${TEST_USER_UID} gid=${TEST_USER_GID} fowner=${TEST_USER_UID} fgroup=${TEST_USER_GID} "
 
 # Check that the policy was set
 actpolicy=$(nsenter --mount -t "${SHELL_PID}" cat "${rootfs}/mnt/ima/policy")
