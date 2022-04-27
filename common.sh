@@ -61,6 +61,12 @@ function check_auditd()
   fi
 }
 
+# Get the size (filesize) of the audit log
+function get_auditlog_size()
+{
+  stat -c%s "${AUDITLOG}"
+}
+
 function check_ima_support()
 {
   if [ ! -f /sys/kernel/security/ima/ascii_runtime_measurements ]; then
