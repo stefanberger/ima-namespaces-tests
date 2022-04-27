@@ -44,7 +44,7 @@ while :; do
   [ "${ctr}" -ne 0 ] && num_extra=1
 
   # Count lines in audit log for log rotation detection
-  numlines1=$(grep -c ^ "${AUDITLOG}")
+  auditlog_size_1=$(get_auditlog_size)
 
   # Children indicate failure by creating the failfile
   FAILFILE="failfile"
@@ -65,8 +65,8 @@ while :; do
     exit "${FAIL:-1}"
   fi
 
-  numlines2=$(grep -c ^ "${AUDITLOG}")
-  if [ "${numlines2}" -lt "${numlines1}" ]; then
+  auditlog_size_2=$(get_auditlog_size)
+  if [ "${auditlog_size_2}" -lt "${auditlog_size_1}" ]; then
     echo " INFO: Repeating test due to audit log rotation"
     continue
   fi
