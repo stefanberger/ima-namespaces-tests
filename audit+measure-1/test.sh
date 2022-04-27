@@ -41,8 +41,8 @@ before=$(grep -c "file=\"${rootfs}/bin/busybox2\"" "${AUDITLOG}")
 
 echo "INFO: Testing auditing and measurements inside container"
 
-policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
-'audit func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
+policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 fowner=0 \n'\
+'audit func=BPRM_CHECK mask=MAY_EXEC uid=0 fowner=0 \n'
 
 SYNCFILE="syncfile" POLICY="${policy}" \
   run_busybox_container_set_policy "/mnt" "${policy}" ./measure+audit.sh
@@ -68,8 +68,8 @@ before="${after}"
 
 echo "INFO: Testing re-auditing and re-measurement caused by executable in container"
 
-policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
-'audit func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
+policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 fowner=0 \n'\
+'audit func=BPRM_CHECK mask=MAY_EXEC uid=0 fowner=0 \n'
 
 SYNCFILE="syncfile" POLICY=${policy} \
   run_busybox_container_set_policy "/mnt" "${policy}" ./remeasure+reaudit.sh
@@ -96,8 +96,8 @@ before=$(grep -c "${search}" "${AUDITLOG}")
 
 echo "INFO: Testing that TomToU violation inside container is NOT audited"
 
-policy='audit func=FILE_CHECK mask=MAY_READ uid=0 \n'\
-'measure func=FILE_CHECK mask=MAY_READ uid=0 \n'
+policy='audit func=FILE_CHECK mask=MAY_READ uid=0 fowner=0 \n'\
+'measure func=FILE_CHECK mask=MAY_READ uid=0 fowner=0 \n'
 
 # Number of ToMToU audit log entries is influenced by measure rules on the host
 num_extra_measure=0
@@ -128,8 +128,8 @@ before=$(grep -c "${search}" "${AUDITLOG}")
 
 echo "INFO: Testing that open_writers violation inside container is NOT audited"
 
-policy='audit func=FILE_CHECK mask=MAY_READ uid=0 \n'\
-'measure func=FILE_CHECK mask=MAY_READ uid=0 \n'
+policy='audit func=FILE_CHECK mask=MAY_READ uid=0 fowner=0 \n'\
+'measure func=FILE_CHECK mask=MAY_READ uid=0 fowner=0 \n'
 
 SYNCFILE="syncfile" POLICY=${policy} \
   run_busybox_container_set_policy "/mnt" "${policy}" ./open_writers.sh
