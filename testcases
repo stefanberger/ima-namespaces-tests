@@ -35,3 +35,4 @@ vtpm-1/test.sh
 vtpm-2/test.sh
 vtpm-many-1/test.sh
 vtpm-many-2/test.sh
+vtpm-many-3/test.sh
