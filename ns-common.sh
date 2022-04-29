@@ -36,6 +36,7 @@ mnt_securityfs()
 
 # Get the name of the template from the measurement log at the given
 # mountpoint
+# @param1: securityfs mount point
 get_template_from_log()
 {
   local mntdir="$1"
@@ -83,6 +84,7 @@ wait_cage_full()
 }
 
 # Let the containers of out the cage - woof! woof!
+# @param1: syncfile
 open_cage()
 {
   local syncfile="$1"
@@ -151,7 +153,7 @@ hash_file()
 }
 
 # Wait for a file to disappear
-# @param1: Name of the fil
+# @param1: Name of the file
 # @param2: Number of times to try with 0.1s wait in between
 wait_file_gone()
 {
@@ -172,6 +174,10 @@ wait_file_gone()
   return 1
 }
 
+# Start swtpm with the chardev interface inside a container (for testing)
+# @param1: Id of the namespace (typically pass NSID when running concurrent
+#          containers)
+# @param2: file descriptor of the 'server side' file of vtpm_proxy device
 start_swtpm_chardev()
 {
   local nsid="$1"
@@ -190,6 +196,9 @@ start_swtpm_chardev()
     "$@" &
 }
 
+# Gracefully stop swtpm
+# @param1: Id of the namespace (typically pass NSID when running concurrent
+#          containers)
 stop_swtpm()
 {
   swtpm_ioctl -s --unix "/swtpm-${nsid}/ctrl"
