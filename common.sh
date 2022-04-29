@@ -12,6 +12,7 @@ else
   WORKDIR="${IMA_TEST_WORKDIR:-/var/lib/imatest}"
 fi
 
+# Check whether current user is root
 function check_root()
 {
   if [ "$(id -u)" -ne 0 ]; then
@@ -22,6 +23,9 @@ function check_root()
 
 # Check whether running as root or otherwise if password-less sudo is
 # possible if it is allowed
+#
+# Environment or global variables:
+# IMA_TEST_ALLOW_SUDO: non-empty if usage of sudo is to be allowed
 function check_root_or_sudo()
 {
   if [ "$(id -u)" -eq 0 ]; then
@@ -39,6 +43,8 @@ function check_root_or_sudo()
   fi
 }
 
+# Check whether the vtpm proxy device is available; try to enable it by
+# loading the kernel module
 function check_vtpm_proxy_device
 {
   if [ ! -c /dev/vtpmx ]; then
@@ -49,6 +55,7 @@ function check_vtpm_proxy_device
   fi
 }
 
+# Check whether auditd is running
 function check_auditd()
 {
   if ! systemctl status auditd &>/dev/null; then
@@ -62,11 +69,15 @@ function check_auditd()
 }
 
 # Get the size (filesize) of the audit log
+#
+# Environment or global variables:
+# AUDITLOG: full path to the audit log
 function get_auditlog_size()
 {
   stat -c%s "${AUDITLOG}"
 }
 
+# Check whether the host has IMA support
 function check_ima_support()
 {
   if [ ! -f /sys/kernel/security/ima/ascii_runtime_measurements ]; then
@@ -75,6 +86,7 @@ function check_ima_support()
   fi
 }
 
+# Check whether SELinux is enabled on the host
 function check_selinux_enabled()
 {
   if ! type -p selinuxenabled | grep -q ^; then
@@ -88,7 +100,8 @@ function check_selinux_enabled()
   fi
 }
 
-# Check whether swtpm support tpm-1.2 or tpm-2.0
+# Check whether swtpm supports tpm-1.2 or tpm-2.0
+# @param1: either 'tpm-1.2' or 'tpm-2.0'
 function __check_swtpm_tpmXX_support()
 {
   local searchkey="$1"
@@ -110,18 +123,22 @@ function __check_swtpm_tpmXX_support()
   fi
 }
 
-# Check whether swtpm support tpm-1.2
+# Check whether swtpm supports tpm-1.2
 function check_swtpm_tpm12_support()
 {
    __check_swtpm_tpmXX_support "tpm-1.2"
 }
 
-# Check whether swtpm support tpm-2.0
+# Check whether swtpm supports tpm-2.0
 function check_swtpm_tpm2_support()
 {
    __check_swtpm_tpmXX_support "tpm-2.0"
 }
 
+# Check whether the user allows running time-consuming tests
+#
+# Environment or global variable
+# IMA_TEST_EXPENSIVE: non-empty to indicate that time-consuming tests may run
 function check_allow_expensive_test()
 {
   if [ -z "${IMA_TEST_EXPENSIVE}" ]; then
@@ -130,6 +147,7 @@ function check_allow_expensive_test()
   fi
 }
 
+# Create the work directory for the IMA tests
 function create_workdir()
 {
    rm -rf "${WORKDIR}"
@@ -200,7 +218,7 @@ function setup_busybox_container()
 # @param1: The full path to the executable
 # @param2: Optional directory to install the executable in; if omitted it
 #          will be installed under the same path the executable was found
-#          (/sbin/foobar will be installed to /sbin/foobar in container)
+#          (/sbin/foobar will be installed to /sbin/foobar in container fs)
 function copy_elf_busybox_container()
 {
   local executable="$1"
@@ -259,7 +277,11 @@ function run_busybox_container()
 
 # Run the given executable or script in the busybox container and
 # setup a vTPM
+# @param1: 1 for TPM 2 device, otherwise TPM 1.2
 # @param2...: Executable to run and its parameters
+#
+# Environment or global variables:
+# VTPM_EXEC: Path to vtpm-exec program; mandatory
 function run_busybox_container_vtpm()
 {
   local tpm2="$1"; shift 1
@@ -373,10 +395,9 @@ function run_busybox_container_set_policy()
 
 # Run the given executable or script in the busybox container and create a key
 # session. Filter out output from 'keyctl session' starting with 'Joined session'.
+# @param1...: Executable and parameters
 function run_busybox_container_key_session()
 {
-  local executable="$1"
-
   local rootfs
 
   rootfs="$(get_busybox_container_root)"
@@ -384,7 +405,7 @@ function run_busybox_container_key_session()
   SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
   PATH=/bin:/usr/bin \
   unshare --user --map-root-user --mount-proc --pid --fork \
-    --root "${rootfs}" keyctl session - "${executable}" \
+    --root "${rootfs}" keyctl session - "$@" \
     2> >(sed '/^Joined session.*/d')
   return $?
 }
@@ -457,6 +478,7 @@ function wait_for_file()
 
 # Wait for the child to exit and exit with its error code unless
 # it reports success.
+# @param1: child process Id
 function wait_child_exit_with_child_failure()
 {
   local childpid="$1"
