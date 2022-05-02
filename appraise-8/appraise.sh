@@ -6,7 +6,7 @@
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "/mnt" "sha256" "ima-sig"
 
 KEY=./rsakey.pem
 CERT=./rsa.crt

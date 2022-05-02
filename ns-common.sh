@@ -9,9 +9,13 @@
 # Mount the securityfs with IMA support; if it doesn't work or 
 # the ima directory doesn't show up exit with ${SKIP:-3}
 # @param1: mount directory
+# @param2: hash for IMA to use for measuring apps; optional parameter
+# @param3: template name for IMA to user for logging
 mnt_securityfs()
 {
   local mntdir="$1"
+  local imahash="$2"
+  local imatemplate="$3"
 
   local msg
 
@@ -23,6 +27,22 @@ mnt_securityfs()
   if [ ! -d "${mntdir}/ima" ]; then
     echo " Error: SecurityFS does not have the ima directory"
     exit "${SKIP:-3}"
+  fi
+
+  if [ -n "${imahash}" ]; then
+    if [ ! -f "${mntdir}/ima/hash" ]; then
+      echo " Error: IMA's SecurityFS does not have the hash config file"
+      exit "${SKIP:-3}"
+    fi
+    echo "${imahash}" > "${mntdir}/ima/hash"
+  fi
+
+  if [ -n "${imatemplate}" ]; then
+    if [ ! -f "${mntdir}/ima/template_name" ]; then
+      echo " Error: IMA's SecurityFS does not have the template_name config file"
+      exit "${SKIP:-3}"
+    fi
+    echo "${imatemplate}" > "${mntdir}/ima/template_name"
   fi
 
   if [ -n "${VTPM_DEVICE_FD}" ]; then
