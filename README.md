@@ -88,6 +88,38 @@ Some of the tests, particularly those related to auditing that check the content
 audit log, require root rights. This is the reason for the `sudo` in the above command.
 Many tests can be run as normal user.
 
+### Running multiple instances of the Tests
+
+To test that 'everything is holding up' it is possible to run multiple instances
+of the test suite, each in a different terminal. The important part is that each
+instance is using a different work directory and log file.
+Beware though that the more instances are running concurrently the more likely
+it is that timeouts occur or that auditing-test errors occur due to audit.log
+rotation.
+
+One terminal:
+```
+export I=1; for ((i=0;i<10;i++)); do \
+  sudo IMA_TEST_WORKDIR=/var/lib/imatest-${I} ./imatest --testcases testcases --logfile /var/log/imatest-${I}.log --clear; \
+  echo; \
+done
+```
+
+Another one:
+```
+export I=2; for ((i=0;i<10;i++)); do \
+  sudo IMA_TEST_WORKDIR=/var/lib/imatest-${I} ./imatest --testcases testcases --logfile /var/log/imatest-${I}.log --clear; \
+  echo; \
+done
+```
+
+Follow the logs:
+
+```
+tail -f /var/log/imatest-*.log
+```
+
+
 ## Running Individual Tests
 
 To run tests individually have a look at the entries in the `testcases` file.
