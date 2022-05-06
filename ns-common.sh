@@ -9,8 +9,15 @@
 # Mount the securityfs with IMA support; if it doesn't work or 
 # the ima directory doesn't show up exit with ${SKIP:-3}
 # @param1: mount directory
-# @param2: hash for IMA to use for measuring apps; optional parameter
-# @param3: template name for IMA to user for logging
+# @param2: hash for IMA to use for measuring apps; ignored if empty string;
+#          optional parameter
+# @param3: template name for IMA to user for logging; ignored if empty string;
+#          optional parameter
+#
+# Environment variables:
+# VTPM_DEVICE_FD: Set by vtpm-exec upon creation of device and contains the
+#                 server side file descriptor to use to connect TPM device
+#                 to IMA namespace
 mnt_securityfs()
 {
   local mntdir="$1"
