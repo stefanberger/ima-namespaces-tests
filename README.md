@@ -164,6 +164,7 @@ Concerns for the testing are:
 | audit+measure-1 | Measuring and auditing of file; re-measuring and re-auditing of file after file modification; causing of open_writes and ToMToU audit message |
 | audit+measure-2 | Host modifies file that namespace must re-audit and re-measure |
 | au+me+app-1     | Host modifies file that namespace must re-audit and re-measure and re-appraise |
+| evm-1           | Check that security.evm cannot be written while EVM is not namespaced |
 | hash-1          | Ensuring that a xattr hash is generated on a file following hash policy rule |
 | hash-2          | Ensuring that a xattr hash is generated on a file following hash policy rule and that the host, that has no hash rule, will not modify the hash |
 | measure-1       | Measuring of an executed file and re-measuring after modification of the file|

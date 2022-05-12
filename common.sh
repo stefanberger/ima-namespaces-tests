@@ -539,6 +539,12 @@ function check_ns_vtpm_support()
   run_busybox_container_vtpm "1" ./check.sh vtpm
 }
 
+# Check wether EVM is supported in namespace (current not at all)
+function check_ns_evm_support()
+{
+  run_busybox_container ./check.sh evm
+}
+
 # Ensure that the host does not have a rule like the given one
 # @param1: 'grep -E' type of pattern describing rule to grep for
 function check_host_ima_has_no_rule_like()
