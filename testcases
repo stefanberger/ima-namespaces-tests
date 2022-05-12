@@ -19,6 +19,7 @@ audit-many-1/test.sh
 audit+measure-1/test.sh
 audit+measure-2/test.sh
 au+me+app-1/test.sh
+evm-1/test.sh
 hash-1/test.sh
 hash-2/test.sh
 measure-1/test.sh
