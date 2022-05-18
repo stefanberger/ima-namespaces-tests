@@ -45,7 +45,7 @@ fi
 
 num=$(( $(nproc) * 5 ))
 
-echo "INFO: Testing measurements in containers usind differt PCRs for PCR_Extends; starting ${num} containers"
+echo "INFO: Testing measurements in containers using different PCRs for PCR_Extends; starting ${num} containers"
 
 # Children indicate failure by creating the failfile
 rootfs="$(get_busybox_container_root)"
