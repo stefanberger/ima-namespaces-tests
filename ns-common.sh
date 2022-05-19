@@ -2,7 +2,12 @@
 
 # SPDX-License-Identifier: BSD-2-Clause
 
-# shellcheck disable=SC2059,SC3043
+# shellcheck disable=SC2059,SC3043,SC2034
+
+EVM_INIT_HMAC=1
+EVM_INIT_X509=2
+EVM_ALLOW_METADATA_WRITES=4
+EVM_SETUP_COMPLETE=$((0x80000000))
 
 # Common functions for the test scripts running in the namespace
 
@@ -57,6 +62,10 @@ mnt_securityfs()
   fi
 
   echo 1 > "${mntdir}/ima/active"
+
+  if [ -f "${mntdir}/integrity/evm/active" ]; then
+    echo 1 > "${mntdir}/integrity/evm/active"
+  fi
 
   return 0
 }
