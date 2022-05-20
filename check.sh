@@ -34,6 +34,18 @@ if [ "${rc}" -eq 0 ]; then
           break
         }
       done
+
+      # Also EVM files must be inaccessible
+      p="${MNT}/integrity/evm"
+      if [ -d "${p}" ]; then
+        for f in "${p}/"*; do
+          [ "${f}" = "${p}/active" ] && continue
+          if cat "${f}" 2>/dev/null; then
+            echo " Error: Should not be able to access file ${f}"
+          fi
+        done
+      fi
+
       # activate IMA namespace
       echo 1 > "${MNT}/ima/active"
 
