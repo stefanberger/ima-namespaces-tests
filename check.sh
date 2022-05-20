@@ -18,7 +18,7 @@ MNT=_mnt
 if [ "${rc}" -eq 0 ]; then
   case "$1" in
   securitfs|audit|measure|appraise|hash|selinux|evm) # securityfs is needed by all
-    mkdir "${MNT}"
+    [ ! -d "${MNT}" ] && mkdir "${MNT}"
     if ! msg=$(mount -t securityfs "${MNT}" "${MNT}" 2>&1); then
       rc=1
     elif [ ! -d "${MNT}/ima" ]; then
