@@ -16,7 +16,7 @@ SYNCFILE=${SYNCFILE:-syncfile}
 mnt_securityfs "/mnt"
 
 # Wait until host has setup the policy now
-if ! wait_file_gone "${SYNCFILE}" 20; then
+if ! wait_file_gone "${SYNCFILE}" 50; then
   echo " Error: Syncfile did not disappear in time"
   exit "${FAIL:-1}"
 fi
@@ -57,7 +57,7 @@ fi
 # Tell host to modify file now
 echo > "${SYNCFILE}"
 
-if ! wait_file_gone "${SYNCFILE}" 20; then
+if ! wait_file_gone "${SYNCFILE}" 50; then
   echo " Error: Syncfile for indicating modified file did not disappear in time"
   exit "${FAIL:-1}"
 fi
@@ -95,7 +95,7 @@ echo > "${SYNCFILE}"
 ################### Part 2 ################
 
 # Wait for host to indicated that it removed the signature
-if ! wait_file_gone "${SYNCFILE}" 20; then
+if ! wait_file_gone "${SYNCFILE}" 50; then
   echo " Error: Syncfile for indicating removed signature did not disappear in time"
   exit "${FAIL:-1}"
 fi
