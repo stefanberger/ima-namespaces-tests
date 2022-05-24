@@ -48,7 +48,7 @@ TESTEXE="${TESTEXE}" SYNCFILE="${SYNCFILE}" \
 pid=$!
 
 # Wait until namespace wants us to modify the file
-if ! wait_for_file "${syncfile}" 40; then
+if ! wait_for_file "${syncfile}" 50; then
   echo " Error: Syncfile did not appear!"
 else
   # modify the file signature

@@ -60,7 +60,7 @@ fi
 
 syncfile="${rootfs}/syncfile"
 
-if ! wait_for_file "${syncfile}" 20; then
+if ! wait_for_file "${syncfile}" 50; then
   wait_child_exit_with_child_failure "${childpid}"
   echo " Error: Namespace did not write syncfile in time to order file modification"
   exit "${FAIL:-1}"
@@ -70,7 +70,7 @@ echo >> "${rootfs}/bin/busybox2"
 
 rm -f "${syncfile}"
 
-if ! wait_for_file "${syncfile}" 20; then
+if ! wait_for_file "${syncfile}" 50; then
   wait_child_exit_with_child_failure "${childpid}"
   echo " Error: Namespace did not write syncfile in time after executing modified file"
   exit "${FAIL:-1}"

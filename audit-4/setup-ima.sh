@@ -14,7 +14,7 @@ mnt_securityfs /mnt
 
 echo > "${SYNCFILE}"
 
-if ! wait_file_gone "${SYNCFILE}" 30; then
+if ! wait_file_gone "${SYNCFILE}" 50; then
   echo " Error: Caller did not remove syncfile in time"
   echo > "${FAILFILE}"
   exit "${FAIL:-1}"

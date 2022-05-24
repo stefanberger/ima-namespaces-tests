@@ -33,7 +33,7 @@ fi
 echo > "${SYNCFILE}"
 
 # Wait for host to tell it's done
-if ! wait_file_gone "${SYNCFILE}" 30; then
+if ! wait_file_gone "${SYNCFILE}" 50; then
   echo " Error: Host did not remove ${SYNCFILE} in time"
   exit "${FAIL:-1}"
 fi

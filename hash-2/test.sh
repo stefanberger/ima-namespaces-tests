@@ -43,7 +43,7 @@ rootfs=$(get_busybox_container_root)
 syncfile="${rootfs}/syncfile"
 testfile="${rootfs}/testfile"
 
-if ! wait_for_file "${syncfile}" 30; then
+if ! wait_for_file "${syncfile}" 50; then
   echo "Error: Syncfile did not appear in time"
   wait_child_exit_with_child_failure "${childpid}"
   exit "${FAIL:-1}"
