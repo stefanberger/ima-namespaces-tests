@@ -188,6 +188,21 @@ hash_file()
   "${tool}" "${filename}" 2>/dev/null | cut -d" " -f1
 }
 
+# Get the length of a given hash in bytes
+# @param1: Name of the hash
+get_hash_length()
+{
+  local hashname="$1"
+
+  case "${hashname}" in
+  md5) echo 16;;
+  sha1) echo 20;;
+  sha256) echo 32;;
+  sha512) echo 64;;
+  sha384|sha224|*) echo "unsupported hash: ${hashname}";
+  esac
+}
+
 # Wait for a file to disappear
 # @param1: Name of the file
 # @param2: Number of times to try with 0.1s wait in between

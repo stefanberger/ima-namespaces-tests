@@ -8,7 +8,10 @@
 
 SYNCFILE=${SYNCFILE:-syncfile}
 
-mnt_securityfs "/mnt"
+imahash="sha1"
+imatemplate="ima-ng"
+hashlen=$(($(get_hash_length "${imahash}") * 2))
+mnt_securityfs "/mnt" "${imahash}" "${imatemplate}"
 
 echo "testtest" > testfile
 
@@ -34,7 +37,7 @@ exec 101>&-
 
 # expecting an entry like this:
 #10 0000000000000000000000000000000000000000 ima-ng sha1:0000000000000000000000000000000000000000 /run/imatest/rootfs/testfile
-ctr=$(grep -c -E '^10 [0]{40} .* sha1:[0]{40} .*rootfs/testfile' /mnt/ima/ascii_runtime_measurements)
+ctr=$(grep -c -E "^10 [0]{40} ${imatemplate} ${imahash}:[0]{${hashlen}} .*rootfs/testfile" /mnt/ima/ascii_runtime_measurements)
 if [ "${ctr}" -ne 1 ]; then
   echo " Error: Could not find 1 entry for violation in container, found ${ctr}."
   cat /mnt/ima/ascii_runtime_measurements
