@@ -36,7 +36,7 @@ for f in good* bad*; do
 done
 
 echo $((EVM_SETUP_COMPLETE | EVM_ALLOW_METADATA_WRITES)) > /mnt/evm
-echo -n "  Configuring EVM with EVM_ALLOW_METADATA_WRITES flag: "
+printf "  Configuring EVM with EVM_ALLOW_METADATA_WRITES flag: "
 cat /mnt/evm && echo
 
 for f in good*; do

@@ -33,7 +33,7 @@ fi
 
 # To be able to write security.evm set EVM_ALLOW_METADATA flag
 echo $((EVM_ALLOW_METADATA_WRITES)) > /mnt/evm
-echo -n "  Configuring EVM with EVM_ALLOW_METADATA_WRITES flag: "
+printf "  Configuring EVM with EVM_ALLOW_METADATA_WRITES flag: "
 cat /mnt/evm ; echo
 
 # Sign tools to be able to use them later on
@@ -104,7 +104,7 @@ if ! busybox2 cat /mnt/ima/policy >/dev/null 2>&1; then
 fi
 
 echo $((EVM_INIT_X509)) > /mnt/evm
-echo -n "  Configuring EVM with EVM_INIT_X509 flag: "
+printf "  Configuring EVM with EVM_INIT_X509 flag: "
 cat /mnt/evm ; echo
 
 # A bad EVM signature (unknown key) that must not allow the file to execute anymore
