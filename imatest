@@ -100,7 +100,7 @@ function imatest()
     echo "line=${line}" > "${statefile}"
 
     testcase=$(sed -n "${line}p" "${testcases}")
-    if [ -n "$(echo "${testcase}" | tr -d " ")" ]; then
+    if [ "${testcase:0:1}" != "#" ] && [ -n "$(echo "${testcase}" | tr -d " ")" ]; then
       local testcase_dir
 
       testcase_dir=$(dirname "${testcase}")
