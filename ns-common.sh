@@ -2,7 +2,7 @@
 
 # SPDX-License-Identifier: BSD-2-Clause
 
-# shellcheck disable=SC2059,SC3043,SC2034
+# shellcheck disable=SC2059,SC3043,SC2034,SC3037
 
 EVM_INIT_HMAC=1
 EVM_INIT_X509=2
@@ -29,7 +29,7 @@ mnt_securityfs()
   local imahash="$2"
   local imatemplate="$3"
 
-  local msg
+  local msg dmsgmsg timeout
 
   if ! msg=$(mount -t securityfs "${mntdir}" "${mntdir}" 2>&1); then
     echo " Error: Could not mount securityfs: ${msg}"
@@ -58,7 +58,22 @@ mnt_securityfs()
   fi
 
   if [ -n "${VTPM_DEVICE_FD}" ]; then
-      vtpm-exec --connect-to-ima-ns "${VTPM_DEVICE_FD}"
+      if ! msg=$(vtpm-exec --connect-to-ima-ns "${VTPM_DEVICE_FD}" 2>&1); then
+          timeout=10
+          dmsgmsg=$(dmesg --ctime --since "${timeout} seconds ago" |
+                    grep " tpm${VTPM_DEVICE_NUM}:")
+          if [ -n "${dmsgmsg}" ]; then
+              # Odd: kernel message may have a later timestamp than the $(date)
+              # This has to come out as one message so it's not interleaved with others...
+              echo -e " $(date): vtpm-exec on /dev/tpm${VTPM_DEVICE_NUM}: ${msg}\n" \
+                      " dmsg output for last ${timeout} seconds for /dev/tpm${VTPM_DEVICE_NUM} : ${dmsgmsg}\n" \
+                      " [Timeouts under heavy load may be expected.]"
+          else
+              echo -e " $(date): vtpm-exec on /dev/tpm${VTPM_DEVICE_NUM}: ${msg}" \
+                      " ==> It's not clear what caused the TPM failure on /dev/tpm${VTPM_DEVICE_NUM}"
+          fi
+          exit "${FAIL:-1}"
+      fi
   fi
 
   echo 1 > "${mntdir}/ima/active"

@@ -2,7 +2,7 @@
 
 # SPDX-License-Identifier: BSD-2-Clause
 
-# shellcheck disable=SC2059
+# shellcheck disable=SC2059,SC3037
 
 # Caller must pass:
 # NSID: distinct namespace id number
@@ -64,7 +64,9 @@ if [ "${exp}" -ne "${ctr_extends}" ]; then
   exit "${FAIL:-1}"
 fi
 if [ "${ctr_measure}" -ne "${ctr_extends}" ]; then
-  echo " Error: Expected ${ctr_measure} PCR_Extends for PCR ${pcr} but found ${ctr_extends}."
+  msg="$(dmesg --ctime --since '30 seconds ago' | grep "tpm${VTPM_DEVICE_NUM}:")"
+  echo -e " Error: Expected ${ctr_measure} PCR_Extend's but found ${ctr_extends}.\n" \
+          " dmsg output for last 30 seconds for tpm${VTPM_DEVICE_NUM}: ${msg}"
   echo > "${FAILFILE}"
   exit "${FAIL:-1}"
 fi

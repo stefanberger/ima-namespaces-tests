@@ -2,7 +2,7 @@
 
 # SPDX-License-Identifier: BSD-2-Clause
 
-# shellcheck disable=SC2059
+# shellcheck disable=SC2059,SC3037
 
 . ./ns-common.sh
 
@@ -26,7 +26,9 @@ ctr_extends=$(grep -c \
                    /swtpm.log)
 ctr_measure=$(grep -c ^ /mnt/ima/ascii_runtime_measurements)
 if [ "${ctr_measure}" -ne "${ctr_extends}" ]; then
-  echo " Error: Expected ${ctr_measure} PCR_Extend's but found ${ctr_extends}."
+  msg="$(dmesg --ctime --since '30 seconds ago' | grep "tpm${VTPM_DEVICE_NUM}:")"
+  echo -e " Error: Expected ${ctr_measure} PCR_Extend's but found ${ctr_extends}.\n" \
+          " dmsg output for last 30 seconds for tpm${VTPM_DEVICE_NUM}: ${msg}"
   exit "${FAIL:-1}"
 fi
 
