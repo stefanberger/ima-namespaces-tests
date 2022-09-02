@@ -318,7 +318,7 @@ function run_busybox_container_set_policy()
   local policy="${2}"
   shift 2
 
-  local rootfs unsharepid childpid c rc policyfile failfile
+  local rootfs unsharepid childpid c rc policyfile failfile found
 
   rootfs="$(get_busybox_container_root)"
   failfile="${rootfs}/${FAILFILE}"
@@ -356,12 +356,19 @@ function run_busybox_container_set_policy()
 
   activefile="${rootfs}${mnt}/ima/active"
   # wait until the active file is there
-  for ((c = 0; c < 30; c++)); do
+  found=0
+  for ((c = 0; c < 50; c++)); do
     if nsenter --mount -t "${childpid}" /bin/sh -c "[ ! -f ${activefile} ] && exit 1 || exit 0"; then
+      found=1
       break
     fi
     sleep 0.1
   done
+  if [ "${found}" != "1" ]; then
+    echo " Error: ${activefile} did not show up in namespace in time (~5s). Heavily loaded system?"
+    return "${FAIL:-1}"
+  fi
+
   # wait until the active file has '1' in it
   for ((c = 0; c < 30; c++)); do
     active=$(nsenter --mount -t "${childpid}" cat "${activefile}")
