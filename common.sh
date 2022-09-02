@@ -184,6 +184,8 @@ function setup_busybox_container()
   rootfs="$(get_busybox_container_root)"
 
   mkdir -p "${rootfs}"/{bin,mnt,proc,dev}
+  rm -f "${rootfs}"/dev/kmsg
+  mknod "${rootfs}"/dev/kmsg c 1 11
 
   while [ $# -ne 0 ]; do
     if ! cp "$1" "${rootfs}"; then
@@ -199,7 +201,7 @@ function setup_busybox_container()
   fi
   pushd "${rootfs}/bin" 1>/dev/null || exit "${FAIL:-1}"
   for prg in \
-      cat chmod cut cp dirname echo env find grep head ls mkdir mount mv printf rm \
+      cat chmod cut cp date dirname echo env find grep head ls mkdir mount mv printf rm \
       sh sha1sum sha256sum sha384sum sha512sum sleep sync \
       tail time which; do
     ln -s busybox ${prg}

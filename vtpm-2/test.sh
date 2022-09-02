@@ -34,6 +34,7 @@ fi
 copy_elf_busybox_container "$(which swtpm)"
 copy_elf_busybox_container "$(which swtpm_ioctl)"
 copy_elf_busybox_container "${VTPM_EXEC}" "bin/"
+copy_elf_busybox_container "$(which dmesg)" "bin/"
 
 # The following test needs swtpm and ${VTPM_EXEC} copied
 if ! check_ns_vtpm_support; then

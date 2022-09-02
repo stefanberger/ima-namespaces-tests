@@ -93,10 +93,9 @@ static int vtpm_proxy_connect_imans(int fd)
     n = ioctl(fd, VTPM_PROXY_IOC_CONNECT_TO_IMA_NS, 0);
     if (n < 0) {
         fprintf(stderr,
-                "Could not connect vtpm proxy to IMA namespace: "
-                "ioctl on fd %d failed: %s\n", fd, strerror(errno));
-        fprintf(stderr,
-                "[VTPM_DEVICE_NUM=%s]\n",getenv("VTPM_DEVICE_NUM"));
+                "Could not connect vtpm proxy (/dev/tpm%s) to IMA namespace: "
+                "ioctl on fd %d failed: %s\n",
+                getenv("VTPM_DEVICE_NUM"), fd, strerror(errno));
         return errno;
     }
 
