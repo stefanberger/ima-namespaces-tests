@@ -184,8 +184,10 @@ function setup_busybox_container()
   rootfs="$(get_busybox_container_root)"
 
   mkdir -p "${rootfs}"/{bin,mnt,proc,dev}
-  rm -f "${rootfs}"/dev/kmsg
-  mknod "${rootfs}"/dev/kmsg c 1 11
+  if [ "$(id -u)" = "0" ]; then
+    rm -f "${rootfs}"/dev/kmsg
+    mknod "${rootfs}"/dev/kmsg c 1 11
+  fi
 
   while [ $# -ne 0 ]; do
     if ! cp "$1" "${rootfs}"; then
