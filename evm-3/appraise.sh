@@ -130,8 +130,8 @@ fi
 
 # Using busybox2 must not work anymore since it's completely unsigned
 if busybox2 cat /mnt/ima/policy >/dev/null 2>&1; then
-   echo " Error: Could execute unsigned busybox2"
-   exit "${FAIL:-1}"
+  echo " Error: Could execute unsigned busybox2"
+  exit "${FAIL:-1}"
 fi
 
 exit "${SUCCESS:-0}"
