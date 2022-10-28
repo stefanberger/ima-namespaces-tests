@@ -92,7 +92,7 @@ get_template_from_log()
 {
   local mntdir="$1"
 
-  # use busybox to reduce dependeny on signed or copied apps
+  # use busybox to reduce dependency on signed or copied apps
   busybox grep boot_aggregate < "${mntdir}/ima/ascii_runtime_measurements" | \
     busybox cut -d" " -f3
 }

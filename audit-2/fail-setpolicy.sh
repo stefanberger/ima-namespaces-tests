@@ -16,4 +16,4 @@ echo "${policy}" > /mnt/ima/policy 2>/dev/null && {
   exit "${FAIL:-1}"
 }
 
-exit "${SUCCESSS:-0}"
+exit "${SUCCESS:-0}"

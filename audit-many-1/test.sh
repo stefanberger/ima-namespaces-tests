@@ -38,7 +38,7 @@ while :; do
   rootfs=$(get_busybox_container_root)
   before=$(grep -c "file=\"${rootfs}/bin/busybox2\"" "${AUDITLOG}")
 
-  # Accomodate the case where we have a host audit rule
+  # Accommodate the case where we have a host audit rule
   num_extra=0
   ctr=$(grep -c -E '^audit.*func=BPRM_CHECK .*MAY_EXEC' "${SECURITYFS_MNT}/ima/policy")
   [ "${ctr}" -ne 0 ] && num_extra=1

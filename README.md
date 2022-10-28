@@ -81,7 +81,7 @@ make
 sudo ./imatest --testcases testcases --logfile /var/log/imatest.log --clear
 ```
 
-Afer a test run have a look at the output file `/var/log/imatest.log`. Depending on the
+After a test run have a look at the output file `/var/log/imatest.log`. Depending on the
 IMA namespacing support of IMA-audit, IMA-measure etc., various tests may have been skipped.
 
 Some of the tests, particularly those related to auditing that check the contents of the
