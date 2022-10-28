@@ -159,7 +159,7 @@ while [ "${stage}" -le 14 ]; do
         echo > "${FAILFILE}"
       fi
       if [ "${msg}" != "${expected}" ]; then
-        echo " Error: msg varaible does not have expected value"
+        echo " Error: msg variable does not have expected value"
         echo " expected: ${expected}"
         echo " actual  : ${msg}"
         echo > "${FAILFILE}"

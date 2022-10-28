@@ -169,7 +169,7 @@ function get_busybox_container_root()
   echo "${WORKDIR}/rootfs"
 }
 
-# Setup a simple container with statically linke busybox inside
+# Setup a simple container with statically linked busybox inside
 function setup_busybox_container()
 {
   local busybox rootfs
@@ -313,7 +313,7 @@ function run_busybox_container_vtpm()
 # Run the given executable or script in the busybox container
 # and set the policy via nsenter.
 # The test script inside the container must set securityfs and then
-# has to wait for teh SYNCFILE to disappear
+# has to wait for the SYNCFILE to disappear
 #
 # @param1: Mount point of securityfs inside container
 # @param2: The policy to set
@@ -321,7 +321,7 @@ function run_busybox_container_vtpm()
 #
 # environment variables:
 # SYNCFILE: syncfile to use to synchronize with container
-# FAILFILE: optional failfile to write in case an error occurrs
+# FAILFILE: optional failfile to write in case an error occurs
 function run_busybox_container_set_policy()
 {
   local mnt="${1}"
@@ -556,7 +556,7 @@ function check_ns_vtpm_support()
   run_busybox_container_vtpm "1" ./check.sh vtpm
 }
 
-# Check wether EVM is supported in namespace (current not at all)
+# Check whether EVM is supported in namespace (current not at all)
 function check_ns_evm_support()
 {
   run_busybox_container ./check.sh evm

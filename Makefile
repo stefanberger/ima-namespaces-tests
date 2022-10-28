@@ -52,5 +52,6 @@ check: install
 
 syntax-check:
 	shellcheck *.sh */*.sh imatest
+	codespell *.sh */*.sh imatest *.md
 
 .PHONY: .FORCE
