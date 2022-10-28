@@ -1,0 +1,7 @@
+measure func=MMAP_CHECK mask=MAY_EXEC 
+measure func=BPRM_CHECK mask=MAY_EXEC 
+measure func=FILE_CHECK mask=MAY_READ uid=%UID% permit_directio 
+measure func=MODULE_CHECK 
+measure func=FIRMWARE_CHECK 
+audit func=BPRM_CHECK 
+audit func=FILE_CHECK mask=MAY_READ uid=%UID% permit_directio 

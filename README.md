@@ -229,3 +229,5 @@ unnecessary reboots.
 | Testcase                       | What it Covers                                                             |
 |--------------------------------|----------------------------------------------------------------------------|
 | host-audit+measure-1/test.sh   | Run and rename an executable and ensure it is not audited and logged again after renaming |
+| host-audit+measure-2/test.sh   | Open a file as root and as user 'nobody' and check that the audit and measurement logs only contain an entry due to user 'nobody' |
+| host-audit+measure-2/tomtou.sh | Cause a ToMToU audit log message when user 'nobody' opens are file for reading and writing |
