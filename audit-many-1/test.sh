@@ -40,8 +40,10 @@ while :; do
 
   # Accommodate the case where we have a host audit rule
   num_extra=0
-  ctr=$(grep -c -E '^audit.*func=BPRM_CHECK .*MAY_EXEC' "${SECURITYFS_MNT}/ima/policy")
-  [ "${ctr}" -ne 0 ] && num_extra=1
+  c1=$(grep -cE '^audit.*func=BPRM_CHECK .*mask=MAY_EXEC.*' "${SECURITYFS_MNT}/ima/policy")
+  c2=$(grep -E '^audit.*func=BPRM_CHECK ' "${SECURITYFS_MNT}/ima/policy" |
+         grep -cv " mask=")
+  [ "$((c1+c2))" -ne 0 ] && num_extra=1
 
   # Count lines in audit log for log rotation detection
   auditlog_size_1=$(get_auditlog_size)
