@@ -188,7 +188,43 @@ Concerns for the testing are:
 | vtpm-many-3     | Concurrently running IMA namespaces with measurement policy using different PCRs; check IMA measurement list against PCR_Extends; use TPM 2 (swtpm) |
 
 
-### Test cases for IMA on the host
+## Test cases for IMA on the host
+
+It is also possible to test IMA on the host, however, there are some
+limitations. Since different tests need different IMA policies it is
+necessary for the host to reboot between tests. Tests for IMA appraisal
+may need to be restricted to hosts running an SELinux policy so that
+appraisal rules can be activated based on an SELinux label selector.
+
+All IMA tests for the host can be run from the command line.
+However, the host's IMA policy has to be either empty or completely
+replaceable so that only the required rules are active.
+
+To run the IMA host tests using a systemd service, that may reboot the host
+multiple times to set different IMA policies, run the following command:
+
+```
+sudo make check
+```
+
+To prevent the host from running the IMA tests on the next reboot run the
+following command:
+
+```
+sudo systemctl disable imatest
+```
+
+or
+
+```
+sudo make uninstall
+```
+
+The test results will be in /var/log/imatest.log
+
+The test cases for the host are organized so that multiple tests that can
+share the same policy are located in the same directory. This avoids
+unnecessary reboots.
 
 | Testcase                       | What it Covers                                                             |
 |--------------------------------|----------------------------------------------------------------------------|

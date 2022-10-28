@@ -4,7 +4,8 @@ After=auditd.service
 
 [Service]
 Type=forking
-ExecStart=/bin/imatest --testcases /usr/share/imatest/testcases --logfile /var/log/imatest.log
+WorkingDirectory=/usr/share/imatest
+ExecStart=/bin/imatest --testcases /usr/share/imatest/host-testcases --logfile /var/log/imatest.log
 
 [Install]
 WantedBy=multi-user.target

@@ -2,26 +2,13 @@
 INSTDIR ?= /usr/share/imatest
 
 TESTDIRS = \
-	appraise-1 \
-	appraise-2 \
-	appraise-3 \
-	appraise-4 \
-	appraise-many-1 \
-	appraise-many-2 \
-	audit-1 \
-	audit-many-1 \
-	audit+measure-1 \
-	measure-1 \
-	measure-many-1 \
-	measure-many-2 \
-	measure-many-3 \
-	measure-many-4
+	host-audit+measure-1
 
 DESTS := $(patsubst %,$(INSTDIR)/%,$(TESTDIRS))
 
 $(INSTDIR)/% : % .FORCE
-	@mkdir -p $@
-	cp -r $< $@
+	mkdir -p $@
+	cp -r $</* $@
 
 .FORCE:
 
@@ -35,8 +22,9 @@ clean:
 install: all $(DESTS)
 	install -m 755 imatest /usr/bin/imatest
 	install -m 644 imatest.service /usr/lib/systemd/system/imatest.service
-	install -m 644 testcases $(INSTDIR)
+	install -m 644 host-testcases $(INSTDIR)
 	install -m 644 common.sh $(INSTDIR)
+	install -m 644 ns-common.sh $(INSTDIR)
 
 uninstall:
 	rm -rf /usr/bin/imatest /usr/lib/systemd/system/imatest.service $(INSTDIR)

@@ -130,6 +130,7 @@ function imatest()
           ;;
         "${SUCCESS_NEEDS_REBOOT}")
           logit "${logfile}" "  Test completed successfully (trying next test before rebooting)"
+          stats_pass=$((stats_pass + 1))
           ;;
         "${FAIL}")
           logit "${logfile}" "  Test failed."
