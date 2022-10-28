@@ -448,7 +448,10 @@ function run_busybox_container_nested()
 }
 
 # Wait for the given number of entries in the file that may not
-# get results immediately, such as the audit log.
+# get results immediately, such as the audit log. Once the expected
+# number of entries has been seen found wait for 1s and report the
+# number of entries found then (in case file hadn't settled, yet)
+#
 # @param1: The file to grep through
 # @param2: The entry to look for; may be a grep regular expression
 # @param3: The number of entries to find
@@ -465,7 +468,8 @@ function wait_num_entries()
   for ((c = 0;  c < retries; c++)); do
      ctr=$(grep -c -E "${entry}" "${file}")
      if [ "${ctr}" -eq "${numentries}" ]; then
-       echo "${ctr}"
+       sleep 1
+       grep -c -E "${entry}" "${file}"
        return 0
      fi
      sleep 0.1
