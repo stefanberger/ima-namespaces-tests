@@ -141,6 +141,41 @@ set_policy_from_string()
   fi
 }
 
+# Set the policy given by a file. If the policy cannot be set then report an
+# error and exit with an error code that would cause the test harness to
+# reboot the host.
+#
+# @param1: securityfs mount point
+# @param2: IMA policy file
+set_policy_from_file()
+{
+  local mntdir="$1"
+  local policyfile="$2"
+
+  if ! diff "${policyfile}" "${mntdir}/ima/policy" 1>/dev/null 2>/dev/null; then
+    if ! cat "${policyfile}" > "${mntdir}/ima/policy"; then
+      echo " Error: Could not load policy."
+      exit "${RETRY_AFTER_REBOOT:-1}"
+    fi
+    if ! diff "${policyfile}" "${mntdir}/ima/policy" 1>/dev/null 2>/dev/null; then
+      echo " Error: Could not replace existing policy with new policy. Need to reboot."
+      exit "${RETRY_AFTER_REBOOT:-1}"
+    fi
+  fi
+}
+
+# Show the IMA policy
+#
+# @param1: securityfs mount point
+show_policy()
+{
+  local mntdir="$1"
+
+  echo "IMA policy at ${mntdir}:"
+  cat "${mntdir}/ima/policy"
+  echo
+}
+
 # Set a measurement policy
 #
 # @param1: securityfs mount point
@@ -161,6 +196,27 @@ set_measurement_policy_from_string()
 set_appraisal_policy_from_string()
 {
   set_policy_from_string "$1" "$2" "$3" "appraisal" "$4"
+}
+
+# Find a pattern, described by a grep supported regular expression, in the IMA
+# measurement log a given number of times
+#
+# @param1: securityfs mount point
+# @param2: The string to find in the measurement log; this can be a grep regex
+# @param3: The expected number of times to find the string
+measurementlog_find()
+{
+  local mntdir="$1"
+  local regex="$2"
+  local exp="$3"
+
+  local ctr
+
+  ctr=$(grep -cE "${regex}" "${mntdir}/ima/ascii_runtime_measurements")
+  if [ "${ctr}" -ne "${exp}" ]; then
+    echo " Error: Could not find '${regex}' ${exp} times in IMA measurement log, found it ${ctr} times."
+    exit "${FAIL:-1}"
+  fi
 }
 
 # Let container run into the cage and have it wait - woof!
