@@ -30,8 +30,10 @@ fi
 
 # Accommodate the case where we have a host audit rule
 num_extra=0
-ctr=$(grep -c -E '^audit.*func=BPRM_CHECK .*MAY_EXEC' "${SECURITYFS_MNT}/ima/policy")
-[ "${ctr}" -ne 0 ] && num_extra=1
+c1=$(grep -cE '^audit.*func=BPRM_CHECK .*mask=MAY_EXEC.*' "${SECURITYFS_MNT}/ima/policy")
+c2=$(grep -E '^audit.*func=BPRM_CHECK ' "${SECURITYFS_MNT}/ima/policy" |
+       grep -cv " mask=")
+[ "$((c1+c2))" -ne 0 ] && num_extra=1
 
 rootfs=$(get_busybox_container_root)
 before=$(grep -c "type=INTEGRITY_RULE .* file=\"${rootfs}/bin/busybox2\"" "${AUDITLOG}")
@@ -54,7 +56,7 @@ expected=$((before + 1 + num_extra))
 after=$(wait_num_entries "${AUDITLOG}" "type=INTEGRITY_RULE .* file=\"${rootfs}/bin/busybox2\"" $((expected)) 30)
 if [ $((expected)) -ne "${after}" ]; then
   wait_child_exit_with_child_failure "${childpid}"
-  echo " Error: Wrong number of busybox2 entries in audit log."
+  echo " Error: (1) Wrong number of busybox2 entries in audit log."
   echo "        Expected $((expected - before)) more log entries. Expected ${expected}, found ${after}."
   exit "${FAIL:-1}"
 fi
@@ -77,11 +79,11 @@ if ! wait_for_file "${syncfile}" 20; then
   exit "${FAIL:-1}"
 fi
 
-expected=$((before + 2 + num_extra))
+expected=$((before + 2 + num_extra * 2))
 after=$(wait_num_entries "${AUDITLOG}" "type=INTEGRITY_RULE .* file=\"${rootfs}/bin/busybox2\"" $((expected)) 30)
 if [ $((expected)) -ne "${after}" ]; then
   wait_child_exit_with_child_failure "${childpid}"
-  echo " Error: Wrong number of busybox2 entries in audit log."
+  echo " Error: (2) Wrong number of busybox2 entries in audit log."
   echo "        Expected $((expected - before)) more log entries. Expected ${expected}, found ${after}."
   exit "${FAIL:-1}"
 fi
