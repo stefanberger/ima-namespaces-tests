@@ -186,3 +186,10 @@ Concerns for the testing are:
 | vtpm-many-1     | Concurrently running IMA namespaces with measurement policy; check IMA measurement list against PCR_Extends; use TPM 1.2 (swtpm) |
 | vtpm-many-2     | Concurrently running IMA namespaces with measurement policy; check IMA measurement list against PCR_Extends; use TPM 2 (swtpm) |
 | vtpm-many-3     | Concurrently running IMA namespaces with measurement policy using different PCRs; check IMA measurement list against PCR_Extends; use TPM 2 (swtpm) |
+
+
+### Test cases for IMA on the host
+
+| Testcase                       | What it Covers                                                             |
+|--------------------------------|----------------------------------------------------------------------------|
+| host-audit+measure-1/test.sh   | Run and rename an executable and ensure it is not audited and logged again after renaming |

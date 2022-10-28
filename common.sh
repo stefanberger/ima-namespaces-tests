@@ -83,6 +83,26 @@ function get_auditlog_size()
   stat -c%s "${AUDITLOG}"
 }
 
+# Find a particular string in the audit log a number of times
+#
+# @param1: The string to find in the audit log; this can be a grep regex
+# @param2: The expected number of times to find the string
+# @param3: The number of times to retry after waiting for 0.1s
+function auditlog_find()
+{
+  local regex="$1"
+  local exp="$2"
+  local retries="$3"
+
+  local ctr
+
+  ctr="$(wait_num_entries "${AUDITLOG}" "${regex}" "${exp}" "${retries}")"
+  if [ "${ctr}" -ne "${exp}" ]; then
+    echo " Error: Could not find '${regex}' ${exp} times in audit log, found it ${ctr} times."
+    exit "${FAIL:-1}"
+  fi
+}
+
 # Check whether the host has IMA support
 function check_ima_support()
 {
