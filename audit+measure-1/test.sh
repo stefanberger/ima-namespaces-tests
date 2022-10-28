@@ -33,7 +33,7 @@ fi
 
 # Accomodate the case where we have a host audit rule
 num_extra=0
-ctr=$(grep -c -E '^audit.*func=BPRM_CHECK .*MAY_EXEC' /sys/kernel/security/ima/policy)
+ctr=$(grep -c -E '^audit.*func=BPRM_CHECK .*MAY_EXEC' "${SECURITYFS_MNT}/ima/policy")
 [ "${ctr}" -ne 0 ] && num_extra=1
 
 rootfs=$(get_busybox_container_root)
@@ -101,7 +101,7 @@ policy='audit func=FILE_CHECK mask=MAY_READ uid=0 fowner=0 \n'\
 
 # Number of ToMToU audit log entries is influenced by measure rules on the host
 num_extra_measure=0
-ctr=$(grep -c -E '^measure.*func=FILE_CHECK .*MAY_READ' /sys/kernel/security/ima/policy)
+ctr=$(grep -c -E '^measure.*func=FILE_CHECK .*MAY_READ' "${SECURITYFS_MNT}/ima/policy")
 [ "${ctr}" -ne 0 ] && num_extra_measure=1
 
 SYNCFILE="syncfile" POLICY=${policy} \

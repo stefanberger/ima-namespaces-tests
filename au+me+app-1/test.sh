@@ -35,7 +35,7 @@ copy_elf_busybox_container "$(which evmctl)"
 
 # Accomodate the case where we have a host audit rule
 num_extra=0
-ctr=$(grep -c -E '^audit.*func=BPRM_CHECK .*MAY_EXEC' /sys/kernel/security/ima/policy)
+ctr=$(grep -c -E '^audit.*func=BPRM_CHECK .*MAY_EXEC' "${SECURITYFS_MNT}/ima/policy")
 [ "${ctr}" -ne 0 ] && num_extra=1
 
 rootfs=$(get_busybox_container_root)

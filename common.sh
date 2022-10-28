@@ -12,6 +12,12 @@ else
   WORKDIR="${IMA_TEST_WORKDIR:-/var/lib/imatest}"
 fi
 
+SECURITYFS_MNT="$(mount  | sed -n 's/^securityfs on \(.*\) type .*/\1/p')"
+if [ -z "${SECURITYFS_MNT}" ]; then
+  echo "Error: Could not determine securityfs mount point."
+  exit "${FAIL:-1}"
+fi
+
 # Check whether current user is root
 function check_root()
 {
@@ -80,7 +86,7 @@ function get_auditlog_size()
 # Check whether the host has IMA support
 function check_ima_support()
 {
-  if [ ! -f /sys/kernel/security/ima/ascii_runtime_measurements ]; then
+  if [ ! -f "${SECURITYFS_MNT}/ima/ascii_runtime_measurements" ]; then
     echo " Info: IMA not supported by this kernel ($(uname -rs))"
     exit "${SKIP:-3}"
   fi
@@ -562,7 +568,7 @@ function check_host_ima_has_no_rule_like()
 {
   local pattern="${1}"
 
-  local imapolicy="/sys/kernel/security/ima/policy"
+  local imapolicy="${SECURITYFS_MNT}/ima/policy"
 
   check_root_or_sudo
 
