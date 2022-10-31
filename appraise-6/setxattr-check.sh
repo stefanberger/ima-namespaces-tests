@@ -32,11 +32,7 @@ algos_str=$(get_hash_algo_strings "${ALGOS}")
 
 policy="appraise func=SETXATTR_CHECK appraise_algos=${algos_str} \n"
 
-printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set appraise policy with SETXATTR_CHECK rule. Does IMA-ns support IMA-appraise?"
-  echo " policy: |${policy}|"
-  exit "${SKIP:-3}"
-}
+set_appraisal_policy_from_string "${SECURITYFS_MNT}" "${policy}" "" 1
 
 echo > testfile
 algo=1

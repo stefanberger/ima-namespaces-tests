@@ -18,10 +18,7 @@ keyctl padd asymmetric "" %keyring:_ima < "${CERT}" >/dev/null 2>&1
 prepolicy='dont_appraise fsmagic=0x73636673 \n'\
 'appraise func=POLICY_CHECK mask=MAY_READ \n'
 
-printf "${prepolicy}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set policy appraise policy. Does IMA-ns support IMA-appraise?"
-  exit "${SKIP:-3}"
-}
+set_appraisal_policy_from_string "${SECURITYFS_MNT}" "${prepolicy}" "" 1
 
 policy='appraise func=FILE_CHECK mask=MAY_READ uid=0 \n'
 printf "${policy}" > /policyfile

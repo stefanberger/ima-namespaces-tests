@@ -32,10 +32,9 @@ evmctl ima_sign --imasig --key "${KEY}" -a sha256 "${BUSYBOX2}"      >/dev/null 
 
 # now add appraisal policy rule
 appraisal_policy="appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 \n"
-if ! printf "${appraisal_policy}" > "${SECURITYFS_MNT}/ima/policy"; then
-  echo " Error: Could not set appraisal policy in namespace"
-  exit "${SKIP:-3}"
-fi
+
+set_appraisal_policy_from_string "${SECURITYFS_MNT}" "${appraisal_policy}" "" 0
+
 POLICY="${POLICY}${appraisal_policy}"
 
 nspolicy=$(${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy")

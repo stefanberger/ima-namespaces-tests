@@ -33,10 +33,7 @@ fi
 policy='appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
 
-printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraise?"
-  exit "${SKIP:-3}"
-}
+set_appraisal_policy_from_string "${SECURITYFS_MNT}" "${policy}" "" 1
 
 # Using busybox2 must fail since it's not signed
 if "${TESTEXE}" cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then

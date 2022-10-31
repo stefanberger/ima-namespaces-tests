@@ -103,12 +103,14 @@ get_template_from_log()
 # @param2: The IMA policy as string
 # @param3: Optional filename of a file to write to in case of error
 # @param4: Type of policy, e.g. 'audit' or 'measurement'; used in error message
+# @param5: Whether to read back the policy; 0 for not reading back
 set_policy_from_string()
 {
   local mntdir="$1"
   local policy="$2"
   local failfile="$3"
   local policytype="$4"
+  local readback="$5"
 
   local nspolicy
 
@@ -118,15 +120,17 @@ set_policy_from_string()
       echo " Error: Could not set ${policytype} policy. Does IMA-ns support IMA-${policytype}?"
       exit "${SKIP:-3}"
     fi
-    nspolicy=$(cat "${mntdir}/ima/policy")
-    if [ "${nspolicy}" != "$(printf "${policy}")" ]; then
-      echo " Error: Could not replace existing policy with new policy."
-      echo " expected: '$(printf "${policy}")'"
-      echo " actual  : '${nspolicy}'"
-      if [ -n "${failfile}" ]; then
-        echo > "${failfile}"
+    if [ "${readback}" -ne 0 ]; then
+      nspolicy=$(cat "${mntdir}/ima/policy" 2>/dev/null)
+      if [ "${nspolicy}" != "$(printf "${policy}")" ]; then
+        echo " Error: Could not replace existing policy with new policy."
+        echo " expected: '$(printf "${policy}")'"
+        echo " actual  : '${nspolicy}'"
+        if [ -n "${failfile}" ]; then
+          echo > "${failfile}"
+        fi
+        exit "${FAIL:-1}"
       fi
-      exit "${FAIL:-1}"
     fi
   fi
 }
@@ -138,7 +142,19 @@ set_policy_from_string()
 # @param3: Optional filename of a file to write to in case of error
 set_measurement_policy_from_string()
 {
-  set_policy_from_string "$1" "$2" "$3" "measurement"
+  set_policy_from_string "$1" "$2" "$3" "measurement" 1
+}
+
+# Set an appraisal policy
+#
+# @param1: securityfs mount point
+# @param2: The IMA policy as string
+# @param3: Optional filename of a file to write to in case of error
+# @param4: Whether to read back the policy; 0 for not reading back
+#          Reading back will only work if the used cli tools are signed
+set_appraisal_policy_from_string()
+{
+  set_policy_from_string "$1" "$2" "$3" "appraisal" "$4"
 }
 
 # Let container run into the cage and have it wait - woof!

@@ -37,10 +37,8 @@ keyctl padd asymmetric "" %keyring:_ima < "${CERT}" >/dev/null 2>&1
 policy='measure func=KEY_CHECK \n'\
 'appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
-printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraisal?"
-  exit "${SKIP:-3}"
-}
+
+set_appraisal_policy_from_string "${SECURITYFS_MNT}" "${policy}" "" 1
 
 if [ ! -f "${FAILFILE}" ]; then
   SYNCFILE="${PWD}/syncfile-1"
