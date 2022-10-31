@@ -29,7 +29,13 @@ mnt_securityfs()
   local imahash="$2"
   local imatemplate="$3"
 
-  local msg dmsgmsg timeout
+  local msg dmsgmsg timeout tmp
+
+  # Skip mount if already mounted
+  tmp="$(mount -t securityfs | sed -n 's/^securityfs on \(.*\) type .*/\1/p')"
+  if [ "${tmp}" = "${mntdir}" ]; then
+    return
+  fi
 
   if ! msg=$(mount -t securityfs "${mntdir}" "${mntdir}" 2>&1); then
     echo " Error: Could not mount securityfs: ${msg}"
