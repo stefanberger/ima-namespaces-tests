@@ -169,9 +169,13 @@ function get_busybox_container_root()
   echo "${WORKDIR}/rootfs"
 }
 
-# Setup a simple container with statically linked busybox inside
-function setup_busybox_container()
+# Setup a filesystem (for a container) with statically linked busybox inside
+# @param1: For container set '1', for host set '0'
+# @param2...: Files to copy into the filesystem
+function __setup_busybox()
 {
+  local forcontainer="$1"; shift
+
   local busybox rootfs
 
   busybox="$(type -P busybox)"
@@ -189,10 +193,14 @@ function setup_busybox_container()
 
   rootfs="$(get_busybox_container_root)"
 
-  mkdir -p "${rootfs}"/{bin,mnt,proc,dev}
-  if [ "$(id -u)" = "0" ]; then
-    rm -f "${rootfs}"/dev/kmsg
-    mknod "${rootfs}"/dev/kmsg c 1 11
+  if [ "${forcontainer}" -eq 1 ]; then
+    mkdir -p "${rootfs}"/{bin,mnt,proc,dev}
+    if [ "$(id -u)" = "0" ]; then
+      rm -f "${rootfs}"/dev/kmsg
+      mknod "${rootfs}"/dev/kmsg c 1 11
+    fi
+  else
+    mkdir -p "${rootfs}"/bin
   fi
 
   while [ $# -ne 0 ]; do
@@ -210,7 +218,7 @@ function setup_busybox_container()
   pushd "${rootfs}/bin" 1>/dev/null || exit "${FAIL:-1}"
   for prg in \
       cat chmod cut cp date dirname echo env find grep head ls mkdir mount mv printf rm \
-      sh sha1sum sha256sum sha384sum sha512sum sleep sync \
+      sed sh sha1sum sha256sum sha384sum sha512sum sleep sync \
       tail time which; do
     ln -s busybox ${prg}
   done
@@ -221,6 +229,20 @@ function setup_busybox_container()
     exit "${FAIL:-1}"
   fi
   echo >> "${rootfs}/bin/busybox2"
+}
+
+# Setup a filesystem for a container with statically linked busybox
+# @param1...: Files to copy into the filesystem
+function setup_busybox_container()
+{
+  __setup_busybox 1 "$@"
+}
+
+# Setup a filesystem with statically linked busybox
+# @param1...: Files to copy into the filesystem
+function setup_busybox_host()
+{
+  __setup_busybox 0 "$@"
 }
 
 # Copy the given executable and all its libraries into the busybox
@@ -269,6 +291,26 @@ function copy_elf_busybox_container()
       sed -n 's/.*=> \([^(]*\) (.*/\1/p'); do
     copy_elf_busybox_container "${dep}"
   done
+}
+
+# Run the given executable or script on the host with a restricted PATH to only
+# make executables available previously copied using setup_busybox_host().
+function run_busybox_host()
+{
+  local rootfs rc
+
+  rootfs="$(get_busybox_container_root)"
+
+  pushd "${rootfs}" 1>/dev/null || exit "${FAIL:-1}"
+
+  SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
+  PATH="${rootfs}/bin:${rootfs}/usr/bin" SECURITYFS_MNT="${SECURITYFS_MNT}" \
+    "$@"
+  rc=$?
+
+  popd 1>/dev/null || exit "${FAIL:-1}"
+
+  return $rc
 }
 
 # Run the given executable or script in the busybox container
