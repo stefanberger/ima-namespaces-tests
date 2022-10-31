@@ -14,7 +14,7 @@ SYNCFILE=${SYNCFILE:-syncfile} # keep shellcheck happy
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 KEY=./rsakey.pem
 CERT=./rsa.crt
@@ -33,13 +33,13 @@ fi
 policy='appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
 
-printf "${policy}" > /mnt/ima/policy || {
+printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraise?"
   exit "${SKIP:-3}"
 }
 
 # Using busybox2 must fail since it's not signed
-if "${TESTEXE}" cat /mnt/ima/policy >/dev/null 2>&1; then
+if "${TESTEXE}" cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
    echo " Error: Could execute unsigned file even though appraise policy is active"
    exit "${FAIL:-1}"
 fi
@@ -47,7 +47,7 @@ fi
 evmctl ima_sign --imasig --key "${KEY}" -a sha256 "${TESTEXE}"  >/dev/null 2>&1
 evmctl ima_sign --imasig --key "${KEY}" -a sha256 /bin/busybox  >/dev/null 2>&1
 
-nspolicy=$("${TESTEXE}" cat /mnt/ima/policy)
+nspolicy=$("${TESTEXE}" cat "${SECURITYFS_MNT}/ima/policy")
 
 if [ "$(printf "${policy}")" != "${nspolicy}" ]; then
   echo " Error: Bad policy in namespace."
@@ -57,7 +57,7 @@ if [ "$(printf "${policy}")" != "${nspolicy}" ]; then
 fi
 
 # ima-sig gives us 2 entry already, ima-ng shows only 1
-before=$(grep -c busybox2 /mnt/ima/ascii_runtime_measurements)
+before=$(grep -c busybox2 "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 
 # Let the host script know that it should modify the file now
 echo > "${SYNCFILE}"
@@ -74,19 +74,19 @@ while [ -f "${SYNCFILE}" ]; do
 done
 
 # Using busybox2 must fail since it's not signed with a known key anymore
-if "${TESTEXE}" cat /mnt/ima/policy >/dev/null 2>&1; then
+if "${TESTEXE}" cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
    echo " Error: Could execute file signed with unknown key even though appraise policy is active"
    exit "${FAIL:-1}"
 fi
 
 evmctl ima_sign --imasig --key "${KEY}" -a sha256 "${TESTEXE}" >/dev/null 2>&1
 # Using busybox2 must work now since it's properly signed again
-if ! "${TESTEXE}" cat /mnt/ima/policy >/dev/null 2>&1; then
+if ! "${TESTEXE}" cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
    echo " Error: Could NOT execute signed file after re-signing"
    exit "${FAIL:-1}"
 fi
 
-after=$(grep -c "${TESTEXE}" /mnt/ima/ascii_runtime_measurements)
+after=$(grep -c "${TESTEXE}" "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 if [ "$((before * 2 - 1))" -ne "${after}" ]; then
   echo " Error: Could not find $((before * 2 - 1)) measurement(s) of ${TESTEXE} in container, found ${after}."
   exit "${FAIL:-1}"

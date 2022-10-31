@@ -20,7 +20,7 @@ for f in good* bad*; do
   fi
 done
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 # Writing security.evm must fail for as long as EVM_ALLOW_METADATA_WRITES has not been
 # written to evm file
@@ -35,9 +35,9 @@ for f in good* bad*; do
   fi
 done
 
-echo $((EVM_SETUP_COMPLETE | EVM_ALLOW_METADATA_WRITES)) > /mnt/evm
+echo $((EVM_SETUP_COMPLETE | EVM_ALLOW_METADATA_WRITES)) > "${SECURITYFS_MNT}/evm"
 printf "  Configuring EVM with EVM_ALLOW_METADATA_WRITES flag: "
-cat /mnt/evm && echo
+cat "${SECURITYFS_MNT}/evm" && echo
 
 for f in good*; do
   if ! setfattr -n security.evm -v "${EVMSIG}" "${f}" >/dev/null 2>&1 ; then

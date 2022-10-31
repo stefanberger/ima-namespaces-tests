@@ -279,7 +279,7 @@ function run_busybox_container()
   rootfs="$(get_busybox_container_root)"
 
   SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
-  PATH=/bin:/usr/bin \
+  PATH=/bin:/usr/bin SECURITYFS_MNT="/mnt" \
   unshare --user --map-root-user --mount-proc --pid --fork \
     --root "${rootfs}" "$@"
   return $?
@@ -303,7 +303,7 @@ function run_busybox_container_vtpm()
   rootfs="$(get_busybox_container_root)"
 
   SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
-  PATH=/bin:/usr/bin \
+  PATH=/bin:/usr/bin SECURITYFS_MNT="/mnt" \
   ${VTPM_EXEC} "${opt}" -- \
     unshare --user --map-root-user --mount-proc --pid --fork \
       --root "${rootfs}" "$@"
@@ -342,7 +342,7 @@ function run_busybox_container_set_policy()
   echo > "${rootfs}/${SYNCFILE}"
 
   SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
-  PATH=/bin:/usr/bin \
+  PATH=/bin:/usr/bin SECURITYFS_MNT="${mnt}" \
   unshare --user --map-root-user --mount-proc --pid --fork \
     --root "${rootfs}" "$@" &
   unsharepid=$!
@@ -420,7 +420,7 @@ function run_busybox_container_key_session()
   rootfs="$(get_busybox_container_root)"
 
   SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
-  PATH=/bin:/usr/bin \
+  PATH=/bin:/usr/bin SECURITYFS_MNT="/mnt" \
   unshare --user --map-root-user --mount-proc --pid --fork \
     --root "${rootfs}" keyctl session - "$@" \
     2> >(sed '/^Joined session.*/d')
@@ -439,7 +439,7 @@ function run_busybox_container_nested()
   pushd "${rootfs}" 1>/dev/null || exit "${FAIL:-1}"
 
   SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
-  PATH="${rootfs}"/bin:"${rootfs}"/usr/bin \
+  PATH="${rootfs}"/bin:"${rootfs}"/usr/bin SECURITYFS_MNT="/mnt" \
   unshare --user --map-root-user --mount-proc --pid --fork \
     --mount "$@"
   rc=$?

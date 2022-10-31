@@ -7,7 +7,7 @@
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 KEY=./rsakey.pem
 CERT=./rsa.crt
@@ -35,7 +35,7 @@ done
 policy='dont_appraise fsmagic=0x73636673 \n'\
 'appraise func=FILE_CHECK mask=MAY_READ uid=0 \n'
 
-printf "${policy}" > /mnt/ima/policy || {
+printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraise?"
   exit "${SKIP:-3}"
 }
@@ -54,7 +54,7 @@ fi
 rm -f outputfile
 
 policyadd='appraise func=FILE_CHECK mask=MAY_READ uid=0 permit_directio \n'
-printf "${policyadd}" > /mnt/ima/policy || {
+printf "${policyadd}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraise?"
   exit "${SKIP:-3}"
 }
@@ -65,7 +65,7 @@ if ! "${dd}" if=inputfile iflag=direct of=outputfile oflag=direct status=none; t
    exit "${FAIL:-1}"
 fi
 
-nspolicy=$(busybox2 cat /mnt/ima/policy)
+nspolicy=$(busybox2 cat "${SECURITYFS_MNT}/ima/policy")
 policy="${policy}${policyadd}"
 if [ "$(printf "${policy}")" != "${nspolicy}" ]; then
   echo " Error: Bad policy in namespace."

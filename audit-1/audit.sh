@@ -6,7 +6,7 @@
 
 SYNCFILE=${SYNCFILE:-syncfile}
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 # Wait until host has setup the policy now
 if ! wait_file_gone "${SYNCFILE}" 50; then
@@ -14,7 +14,7 @@ if ! wait_file_gone "${SYNCFILE}" 50; then
   exit "${FAIL:-1}"
 fi
 
-nspolicy=$(busybox2 cat /mnt/ima/policy)
+nspolicy=$(busybox2 cat "${SECURITYFS_MNT}/ima/policy")
 
 if [ "${POLICY}" != "${nspolicy}" ]; then
   echo " Error: Bad policy in namespace."

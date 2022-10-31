@@ -11,7 +11,7 @@ SYNCFILE=${SYNCFILE:-syncfile}
 
 create_imans()
 {
-  mnt_securityfs "/mnt"
+  mnt_securityfs "${SECURITYFS_MNT}"
 }
 
 get_policy_string()
@@ -37,7 +37,7 @@ check_policy()
   local policy tmp
 
   policy="$(get_policy_string "${has_rules}")"
-  tmp="$(cat "/mnt/ima/policy")"
+  tmp="$(cat "${SECURITYFS_MNT}/ima/policy")"
   if [ "${tmp}" != "$(printf "${policy}")" ]; then
     echo " Error: Unexpected policy in namespace"
     echo " expected: |${policy}|"
@@ -63,7 +63,7 @@ set_policy()
   local policy tmp
 
   policy="$(get_policy_string 1)"
-  printf "${policy}" > "/mnt/ima/policy"
+  printf "${policy}" > "${SECURITYFS_MNT}/ima/policy"
   check_policy_has_label
 }
 
@@ -93,7 +93,7 @@ measure_loop()
   fi
 
   while [ ! -f "${donefile}" ]; do
-    cat "/mnt/ima/policy" >/dev/null
+    cat "${SECURITYFS_MNT}/ima/policy" >/dev/null
     if [ "${NSID}" -le "${limit}" ]; then
       "./${myfile}" >/dev/null
       printf "a" >> "${myfile}"

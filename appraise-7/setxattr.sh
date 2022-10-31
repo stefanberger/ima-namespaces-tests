@@ -15,7 +15,7 @@ for f in good*; do
   fi
 done
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 for f in good*; do
   if ! evmctl ima_sign --imasig --key "${KEY}" -a sha256 "${f}" >/dev/null 2>&1 ; then

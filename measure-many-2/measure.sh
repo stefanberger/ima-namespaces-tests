@@ -15,7 +15,7 @@ POLICYDEPTH=${POLICYDEPTH:-${MAXDEPTH}} # up to which level to create a policy
 
 [ -z "${DEPTH}" ] && { exit 1 ; }
 
-MNT="./mnt-${DEPTH}"
+MNT=".${SECURITYFS_MNT}-${DEPTH}"
 
 if [ "${DEPTH}" -le "${POLICYDEPTH}" ]; then
   mkdir -p "${MNT}"

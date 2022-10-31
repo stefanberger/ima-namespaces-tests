@@ -14,7 +14,7 @@ CMDFILE=${CMDFILE:-cmdfile}
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 i=1
 while :; do

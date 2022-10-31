@@ -12,16 +12,16 @@ NSID=${NSID:-0}
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 '
 
-echo "${policy}" > /mnt/ima/policy || {
+echo "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set measure policy. Does IMA-ns support IMA-measurement?"
   exit "${SKIP:-3}"
 }
 
-nspolicy=$(busybox2 cat /mnt/ima/policy)
+nspolicy=$(busybox2 cat "${SECURITYFS_MNT}/ima/policy")
 
 if [ "${policy}" != "${nspolicy}" ]; then
   echo " Error: Bad policy in namespace."
@@ -31,7 +31,7 @@ if [ "${policy}" != "${nspolicy}" ]; then
   exit "${FAIL:-1}"
 fi
 
-ctr=$(grep -c busybox2 /mnt/ima/ascii_runtime_measurements)
+ctr=$(grep -c busybox2 "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 if [ "${ctr}" -ne 1 ]; then
   echo " Error: Could not find 1 measurement of busybox2 in container, found ${ctr}."
   echo > "${FAILFILE}"
@@ -70,7 +70,7 @@ i=0
 while [ "${i}" -lt "${numfiles}" ]; do
   testfile="tf-${NSID}-${i}x"
   rm -f "${testfile}"
-  ctr=$(grep -c "${testfile}" /mnt/ima/ascii_runtime_measurements)
+  ctr=$(grep -c "${testfile}" "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
   if [ "${ctr}" -ne "${loops}" ]; then
     echo > "${FAILFILE}"
     echo " Error: COuld not find ${testfile} ${loops} times in measurement list, but ${ctr} times"

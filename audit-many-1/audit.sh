@@ -12,7 +12,7 @@
 
 SYNCFILE=${SYNCFILE:-syncfile}
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 # Wait until host has setup the policy now
 if ! wait_file_gone "${SYNCFILE}" 50; then
@@ -22,7 +22,7 @@ fi
 
 policy='audit func=BPRM_CHECK mask=MAY_EXEC uid=0 '
 
-nspolicy=$(busybox2 cat /mnt/ima/policy)
+nspolicy=$(busybox2 cat "${SECURITYFS_MNT}/ima/policy")
 
 if [ "${policy}" != "${nspolicy}" ]; then
   echo " Error: Bad policy in namespace."

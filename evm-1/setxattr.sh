@@ -16,7 +16,7 @@ for f in good* bad*; do
   fi
 done
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 # Writing security.evm must fail also after IMA namespace is active
 for f in good* bad*; do

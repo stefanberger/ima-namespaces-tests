@@ -20,7 +20,7 @@ create_keyring_load_key()
 
 create_imans()
 {
-  mnt_securityfs "/mnt"
+  mnt_securityfs "${SECURITYFS_MNT}"
 }
 
 set_policy()
@@ -32,12 +32,12 @@ set_policy()
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 template=ima-ng \n'\
 'measure func=MMAP_CHECK mask=MAY_EXEC uid=0 template=ima-sig \n'
 
-  if ! printf "${policy}" > "/mnt/ima/policy"; then
+  if ! printf "${policy}" > "${SECURITYFS_MNT}/ima/policy"; then
     echo " Error: Could not set appraisal and measurements policy."
     echo > "${FAILFILE}"
   fi
 
-  nspolicy=$(cat /mnt/ima/policy)
+  nspolicy=$(cat "${SECURITYFS_MNT}/ima/policy")
   if [ "$(printf "${policy}")" != "${nspolicy}" ]; then
     echo " Error: Bad policy in namespace."
     echo "expected: |${policy}|"
@@ -128,7 +128,7 @@ count_measurements()
     fullpath="$(which "${f}")"
 
     # expect 0 log entries with ima-sig
-    ctr=$(grep " ima-sig " /mnt/ima/ascii_runtime_measurements | grep -c "${fullpath}")
+    ctr=$(grep " ima-sig " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements" | grep -c "${fullpath}")
     if [ "${ctr}" -ne 0 ]; then
       echo " Error: ${f} should not have been logged with ima-sig."
       echo > "${FAILFILE}"
@@ -136,7 +136,7 @@ count_measurements()
     fi
 
     # expect != 0 log entries with ima-ng
-    ctr=$(grep " ima-ng " /mnt/ima/ascii_runtime_measurements | grep -c "${fullpath}")
+    ctr=$(grep " ima-ng " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements" | grep -c "${fullpath}")
     if [ "${ctr}" -eq 0 ]; then
       echo " Error: ${f} should have been logged with ima-ng."
       echo > "${FAILFILE}"
@@ -145,13 +145,13 @@ count_measurements()
   done
 
   # Libraries are only to be found with template 'ima-sig'
-  ctr=$(grep " ima-sig " /mnt/ima/ascii_runtime_measurements | grep -c -E "\.so\.")
+  ctr=$(grep " ima-sig " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements" | grep -c -E "\.so\.")
   if [ "${ctr}" -eq 0 ]; then
     echo " Error: Shared libraries should have been logged with template ima-sig."
     echo > "${FAILFILE}"
     return
   fi
-  ctr=$(grep " ima-ng " /mnt/ima/ascii_runtime_measurements | grep -c -E "\.so\.")
+  ctr=$(grep " ima-ng " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements" | grep -c -E "\.so\.")
   if [ "${ctr}" -ne 0 ]; then
     echo " Error: No shared libraries should have been logged with template ima-ng."
     echo > "${FAILFILE}"
@@ -161,7 +161,7 @@ count_measurements()
   libimaevm="$(find / 2>/dev/null| grep libimaevm)"
 
   # There must be 1 entry of libimaevm with signature, 2 in total
-  ctr=$(grep " ima-sig " /mnt/ima/ascii_runtime_measurements |grep -c -E "${libimaevm} ")
+  ctr=$(grep " ima-sig " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements" |grep -c -E "${libimaevm} ")
   exp=2
   if [ "${ctr}" -ne "${exp}" ]; then
     echo " Error: Expected ${exp} ima-sig log entries of ${libimaevm} but found ${ctr}."
@@ -169,7 +169,7 @@ count_measurements()
     return
   fi
 
-  ctr=$(grep " ima-sig " /mnt/ima/ascii_runtime_measurements |grep -c -E "${libimaevm} ")
+  ctr=$(grep " ima-sig " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements" |grep -c -E "${libimaevm} ")
   exp=2
   if [ "${ctr}" -ne "${exp}" ]; then
     echo " Error: Expected ${exp} ima-sig log entries of ${libimaevm} but found ${ctr}."
@@ -177,7 +177,7 @@ count_measurements()
     return
   fi
 
-  ctr=$(grep " 030204" /mnt/ima/ascii_runtime_measurements |grep -c -E "${libimaevm} ")
+  ctr=$(grep " 030204" "${SECURITYFS_MNT}/ima/ascii_runtime_measurements" |grep -c -E "${libimaevm} ")
   exp=1
   if [ "${ctr}" -ne "${exp}" ]; then
     echo " Error: Expected ${exp} ima-sig log entries of ${libimaevm} with signature but found ${ctr}."

@@ -7,7 +7,7 @@
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 KEY=./rsakey.pem
 CERT=./rsa.crt
@@ -18,7 +18,7 @@ keyctl padd asymmetric "" %keyring:_ima < "${CERT}" >/dev/null 2>&1
 prepolicy='dont_appraise fsmagic=0x73636673 \n'\
 'appraise func=POLICY_CHECK mask=MAY_READ \n'
 
-printf "${prepolicy}" > /mnt/ima/policy || {
+printf "${prepolicy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set policy appraise policy. Does IMA-ns support IMA-appraise?"
   exit "${SKIP:-3}"
 }
@@ -26,7 +26,7 @@ printf "${prepolicy}" > /mnt/ima/policy || {
 policy='appraise func=FILE_CHECK mask=MAY_READ uid=0 \n'
 printf "${policy}" > /policyfile
 
-echo "/policyfile" > /mnt/ima/policy 2>/dev/null && {
+echo "/policyfile" > "${SECURITYFS_MNT}/ima/policy" 2>/dev/null && {
   echo " Error: Could set unsigned policy"
   exit "${FAIL:-1}"
 }
@@ -36,18 +36,18 @@ if ! msg=$(evmctl ima_sign --imasig --key "${KEY}" -a sha256 "/policyfile" 2>&1)
   exit "${FAIL:-1}"
 fi
 
-echo "/policyfile" > /mnt/ima/policy 2>/dev/null || {
+echo "/policyfile" > "${SECURITYFS_MNT}/ima/policy" 2>/dev/null || {
   echo " Error: Could not set signed policy"
   exit "${FAIL:-1}"
 }
 
 # try initial policy again
-printf "${prepolicy}" > /mnt/ima/policy && {
+printf "${prepolicy}" > "${SECURITYFS_MNT}/ima/policy" && {
   echo " Error: Could set policy by writing policy rules even though this should not work"
   exit "${SKIP:-3}"
 }
 
-nspolicy=$(cat /mnt/ima/policy)
+nspolicy=$(cat "${SECURITYFS_MNT}/ima/policy")
 expected=$(printf "${prepolicy}${policy}")
 if [ "${nspolicy}" != "${expected}" ]; then
   echo " Error: Wrong policy in namespace"

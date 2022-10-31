@@ -7,7 +7,7 @@
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 KEY=./rsakey.pem
 CERT=./rsa.crt
@@ -37,7 +37,7 @@ keyctl padd asymmetric "" %keyring:_ima < "${CERT}" >/dev/null 2>&1
 policy='measure func=KEY_CHECK \n'\
 'appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
-printf "${policy}" > /mnt/ima/policy || {
+printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraisal?"
   exit "${SKIP:-3}"
 }
