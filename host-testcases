@@ -1,3 +1,5 @@
 host-audit+measure-1/test.sh
 host-audit+measure-2/test.sh
 host-audit+measure-2/tomtou.sh
+host-measure-1/test.sh
+host-measure-1/test2.sh

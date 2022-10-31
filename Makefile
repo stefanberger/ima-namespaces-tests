@@ -3,7 +3,8 @@ INSTDIR ?= /usr/share/imatest
 
 TESTDIRS = \
 	host-audit+measure-1 \
-	host-audit+measure-2
+	host-audit+measure-2 \
+	host-measure-1
 
 DESTS := $(patsubst %,$(INSTDIR)/%,$(TESTDIRS))
 
