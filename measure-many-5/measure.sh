@@ -95,7 +95,7 @@ create_ima_ns()
 testfile="testfile"
 bakfile="bakfile"
 cmdfile="cmdfile"
-mntdir="/mnt"
+mntdir="${SECURITYFS_MNT}"
 
 stage=0
 while [ "${stage}" -le 6 ]; do

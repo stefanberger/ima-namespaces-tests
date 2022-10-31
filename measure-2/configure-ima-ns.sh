@@ -48,7 +48,7 @@ get_template()
 
 hash_algo=$(get_hash "${ID}")
 template=$(get_template "${ID}")
-mntdir="/mnt"
+mntdir="${SECURITYFS_MNT}"
 
 if ! msg=$(mount -t securityfs "${mntdir}" "${mntdir}" 2>&1); then
   echo " Error: Could not mount securityfs: ${msg}"

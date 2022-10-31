@@ -7,7 +7,7 @@
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 KEY=./rsakey.pem
 CERT=./rsa.crt
@@ -16,7 +16,7 @@ keyctl newring _ima @s >/dev/null 2>&1
 keyctl newring _evm @s >/dev/null 2>&1
 
 prepolicy1="measure func=KEY_CHECK keyrings=_evm|_ima \n"
-printf "${prepolicy1}" > /mnt/ima/policy || {
+printf "${prepolicy1}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set key measurement policy."
   exit "${FAIL:-1}"
 }
@@ -30,7 +30,7 @@ keyctl padd asymmetric "" %keyring:_ima < "${CERT}" >/dev/null 2>&1
 keyctl padd asymmetric "" %keyring:_evm < "${CERT}" >/dev/null 2>&1
 
 # Expecting measurement of both keys
-ctr=$(grep -c -E " _(ima|evm) " /mnt/ima/ascii_runtime_measurements)
+ctr=$(grep -c -E " _(ima|evm) " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 exp=2
 if [ "${ctr}" -ne "${exp}" ]; then
   echo " Error: Expected ${exp} measurements of keys in container's measurement list, but found ${ctr}."
@@ -39,8 +39,8 @@ if [ "${ctr}" -ne "${exp}" ]; then
 fi
 
 # To be able to write security.evm set EVM_ALLOW_METADATA flag
-echo $((EVM_ALLOW_METADATA_WRITES)) > /mnt/evm
-val=$(cat /mnt/evm)
+echo $((EVM_ALLOW_METADATA_WRITES)) > "${SECURITYFS_MNT}/evm"
+val=$(cat "${SECURITYFS_MNT}/evm")
 exp=${EVM_ALLOW_METADATA_WRITES}
 if [ "${val}" != "${exp}" ]; then
   echo " Error: Value in evm securityfs is wrong"
@@ -69,14 +69,14 @@ done
 policy='appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
 
-printf "${policy}" > /mnt/ima/policy || {
+printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraise?"
   echo > "${FAILFILE}"
   exit "${FAIL:-1}"
 }
 
 # Using busybox2 must fail since it's not signed
-if ${BUSYBOX2} cat /mnt/ima/policy >/dev/null 2>&1; then
+if ${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
   echo " Error: Could execute unsigned ${BUSYBOX2} even though appraise policy is active"
   echo > "${FAILFILE}"
   exit "${FAIL:-1}"
@@ -85,15 +85,15 @@ fi
 evmctl sign --imasig --portable --key "${KEY}" -a sha256 "${BUSYBOX2}"        >/dev/null 2>&1
 evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(type -P busybox)" >/dev/null 2>&1
 
-template=$(get_template_from_log "/mnt")
+template=$(get_template_from_log "${SECURITYFS_MNT}")
 case "${template}" in
 ima-sig|ima-ns) num_extra=1;;
 *) num_extra=0;;
 esac
 
-before=$(grep -c "${BUSYBOX2}" /mnt/ima/ascii_runtime_measurements)
+before=$(grep -c "${BUSYBOX2}" "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 
-nspolicy=$(${BUSYBOX2} cat /mnt/ima/policy)
+nspolicy=$(${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy")
 policy="${prepolicy1}${policy}"
 if [ "$(printf "${policy}")" != "${nspolicy}" ]; then
   echo " Error: Bad policy in namespace."
@@ -103,7 +103,7 @@ if [ "$(printf "${policy}")" != "${nspolicy}" ]; then
   exit "${FAIL:-1}"
 fi
 
-after=$(grep -c "${BUSYBOX2}" /mnt/ima/ascii_runtime_measurements)
+after=$(grep -c "${BUSYBOX2}" "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 expected=$((before + num_extra))
 if [ "${expected}" -ne "${after}" ]; then
   echo " Error: Could not find ${expected} measurement of ${BUSYBOX2} in container, found ${after}."
@@ -119,14 +119,14 @@ if ! setfattr -x security.evm "${BUSYBOX2}"; then
 fi
 
 # Using busybox2 must still work since it's still signed with IMA signature
-if ! ${BUSYBOX2} cat /mnt/ima/policy >/dev/null 2>&1; then
+if ! ${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
   echo " Error: Could not execute "
   echo > "${FAILFILE}"
   exit "${FAIL:-1}"
 fi
 
-echo $((EVM_INIT_X509)) > /mnt/evm
-val=$(cat /mnt/evm)
+echo $((EVM_INIT_X509)) > "${SECURITYFS_MNT}/evm"
+val=$(cat "${SECURITYFS_MNT}/evm")
 exp=$((EVM_INIT_X509|EVM_ALLOW_METADATA_WRITES))
 if [ "${val}" != "${exp}" ]; then
   echo " Error: Value in evm securityfs is wrong"
@@ -145,7 +145,7 @@ if ! setfattr -n security.evm -v "${EVMSIG}" "${BUSYBOX2}"; then
 fi
 
 # Using busybox2 must not work since the EVM signature is bad
-if ${BUSYBOX2} cat /mnt/ima/policy >/dev/null 2>&1; then
+if ${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
   echo " Error: Could execute ${BUSYBOX2} with bad EVM signature"
   getfattr -m ^security.evm -e hex --dump "${BUSYBOX2}"
   echo > "${FAILFILE}"
@@ -161,7 +161,7 @@ if ! setfattr -x security.ima "${BUSYBOX2}"; then
 fi
 
 # Using busybox2 must not work anymore since it's completely unsigned
-if ${BUSYBOX2} cat /mnt/ima/policy >/dev/null 2>&1; then
+if ${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
   echo " Error: Could execute unsigned busybox2"
   echo > "${FAILFILE}"
   exit "${FAIL:-1}"

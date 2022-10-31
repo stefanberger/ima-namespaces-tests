@@ -6,11 +6,11 @@
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 policy='hash func=FILE_CHECK mask=MAY_READ \n'
 
-printf "${policy}" > /mnt/ima/policy || {
+printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set appraise+hash policy. Does IMA-ns support IMA-appraise and hash rules?"
   exit "${SKIP:-3}"
 }

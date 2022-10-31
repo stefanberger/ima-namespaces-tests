@@ -14,7 +14,7 @@ NSID=${NSID:-0}
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 KEY=./rsakey.pem
 CERT=./rsa.crt
@@ -38,7 +38,7 @@ BUSYBOX2="${BINDIR}/busybox2"
 
 # We want to see a measurement of the key when it gets loaded
 prepolicy="measure func=KEY_CHECK \n"
-printf "${prepolicy}" > /mnt/ima/policy || {
+printf "${prepolicy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set key measurement policy. Does IMA-ns support IMA-measure?"
   exit "${SKIP:-3}"
 }
@@ -56,7 +56,7 @@ fi
 "${KEYCTL}" padd asymmetric "" %keyring:_ima < "${CERT}" 1>/dev/null
 
 # Expecting measurement of key
-ctr=$(grep -c " _ima " /mnt/ima/ascii_runtime_measurements)
+ctr=$(grep -c " _ima " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 if [ "${ctr}" -ne 1 ]; then
   echo " Error: Could not find measurement of key in container's measurement list."
   echo > "${FAILFILE}"
@@ -75,13 +75,13 @@ fi
 policy='appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
 
-printf "${policy}" > /mnt/ima/policy || {
+printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraise?"
   exit "${SKIP:-3}"
 }
 
 # Using busybox2 must fail since it's not signed
-if "${BUSYBOX2}" cat /mnt/ima/policy >/dev/null 2>&1; then
+if "${BUSYBOX2}" cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
   echo " Error: Could execute unsigned files even though appraise policy is active"
   echo > "${FAILFILE}"
   exit "${FAIL:-1}"
@@ -90,15 +90,15 @@ fi
 "${EVMCTL}" ima_sign --imasig --key "${KEY}" -a sha256 "${BUSYBOX2}" >/dev/null 2>&1
 "${EVMCTL}" ima_sign --imasig --key "${KEY}" -a sha256 "${BUSYBOX}"  >/dev/null 2>&1
 
-template=$(PATH=${BINDIR} get_template_from_log "/mnt")
+template=$(PATH=${BINDIR} get_template_from_log "${SECURITYFS_MNT}")
 case "${template}" in
 ima-sig|ima-ns) num_extra=1;;
 *) num_extra=0;;
 esac
 
-before=$("${BUSYBOX}" grep -c "${BUSYBOX2}" /mnt/ima/ascii_runtime_measurements)
+before=$("${BUSYBOX}" grep -c "${BUSYBOX2}" "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 
-nspolicy=$("${BUSYBOX2}" cat /mnt/ima/policy)
+nspolicy=$("${BUSYBOX2}" cat "${SECURITYFS_MNT}/ima/policy")
 policy="${prepolicy}${policy}"
 if [ "$(printf "${policy}")" != "${nspolicy}" ]; then
   echo " Error: Bad policy in namespace ${NSID}."
@@ -108,11 +108,11 @@ if [ "$(printf "${policy}")" != "${nspolicy}" ]; then
   exit "${FAIL:-1}"
 fi
 
-after=$("${BUSYBOX}" grep -c "${BUSYBOX2}" /mnt/ima/ascii_runtime_measurements)
+after=$("${BUSYBOX}" grep -c "${BUSYBOX2}" "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 expected=$((before + num_extra))
 if [ "${expected}" -ne "${after}" ]; then
   echo " Error: Could not find ${expected} measurement(s) of ${BUSYBOX2} in container, found ${after}."
-  "${BUSYBOX}" cat -n /mnt/ima/ascii_runtime_measurements
+  "${BUSYBOX}" cat -n "${SECURITYFS_MNT}/ima/ascii_runtime_measurements"
   echo > "${FAILFILE}"
   exit "${FAIL:-1}"
 fi

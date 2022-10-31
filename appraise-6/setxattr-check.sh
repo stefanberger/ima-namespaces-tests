@@ -22,7 +22,7 @@ get_hash_algo_strings()
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 ALGOS=${ALGOS:-1}
 KEY=./rsakey.pem
@@ -32,7 +32,7 @@ algos_str=$(get_hash_algo_strings "${ALGOS}")
 
 policy="appraise func=SETXATTR_CHECK appraise_algos=${algos_str} \n"
 
-printf "${policy}" > /mnt/ima/policy || {
+printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set appraise policy with SETXATTR_CHECK rule. Does IMA-ns support IMA-appraise?"
   echo " policy: |${policy}|"
   exit "${SKIP:-3}"

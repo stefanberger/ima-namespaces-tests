@@ -27,7 +27,7 @@ load_policy()
 'appraise func=SETXATTR_CHECK appraise_algos=sha256,sha512 \n'\
 'appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 gid=0 fowner=0 fgroup=0 \n'\
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 gid=0 fowner=0 fgroup=0 \n'
-  printf "${policy}" > /mnt/ima/policy || {
+  printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
     echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraisal?"
     echo > "${FAILFILE}"
   }
@@ -76,7 +76,7 @@ create_own_key()
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 KEY=./rsakey.pem
 CERT=./rsa.crt
@@ -164,7 +164,7 @@ while [ "${stage}" -le 14 ]; do
        ;;
     load-own-key)
       load_key "${own_cert}" >/dev/null
-      ctr=$(grep -c " _ima " /mnt/ima/ascii_runtime_measurements)
+      ctr=$(grep -c " _ima " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
       if [ "${ctr}" -ne 1 ]; then
         echo " Error: Expected to find key in measurement list."
         echo > "${FAILFILE}"

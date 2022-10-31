@@ -13,7 +13,7 @@ BUSYBOX2="$(which busybox2)"
 
 SYNCFILE=${SYNCFILE:-syncfile}
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 # Wait until host has setup the policy now
 if ! wait_file_gone "${SYNCFILE}" 50; then
@@ -32,13 +32,13 @@ evmctl ima_sign --imasig --key "${KEY}" -a sha256 "${BUSYBOX2}"      >/dev/null 
 
 # now add appraisal policy rule
 appraisal_policy="appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 \n"
-if ! printf "${appraisal_policy}" > /mnt/ima/policy; then
+if ! printf "${appraisal_policy}" > "${SECURITYFS_MNT}/ima/policy"; then
   echo " Error: Could not set appraisal policy in namespace"
   exit "${SKIP:-3}"
 fi
 POLICY="${POLICY}${appraisal_policy}"
 
-nspolicy=$(${BUSYBOX2} cat /mnt/ima/policy)
+nspolicy=$(${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy")
 
 if [ "$(printf "${POLICY}")" != "${nspolicy}" ]; then
   echo " Error: Bad policy in namespace."
@@ -48,7 +48,7 @@ if [ "$(printf "${POLICY}")" != "${nspolicy}" ]; then
 fi
 
 # Expecting 1 measurement
-ctr=$(grep -c "bin/busybox2" /mnt/ima/ascii_runtime_measurements)
+ctr=$(grep -c "bin/busybox2" "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 if [ "${ctr}" -ne 1 ]; then
   echo " Error: Could not find 1 measurement of busybox2 in container, found ${ctr}."
   exit "${FAIL:-1}"
@@ -62,7 +62,7 @@ if ! wait_file_gone "${SYNCFILE}" 50; then
   exit "${FAIL:-1}"
 fi
 
-if ${BUSYBOX2} cat /mnt/ima/policy 2>/dev/null 1>/dev/null; then
+if ${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy" 2>/dev/null 1>/dev/null; then
   echo " Error: Could execute ${BUSYBOX2} even though it should not be possible"
   exit "${FAIL:-1}"
 fi
@@ -70,19 +70,19 @@ fi
 # Re-sign busybox2
 evmctl ima_sign --imasig --key "${KEY}" -a sha256 "${BUSYBOX2}" >/dev/null 2>&1
 
-if ! ${BUSYBOX2} cat /mnt/ima/policy 1>/dev/null; then
+if ! ${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy" 1>/dev/null; then
   echo " Error: Could not execute ${BUSYBOX2} even though it should be possible after re-signing"
   exit "${FAIL:-1}"
 fi
 
 # Expecting 2 or 3 measurements depending on template being used
-template=$(get_template_from_log "/mnt")
+template=$(get_template_from_log "${SECURITYFS_MNT}")
 case "${template}" in
 ima-sig|ima-ns) num_extra=1;;
 *) num_extra=0;;
 esac
 
-ctr=$(grep -c "${BUSYBOX2}" /mnt/ima/ascii_runtime_measurements)
+ctr=$(grep -c "${BUSYBOX2}" "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 exp=$((2 + num_extra))
 if [ "${ctr}" -ne "${exp}" ]; then
   echo " Error: Could not find 2 measurement of busybox2 in container, found ${ctr}."
@@ -100,7 +100,7 @@ if ! wait_file_gone "${SYNCFILE}" 50; then
   exit "${FAIL:-1}"
 fi
 
-if ${BUSYBOX2} cat /mnt/ima/policy 2>/dev/null 1>/dev/null; then
+if ${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy" 2>/dev/null 1>/dev/null; then
   echo " Error: Could execute ${BUSYBOX2} even though it should not be possible after signature removal by host"
   exit "${FAIL:-1}"
 fi
@@ -108,7 +108,7 @@ fi
 # Re-sign busybox2
 evmctl ima_sign --imasig --key "${KEY}" -a sha256 "${BUSYBOX2}" >/dev/null 2>&1
 
-if ! ${BUSYBOX2} cat /mnt/ima/policy 1>/dev/null; then
+if ! ${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy" 1>/dev/null; then
   echo " Error: Could not execute ${BUSYBOX2} even though it should be possible after re-signing"
   exit "${FAIL:-1}"
 fi

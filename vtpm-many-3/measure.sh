@@ -16,17 +16,17 @@ SWTPM_LOG="/swtpm-${NSID}/log"
 # start vTPM before IMA-ns activation
 start_swtpm_chardev "${NSID}" "${VTPM_DEVICE_FD}" --log "level=2,file=${SWTPM_LOG}" --tpm2
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 pcr=$((NSID % 10)) # pcr=[0..9]
 policy="measure func=BPRM_CHECK mask=MAY_EXEC pcr=${pcr} uid=0 "
 
-echo "${policy}" > /mnt/ima/policy || {
+echo "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set measure policy. Does IMA-ns support IMA-measurement?"
   exit "${SKIP:-3}"
 }
 
-nspolicy=$(cat /mnt/ima/policy)
+nspolicy=$(cat "${SECURITYFS_MNT}/ima/policy")
 if [ "${policy}" != "${nspolicy}" ]; then
   echo " Error: Bad policy in namespace."
   echo "expected: ${policy}"
@@ -38,7 +38,7 @@ fi
 ctr_extends=$(grep -c \
                    -E '^ 80 02 00 00 0. .. 00 00 01 82 00 00 00 0A 00 00' \
                    "${SWTPM_LOG}")
-ctr_measure=$(grep -c -E "^10 " /mnt/ima/ascii_runtime_measurements)
+ctr_measure=$(grep -c -E "^10 " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 exp="1"
 if [ "${exp}" -ne "${ctr_extends}" ]; then
   echo " Error: Expected ${exp} extends for PCR 10 but found ${ctr_extends}."
@@ -56,7 +56,7 @@ pcr_hex=$(printf "%02x" "${pcr}")
 ctr_extends=$(grep -c \
                    -E "^ 80 02 00 00 0. .. 00 00 01 82 00 00 00 ${pcr_hex} 00 00" \
                    "${SWTPM_LOG}")
-ctr_measure=$(grep -c -E "^ ${pcr} " /mnt/ima/ascii_runtime_measurements)
+ctr_measure=$(grep -c -E "^ ${pcr} " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 exp="1"
 if [ "${exp}" -ne "${ctr_extends}" ]; then
   echo " Error: Expected ${exp} PCR_Extends for PCR ${pcr} but found ${ctr_extends}."

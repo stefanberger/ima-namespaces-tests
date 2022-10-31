@@ -12,18 +12,18 @@ NSID=${NSID:-0}
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt"
+mnt_securityfs "${SECURITYFS_MNT}"
 
 policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 '
 
-echo "${policy}" > /mnt/ima/policy || {
+echo "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set measure policy. Does IMA-ns support IMA-measurement?"
   exit "${SKIP:-3}"
 }
 
 testfile="testfile"
 
-imahash="$(determine_file_hash_from_log "/mnt")"
+imahash="$(determine_file_hash_from_log "${SECURITYFS_MNT}")"
 
 reported=0
 
@@ -54,27 +54,27 @@ while [ "${i}" -lt 20 ]; do
 
     ./"${testfile}" 1>/dev/null
 
-    ctr=$(grep -c "${testfile}" /mnt/ima/ascii_runtime_measurements)
+    ctr=$(grep -c "${testfile}" "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
     if [ "${ctr}" -ne "${i}" ]; then
       if [ "${reported}" -eq 0 ]; then
         echo " Error in ns ${NSID} round ${i}: Could not find ${i} measurement(s), found ${ctr}."
         reported=1
         if [ ! -f "${FAILFILE}" ]; then
           echo > "${FAILFILE}"
-          cat -n /mnt/ima/ascii_runtime_measurements
+          cat -n "${SECURITYFS_MNT}/ima/ascii_runtime_measurements"
         fi
       fi
     fi
 
     filehash="$(hash_file "${imahash}" "${testfile}")"
-    ctr=$(grep -c "${filehash}" /mnt/ima/ascii_runtime_measurements)
+    ctr=$(grep -c "${filehash}" "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
     if [ "${ctr}" -ne 1 ]; then
       if [ "${reported}" -eq 0 ]; then
         echo " Error in ns ${NSID}: Could not find hash ${filehash} in measurement(s)."
         reported=1
         if [ ! -f "${FAILFILE}" ]; then
           echo > "${FAILFILE}"
-          cat -n /mnt/ima/ascii_runtime_measurements
+          cat -n "${SECURITYFS_MNT}/ima/ascii_runtime_measurements"
         fi
       fi
     fi

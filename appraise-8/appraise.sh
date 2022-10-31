@@ -6,7 +6,7 @@
 
 . ./ns-common.sh
 
-mnt_securityfs "/mnt" "sha256" "ima-sig"
+mnt_securityfs "${SECURITYFS_MNT}" "sha256" "ima-sig"
 
 KEY=./rsakey.pem
 CERT=./rsa.crt
@@ -34,7 +34,7 @@ policy='appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
 'measure func=MMAP_CHECK mask=MAY_EXEC uid=0 \n'
 
-printf "${policy}" > /mnt/ima/policy || {
+printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraise?"
   exit "${SKIP:-3}"
 }
@@ -76,7 +76,7 @@ if ! evmctl --help >/dev/null; then
   exit "${FAIL:-1}"
 fi
 
-ctr=$(grep -c "${libimaevm} " /mnt/ima/ascii_runtime_measurements)
+ctr=$(grep -c "${libimaevm} " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 exp=2
 if [ "${ctr}" -ne "${exp}" ]; then
   echo " Error: Expected ${exp} measurements of ${libimaevm} but found ${ctr}."
