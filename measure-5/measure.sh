@@ -11,10 +11,7 @@ mnt_securityfs "${SECURITYFS_MNT}"
 policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 template=ima-ng \n'\
 'measure func=MMAP_CHECK mask=MAY_EXEC uid=0 template=ima-sig \n'
 
-printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraise?"
-  exit "${SKIP:-3}"
-}
+set_measurement_policy_from_string "${SECURITYFS_MNT}" "${policy}" ""
 
 # Exercise BPRM_CHECK and MMAP_CHECK
 evmctl --help >/dev/null

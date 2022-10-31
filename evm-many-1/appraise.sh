@@ -4,6 +4,7 @@
 
 # shellcheck disable=SC2059,SC3045
 #set -x
+FAILFILE=${FAILFILE:-failfile}
 
 . ./ns-common.sh
 

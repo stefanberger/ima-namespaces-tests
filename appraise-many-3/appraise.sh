@@ -11,6 +11,7 @@
 # FAILFILE: name of file to create upon failure
 # NUM_CONTAINERS: The number of containers started
 NSID=${NSID:-0}
+FAILFILE=${FAILFILE:-failfile}
 
 load_key()
 {

@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 # shellcheck disable=SC2059,SC3023
+SYNCFILE=${SYNCFILE:-syncfile}
+POLICY=${POLICY:-}
 
 . ./ns-common.sh
-
-SYNCFILE=${SYNCFILE:-syncfile}
 
 imahash="sha1"
 imatemplate="ima-ng"

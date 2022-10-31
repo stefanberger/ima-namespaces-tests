@@ -1,6 +1,7 @@
 #!/bin/env sh
 
 # SPDX-License-Identifier: BSD-2-Clause
+POLICY=${POLICY:-}
 
 . ./ns-common.sh
 

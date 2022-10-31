@@ -5,6 +5,7 @@
 #set -x
 
 SYNCFILE=${SYNCFILE:-syncfile}  #make shellcheck happy
+FAILFILE=${FAILFILE:-failfile}
 
 . ./ns-common.sh
 

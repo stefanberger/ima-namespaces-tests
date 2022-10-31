@@ -7,10 +7,10 @@
 # Caller must pass:
 # NSID: distinct namespace id number
 # FAILFILE: name of file to create upon failure
+SYNCFILE=${SYNCFILE:-syncfile}
+FAILFILE=${FAILFILE:-failfile}
 
 . ./ns-common.sh
-
-SYNCFILE=${SYNCFILE:-syncfile}
 
 mnt_securityfs "${SECURITYFS_MNT}"
 

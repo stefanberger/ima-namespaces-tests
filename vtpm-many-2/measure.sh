@@ -8,6 +8,7 @@
 # NSID: distinct namespace id number
 # FAILFILE: name of file to create upon failure
 NSID=${NSID:-1}
+FAILFILE=${FAILFILE:-failfile}
 
 . ./ns-common.sh
 
@@ -18,12 +19,9 @@ start_swtpm_chardev "${NSID}" "${VTPM_DEVICE_FD}" --log "level=2,file=${SWTPM_LO
 
 mnt_securityfs "${SECURITYFS_MNT}"
 
-policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0'
+policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 '
 
-echo "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set measure policy. Does IMA-ns support IMA-measurement?"
-  exit "${SKIP:-3}"
-}
+set_measurement_policy_from_string "${SECURITYFS_MNT}" "${policy}" "${FAILFILE}"
 
 cat "${SECURITYFS_MNT}/ima/ascii_runtime_measurements" >/dev/null
 

@@ -24,18 +24,7 @@ if [ "${DEPTH}" -le "${POLICYDEPTH}" ]; then
 
   policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 '
 
-  echo "${policy}" > "${MNT}/ima/policy" || {
-    echo " Error at depth ${DEPTH}: Could not set measure policy. Does IMA-ns support IMA-measurement?"
-    exit "${SKIP:-3}"
-  }
-
-  nspolicy=$(busybox2 cat "${MNT}/ima/policy")
-  if [ "${policy}" != "${nspolicy}" ]; then
-    echo " Error at depth ${DEPTH}: Bad policy in namespace."
-    echo "expected: |${policy}|"
-    echo "actual  : |${nspolicy}|"
-    exit "${FAIL:-1}"
-  fi
+  set_measurement_policy_from_string "${MNT}" "${policy}" ""
 fi
 
 ./bin/busybox2 echo "depth: $DEPTH" 1>/dev/null

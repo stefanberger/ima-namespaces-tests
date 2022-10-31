@@ -97,6 +97,50 @@ get_template_from_log()
     busybox cut -d" " -f3
 }
 
+# Set the IMA policy from the given string representing the policy
+#
+# @param1: securityfs mount point
+# @param2: The IMA policy as string
+# @param3: Optional filename of a file to write to in case of error
+# @param4: Type of policy, e.g. 'audit' or 'measurement'; used in error message
+set_policy_from_string()
+{
+  local mntdir="$1"
+  local policy="$2"
+  local failfile="$3"
+  local policytype="$4"
+
+  local nspolicy
+
+  nspolicy=$(cat "${mntdir}/ima/policy")
+  if [ "${nspolicy}" != "$(printf "${policy}")" ]; then
+    if ! busybox printf "${policy}" > "${mntdir}/ima/policy"; then
+      echo " Error: Could not set ${policytype} policy. Does IMA-ns support IMA-${policytype}?"
+      exit "${SKIP:-3}"
+    fi
+    nspolicy=$(cat "${mntdir}/ima/policy")
+    if [ "${nspolicy}" != "$(printf "${policy}")" ]; then
+      echo " Error: Could not replace existing policy with new policy."
+      echo " expected: '$(printf "${policy}")'"
+      echo " actual  : '${nspolicy}'"
+      if [ -n "${failfile}" ]; then
+        echo > "${failfile}"
+      fi
+      exit "${FAIL:-1}"
+    fi
+  fi
+}
+
+# Set a measurement policy
+#
+# @param1: securityfs mount point
+# @param2: The IMA policy as string
+# @param3: Optional filename of a file to write to in case of error
+set_measurement_policy_from_string()
+{
+  set_policy_from_string "$1" "$2" "$3" "measurement"
+}
+
 # Let container run into the cage and have it wait - woof!
 # @param1: id of container
 # @parma2: syncfile
