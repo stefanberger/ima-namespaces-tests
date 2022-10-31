@@ -6,6 +6,7 @@
 #set -x
 NSID=${NSID:-0}
 SYNCFILE=${SYNCFILE:-syncfile}
+FAILFILE=${FAILFILE:-failfile}
 
 . ./ns-common.sh
 

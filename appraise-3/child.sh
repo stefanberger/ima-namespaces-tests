@@ -11,6 +11,7 @@
 # FAILFILE: File to leave error code in
 SYNCFILE=${SYNCFILE:-syncfile}
 CMDFILE=${CMDFILE:-cmdfile}
+FAILFILE=${FAILFILE:-failfile}
 
 . ./ns-common.sh
 

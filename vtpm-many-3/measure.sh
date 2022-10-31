@@ -8,6 +8,7 @@
 # NSID: distinct namespace id number
 # FAILFILE: name of file to create upon failure
 NSID=${NSID:-1}
+FAILFILE=${FAILFILE:-failfile}
 
 . ./ns-common.sh
 
@@ -21,17 +22,7 @@ mnt_securityfs "${SECURITYFS_MNT}"
 pcr=$((NSID % 10)) # pcr=[0..9]
 policy="measure func=BPRM_CHECK mask=MAY_EXEC pcr=${pcr} uid=0 "
 
-echo "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set measure policy. Does IMA-ns support IMA-measurement?"
-  exit "${SKIP:-3}"
-}
-
-nspolicy=$(cat "${SECURITYFS_MNT}/ima/policy")
-if [ "${policy}" != "${nspolicy}" ]; then
-  echo " Error: Bad policy in namespace."
-  echo "expected: ${policy}"
-  echo "actual  : ${nspolicy}"
-fi
+set_measurement_policy_from_string "${SECURITYFS_MNT}" "${policy}" "${FAILFILE}"
 
 # TPM_CC_PCR_Extend = 0x00000182
 # Expect 1 extend for the boot aggregate in PCR 10

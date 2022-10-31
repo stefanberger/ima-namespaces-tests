@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 # shellcheck disable=SC2059
+SYNCFILE=${SYNCFILE:-syncfile}
+POLICY=${POLICY:-}
 
 . ./ns-common.sh
-
-SYNCFILE=${SYNCFILE:-syncfile}
 
 mnt_securityfs "${SECURITYFS_MNT}"
 

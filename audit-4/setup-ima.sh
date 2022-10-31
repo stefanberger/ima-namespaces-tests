@@ -4,11 +4,12 @@
 
 # set -x
 
+SYNCFILE=${SYNCFILE:-syncfile}  # make shellcheck happy
+FAILFILE=${FAILFILE:-failfile}
+
 exp_policy="${2}"
 
 . ./ns-common.sh
-
-SYNCFILE=${SYNCFILE:-syncfile}  # make shellcheck happy
 
 mnt_securityfs /mnt
 

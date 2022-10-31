@@ -9,6 +9,7 @@
 # FAILFILE: name of file to create upon failure
 # NUM_CONTAINERS: number of containers running
 NSID=${NSID:-0}
+FAILFILE=${FAILFILE:-failfile}
 
 . ./ns-common.sh
 
@@ -16,10 +17,7 @@ mnt_securityfs "${SECURITYFS_MNT}"
 
 policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 '
 
-echo "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set measure policy. Does IMA-ns support IMA-measurement?"
-  exit "${SKIP:-3}"
-}
+set_measurement_policy_from_string "${SECURITYFS_MNT}" "${policy}" ""
 
 testfile="testfile"
 

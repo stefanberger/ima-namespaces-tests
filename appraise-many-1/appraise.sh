@@ -11,6 +11,7 @@
 # FAILFILE: name of file to create upon failure
 # NUM_CONTAINERS: The number of containers started
 NSID=${NSID:-0}
+FAILFILE=${FAILFILE:-failfile}
 
 . ./ns-common.sh
 
@@ -38,10 +39,8 @@ BUSYBOX2="${BINDIR}/busybox2"
 
 # We want to see a measurement of the key when it gets loaded
 prepolicy="measure func=KEY_CHECK \n"
-printf "${prepolicy}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set key measurement policy. Does IMA-ns support IMA-measure?"
-  exit "${SKIP:-3}"
-}
+
+set_measurement_policy_from_string "${SECURITYFS_MNT}" "${prepolicy}" "${FAILFILE}"
 
 # Synchronize all containers here otherwise we get failures with keyctl padd giving
 # Permission denied errors

@@ -15,10 +15,8 @@ keyctl newring _ima @s >/dev/null 2>&1
 
 # There should be no measurement of the key when it gets loaded due to 'foobar' keyring
 prepolicy1="measure func=KEY_CHECK keyrings=foobar \n"
-printf "${prepolicy1}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set key measurement policy. Does IMA-ns support IMA-measure?"
-  exit "${SKIP:-3}"
-}
+
+set_measurement_policy_from_string "${SECURITYFS_MNT}" "${prepolicy1}" ""
 
 keyctl padd asymmetric "" %keyring:_ima < "${CERT}" >/dev/null 2>&1
 

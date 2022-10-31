@@ -6,12 +6,9 @@
 
 mnt_securityfs "${SECURITYFS_MNT}"
 
-policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0'
+policy='measure func=BPRM_CHECK mask=MAY_EXEC uid=0 '
 
-echo "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set audit policy."
-  exit "${SKIP:-3}"
-}
+set_measurement_policy_from_string "${SECURITYFS_MNT}" "${policy}" ""
 
 # Use busybox twice, once after modification
 busybox2 cat "${SECURITYFS_MNT}/ima/policy" 1>/dev/null 2>/dev/null
