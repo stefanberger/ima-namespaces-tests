@@ -34,9 +34,8 @@ load_policy()
   policy='measure func=KEY_CHECK \n'\
 'appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
-  printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
-    echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraisal?"
-  }
+
+  set_appraisal_policy_from_string "${SECURITYFS_MNT}" "${policy}" "${FAILFILE}" 1
 }
 
 . ./ns-common.sh

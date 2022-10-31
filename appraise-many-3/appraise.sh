@@ -28,10 +28,8 @@ load_policy()
 'appraise func=SETXATTR_CHECK appraise_algos=sha256,sha512 \n'\
 'appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 gid=0 fowner=0 fgroup=0 \n'\
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 gid=0 fowner=0 fgroup=0 \n'
-  printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
-    echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraisal?"
-    echo > "${FAILFILE}"
-  }
+
+  set_appraisal_policy_from_string "${SECURITYFS_MNT}" "${policy}" "${FAILFILE}" 1
 }
 
 create_own_key()

@@ -35,10 +35,7 @@ done
 policy='dont_appraise fsmagic=0x73636673 \n'\
 'appraise func=FILE_CHECK mask=MAY_READ uid=0 \n'
 
-printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
-  echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraise?"
-  exit "${SKIP:-3}"
-}
+set_appraisal_policy_from_string "${SECURITYFS_MNT}" "${policy}" "" 1
 
 # Using dd with flag O_DIRECT must fail since it's not allowed with directio
 if "${dd}" if=inputfile iflag=direct of=outputfile oflag=direct status=none 2>/dev/null; then
