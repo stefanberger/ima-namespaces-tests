@@ -233,3 +233,4 @@ unnecessary reboots.
 | host-audit+measure-2/tomtou.sh | Cause a ToMToU audit log message when user 'nobody' opens are file for reading and writing |
 | host-measure-1/test.sh         | Measuring an executed file |
 | host-measure-1/test2.sh        | Re-measuring after modification of a file |
+| host-measure-2/test.sh         | Testing of BPRM_CHECK and MMAP_CHECK using different templates for logging |
