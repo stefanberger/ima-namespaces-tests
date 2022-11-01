@@ -55,6 +55,7 @@ id="${RANDOM}abc${RANDOM}"
 
 sudo -u "${TEST_USER}" \
   env PATH=/bin:/usr/bin SYNCFILE=${SYNCFILE} FAILFILE=${FAILFILE} \
+  IN_NAMESPACE="1" \
   unshare --user --map-root-user --mount-proc \
     --pid --fork --root "${rootfs}" bin/sh ./setpolicy.sh "${id}" &
 for ((i = 0; i < 10; i++)); do

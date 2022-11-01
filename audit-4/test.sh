@@ -58,6 +58,7 @@ policy="audit func=BPRM_CHECK mask=MAY_EXEC uid=0 gid=0 fowner=0 fgroup=0 "
 
 sudo -u "${TEST_USER}" \
   env PATH=/bin:/usr/bin SYNCFILE=${SYNCFILE} FAILFILE=${FAILFILE} \
+  IN_NAMESPACE="1" \
   unshare --user --map-root-user --mount-proc \
     --pid --fork --root "${rootfs}" bin/sh ./setup-ima.sh "${id}" "${policy}" &
 for ((i = 0; i < 10; i++)); do
