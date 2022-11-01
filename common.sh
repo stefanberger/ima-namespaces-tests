@@ -224,7 +224,7 @@ function __setup_busybox()
   fi
 
   while [ $# -ne 0 ]; do
-    if ! cp "$1" "${rootfs}"; then
+    if ! cp -H "$1" "${rootfs}"; then
       echo "Error: Failed to copy ${1} to ${rootfs}"
       exit "${FAIL:-1}"
     fi
