@@ -156,11 +156,11 @@ function check_allow_expensive_test()
 # Create the work directory for the IMA tests
 function create_workdir()
 {
-   rm -rf "${WORKDIR}"
-   if ! mkdir -p "${WORKDIR}"; then
-     echo " Error: Could not create ${WORKDIR}."
-     exit "${FAIL:-1}"
-   fi
+  rm -rf "${WORKDIR}"
+  if ! mkdir -p "${WORKDIR}"; then
+    echo " Error: Could not create ${WORKDIR}."
+    exit "${FAIL:-1}"
+  fi
 }
 
 # Return the path of the busybox container's root
@@ -177,12 +177,12 @@ function setup_busybox_container()
   busybox="$(type -P busybox)"
 
   if [ -z "${busybox}" ]; then
-     echo "Error: Could not find busybox."
-     exit "${FAIL:-1}"
+    echo "Error: Could not find busybox."
+    exit "${FAIL:-1}"
   fi
   if ! file "${busybox}" | grep -q "statically"; then
-     echo "Error: busybox must be statically linked."
-     exit "${FAIL:-1}"
+    echo "Error: busybox must be statically linked."
+    exit "${FAIL:-1}"
   fi
 
   create_workdir
@@ -246,11 +246,11 @@ function copy_elf_busybox_container()
   fi
 
   if [ -f "${destfile}" ]; then
-     return
+    return
   fi
   if [ ! -f "${executable}" ]; then
-     echo "Executable ${executable} not found on host."
-     exit "${SKIP:-3}"
+    echo "Executable ${executable} not found on host."
+    exit "${SKIP:-3}"
   fi
 
   #echo "Installing $1 to ${destfile}"
@@ -466,13 +466,13 @@ function wait_num_entries()
   local c ctr
 
   for ((c = 0;  c < retries; c++)); do
-     ctr=$(grep -c -E "${entry}" "${file}")
-     if [ "${ctr}" -eq "${numentries}" ]; then
-       sleep 1
-       grep -c -E "${entry}" "${file}"
-       return 0
-     fi
-     sleep 0.1
+    ctr=$(grep -c -E "${entry}" "${file}")
+    if [ "${ctr}" -eq "${numentries}" ]; then
+      sleep 1
+      grep -c -E "${entry}" "${file}"
+      return 0
+    fi
+    sleep 0.1
   done
   echo "${ctr}"
   return 1
