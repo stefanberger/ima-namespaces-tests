@@ -9,7 +9,7 @@ DESTS := $(patsubst %,$(INSTDIR)/%,$(TESTDIRS))
 
 $(INSTDIR)/% : % .FORCE
 	mkdir -p $@
-	cp -r $</* $@
+	cp -rH $</* $@
 
 .FORCE:
 
