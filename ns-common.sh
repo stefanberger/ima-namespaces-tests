@@ -135,7 +135,11 @@ set_policy_from_string()
         if [ -n "${failfile}" ]; then
           echo > "${failfile}"
         fi
-        exit "${FAIL:-1}"
+        if [ -n "${IN_NAMESPACE}" ]; then
+          exit "${FAIL:-1}"
+        else
+          exit "${RETRY_AFTER_REBOOT:-1}"
+        fi
       fi
     fi
   fi
