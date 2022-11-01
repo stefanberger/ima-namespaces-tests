@@ -62,7 +62,7 @@ touch "${rootfs}/bad3"
 chown "0:0" "${rootfs}/bad3"
 
 sudo -u "${TEST_USER}" \
-  env PATH=/bin:/usr/bin SECURITYFS_MNT=/mnt \
+  env PATH=/bin:/usr/bin SECURITYFS_MNT=/mnt IN_NAMESPACE="1" \
   unshare --user --map-root-user --mount-proc \
     --pid --fork --root "${rootfs}" bin/sh ./setxattr.sh
 rc=$?

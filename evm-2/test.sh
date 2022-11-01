@@ -70,7 +70,7 @@ chown "0:0" "${rootfs}/bad3"
 setfattr -n security.evm -v "${TESTEVMSIG}" "${rootfs}/bad1"
 
 sudo -u "${TEST_USER}" \
-  env PATH=/bin:/usr/bin SECURITYFS_MNT=/mnt \
+  env PATH=/bin:/usr/bin SECURITYFS_MNT=/mnt IN_NAMESPACE="1" \
   unshare --user --map-root-user --mount-proc \
     --pid --fork --root "${rootfs}" bin/sh ./setxattr.sh
 rc=$?

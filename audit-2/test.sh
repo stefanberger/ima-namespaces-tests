@@ -42,7 +42,7 @@ echo "INFO: Testing that non-root user '${TEST_USER}' cannot set audit policy ru
 chown -R "${TEST_USER}:${TEST_USER}" "${rootfs}"
 
 sudo -u "${TEST_USER}" \
-  env PATH=/bin:/usr/bin \
+  env PATH=/bin:/usr/bin IN_NAMESPACE="1" \
   unshare --user --map-root-user --mount-proc \
     --pid --fork --root "${rootfs}" bin/sh ./fail-setpolicy.sh
 rc=$?
