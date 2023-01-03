@@ -22,6 +22,7 @@ au+me+app-1/test.sh
 evm-1/test.sh
 evm-2/test.sh
 evm-3/test.sh
+evm-4/test.sh
 evm-many-1/test.sh
 hash-1/test.sh
 hash-2/test.sh
