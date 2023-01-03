@@ -167,6 +167,7 @@ Concerns for the testing are:
 | evm-1           | Check that security.evm cannot be written while EVM is not namespaced |
 | evm-2           | Check that security.evm can be written and removed when EVM is namespaced and files' uid and gid are mapped |
 | evm-3           | Test appraisal with IMA and EVM signaturs and failures when signatures are removed |
+| evm-4           | Test evm_xattrs securityfs file and modification of file metadata (xattrs, mode etc.) to check execution prevention |
 | evm-many-1      | Concurrently running IMA namespaces test appraisal with IMA and EVM signaturs and failures when signatures are removed |
 | hash-1          | Ensuring that a xattr hash is generated on a file following hash policy rule |
 | hash-2          | Ensuring that a xattr hash is generated on a file following hash policy rule and that the host, that has no hash rule, will not modify the hash |
