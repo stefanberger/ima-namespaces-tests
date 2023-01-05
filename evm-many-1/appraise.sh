@@ -27,8 +27,13 @@ NSID=${NSID:-1} # for shellcheck
 BUSYBOX2="$(which busybox2)-${NSID}"
 cp "$(which busybox2)" "${BUSYBOX2}"
 
-keyctl padd asymmetric "" %keyring:_ima < "${CERT}" >/dev/null 2>&1
-keyctl padd asymmetric "" %keyring:_evm < "${CERT}" >/dev/null 2>&1
+for keyring in _ima _evm; do
+  if ! keyctl padd asymmetric "" "%keyring:${keyring}" < "${CERT}" >/dev/null 2>&1; then
+    echo " Error: Could not load key onto ${keyring} keyring likley due to key quota restrictions"
+    echo > "${FAILFILE}"
+    exit "${FAIL:-1}"
+  fi
+done
 
 # Expecting measurement of both keys
 ctr=$(grep -c -E " _(ima|evm) " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
