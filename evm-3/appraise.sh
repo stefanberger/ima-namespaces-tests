@@ -53,10 +53,10 @@ done
 policy='appraise func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'\
 'measure func=BPRM_CHECK mask=MAY_EXEC uid=0 \n'
 
-printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
+if ! printf "${policy}" > "${SECURITYFS_MNT}/ima/policy"; then
   echo " Error: Could not set appraise policy. Does IMA-ns support IMA-appraise?"
   exit "${FAIL:-1}"
-}
+fi
 
 # Using busybox2 must fail since it's not signed
 if busybox2 cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
@@ -91,6 +91,12 @@ if [ "${expected}" -ne "${after}" ]; then
   exit "${FAIL:-1}"
 fi
 
+if ! evmsig="$(getfattr -m ^security.evm -e hex --dump "$(type -P busybox2)" 2>/dev/null |
+              sed  -n 's/^security.evm=//p')"; then
+  echo " Error: Could not get EVM sigature from $(type -P busybox2)"
+  exit "${FAIL:-1}"
+fi
+
 # Remove security.evm
 if ! setfattr -x security.evm "$(type -P busybox2)"; then
   echo " Error: Removing security.evm must work"
@@ -106,6 +112,24 @@ fi
 echo $((EVM_INIT_X509)) > "${SECURITYFS_MNT}/evm"
 printf "  Configuring EVM with EVM_INIT_X509 flag: "
 cat "${SECURITYFS_MNT}/evm" ; echo
+
+# Using busybox2 must still work since it's still signed with IMA signature
+if ! busybox2 cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
+  echo " Error: Could not execute busybox2"
+  exit "${FAIL:-1}"
+fi
+
+# Apply previously read EVM signature now
+if ! setfattr -n security.evm -v "${evmsig}" "$(type -P busybox2)"; then
+  echo " Error: Setting security.evm must work"
+  exit "${FAIL:-1}"
+fi
+
+# Using busybox2 must still work since its now signed with good EVM signature
+if ! busybox2 cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
+  echo " Error: Could not execute busybox2"
+  exit "${FAIL:-1}"
+fi
 
 # A bad EVM signature (unknown key) that must not allow the file to execute anymore
 EVMSIG="0x050204f55d1ddc01007edb34de4276aa03ff00de1f1d3510f4f96310a6a03a3f1e526a211db6746d95e66f5eca1b4165a50d0cd9a70866ee531bde43164a35c27e18c3cc22203d6fb99162017318d73700210aa9b55668b111a66915650bfc6be50f4697145d87249d71c86b851a3c592b28e6f2b5a736d64c020c2131591b003c7633fcbc9de9dc15486cc7a32256bade1f68eb10cee77fd01dc0dc549ba1b90187368619bf36beac7669a674c022471ac8b271acccd182db9f468cd671d1b2c780dbbc9eddf41d44d20fb4f341a4fd32dedc1082db9e14eba320954fe147d0638cb90a11161aa0dc2e22eb89a0623db4058cf5fe0458245db7d0626b2d71f8fe13139240431c21e9"
