@@ -12,6 +12,7 @@ source "${ROOT}/common.sh"
 
 check_ima_support
 
+# must be root to write security.evm (below)
 check_root
 
 setup_busybox_container \
