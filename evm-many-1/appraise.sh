@@ -117,6 +117,12 @@ if [ "${expected}" -ne "${after}" ]; then
   exit "${FAIL:-1}"
 fi
 
+if ! evmsig="$(getfattr -m ^security.evm -e hex --dump "${BUSYBOX2}" 2>/dev/null |
+              sed  -n 's/^security.evm=//p')"; then
+  echo " Error: Could not get EVM sigature from $(type -P busybox2)"
+  exit "${FAIL:-1}"
+fi
+
 # Remove security.evm
 if ! setfattr -x security.evm "${BUSYBOX2}"; then
   echo " Error: Removing security.evm must work"
@@ -139,6 +145,18 @@ if [ "${val}" != "${exp}" ]; then
   echo " Expected: ${exp}"
   echo " Actual  : ${val}"
   echo > "${FAILFILE}"
+  exit "${FAIL:-1}"
+fi
+
+# Apply previously read EVM signature now
+if ! setfattr -n security.evm -v "${evmsig}" "${BUSYBOX2}"; then
+  echo " Error: Setting security.evm must work"
+  exit "${FAIL:-1}"
+fi
+
+# Using busybox2 must still work since its now signed with good EVM signature
+if ! "${BUSYBOX2}" cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
+  echo " Error: Could not execute busybox2"
   exit "${FAIL:-1}"
 fi
 
