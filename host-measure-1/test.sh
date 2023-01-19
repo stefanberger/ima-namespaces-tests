@@ -16,6 +16,7 @@ check_ima_support
 
 setup_busybox_host \
 	"${ROOT}/ns-common.sh" \
+	"${ROOT}/uml_chroot.sh" \
 	"${DIR}/measure.sh"
 
 # Test measurements caused by executable run on host

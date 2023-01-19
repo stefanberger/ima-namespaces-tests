@@ -14,6 +14,7 @@ check_ima_support
 
 setup_busybox_host \
 	"${ROOT}/ns-common.sh" \
+	"${ROOT}/uml_chroot.sh" \
 	"${DIR}/measure.sh"
 
 copy_elf_busybox_container "$(type -P evmctl)"

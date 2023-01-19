@@ -12,12 +12,35 @@ else
   WORKDIR="${IMA_TEST_WORKDIR:-/var/lib/imatest}"
 fi
 
-SECURITYFS_MNT="$(mount \
-		  | sed -n 's/.* on \(.*\) type securityfs .*/\1/p' \
-		  | sed -n 1p)"
-if [ -z "${SECURITYFS_MNT}" ]; then
-  echo "Error: Could not determine securityfs mount point."
-  exit "${FAIL:-1}"
+if [ -n "${IMA_TEST_UML}" ]; then
+  if [ ! -x "${IMA_TEST_UML}" ]; then
+    echo " Error: IMA_TEST_UML must point to the Linux UML executable"
+    exit "${FAIL:-1}"
+  fi
+  if [[ ${IMA_TEST_WORKDIR} =~ \. ]]; then
+    # When there's a '.' in the pathname for the root dir for UML then
+    # the whole parameter to UML disappears
+    echo " Error: IMA_TEST_WORKDIR must not contain a '.' in the path!"
+    exit "${FAIL:-1}"
+  fi
+  if [ "$(id -u)" != 0 ]; then
+    # The directory we create for mounting the loopback-mounted filesystem
+    # must have the same owner on the host as inside UML. This seems to only
+    # work for root.
+    echo " Error: Must be root to use UML"
+    exit "${FAIL:-1}"
+  fi
+  # on UML we don't need securityfs on the host; we can just hard code the path
+  SECURITYFS_MNT=/mnt
+  AUDITLOG="${WORKDIR}/audit.log"
+else
+  SECURITYFS_MNT="$(mount \
+		    | sed -n 's/.* on \(.*\) type securityfs .*/\1/p' \
+		    | sed -n 1p)"
+  if [ -z "${SECURITYFS_MNT}" ]; then
+    echo "Error: Could not determine securityfs mount point."
+    exit "${FAIL:-1}"
+  fi
 fi
 
 # Check whether current user is root
@@ -108,6 +131,10 @@ function auditlog_find()
 # Check whether the host has IMA support
 function check_ima_support()
 {
+  if [ -n "${IMA_TEST_UML}" ]; then
+    return
+  fi
+
   if [ ! -f "${SECURITYFS_MNT}/ima/ascii_runtime_measurements" ]; then
     echo " Info: IMA not supported by this kernel ($(uname -rs))"
     exit "${SKIP:-3}"
@@ -215,7 +242,7 @@ function __setup_busybox()
 
   rootfs="$(get_busybox_container_root)"
 
-  if [ "${forcontainer}" -eq 1 ]; then
+  if [ "${forcontainer}" -eq 1 ] || [ -n "${IMA_TEST_UML}" ] ; then
     mkdir -p "${rootfs}"/{bin,mnt,proc,dev}
     if [ "$(id -u)" = "0" ]; then
       rm -f "${rootfs}"/dev/kmsg
@@ -315,20 +342,95 @@ function copy_elf_busybox_container()
   done
 }
 
+function __post_uml_run()
+{
+  local rc="$1"
+  local rootfs="$2"
+  local stdoutlog="$3"
+  local verbosity="$4"
+
+  case "${rc}" in
+  0)
+    if [ -r "${rootfs}/__exitcode" ]; then
+      rc="$(cat "${rootfs}/__exitcode")"
+    else
+      echo "Error: Missing file ${rootfs}/__exitcode"
+      rc="${FAIL:-1}"
+    fi
+    ;;
+  127) # binary is missing
+    rc="${FAIL:-1}";;
+  134) # binary aborted
+    rc="${FAIL:-1}";;
+  esac
+  # Generate audit log from stdoutlog
+  sed -n "/^audit:/p" < "${stdoutlog}" > "${AUDITLOG}"
+  # Display linux & test output other than audit messages
+  if [ "${verbosity}" -eq 0 ]; then
+    # Filter-out a couple of known Linux dmesg lines
+    sed -e '1,/uml_chroot.sh as init process$/ d' \
+        -e '/^audit:/d' \
+        -e '/^ima:/d' \
+        -e '/^integrity:/d' \
+        -e '/^loop0:/d' \
+        -e '/^EXT4-fs/d' \
+        -e '/^Joined session/d' \
+        -e '/^reboot:/d' \
+        -e '/^[[:space:]]*$/d' \
+        < "${stdoutlog}"
+  fi
+
+  return "${rc}"
+}
+
+function get_verbosity()
+{
+  if [[ "${IMA_TEST_VERBOSE}" =~ ^[0-9]+$ ]]; then
+    echo "${IMA_TEST_VERBOSE}"
+  elif [ -n "${IMA_TEST_VERBOSE}" ]; then
+    echo 1
+  else
+    echo 0
+  fi
+}
+
 # Run the given executable or script on the host with a restricted PATH to only
 # make executables available previously copied using setup_busybox_host().
+# @param1...: Executable and parameters
+#
+# Note: Only global/environment variables with the prefixes 'G_' & 'IMA_TEST_'
+# will be passed through to bash in UML.
 function run_busybox_host()
 {
-  local rootfs rc
+  local rootfs rc stdoutlog stderrlog redir verbosity
 
   rootfs="$(get_busybox_container_root)"
 
   pushd "${rootfs}" 1>/dev/null || exit "${FAIL:-1}"
 
-  SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
-  PATH="${rootfs}/bin:${rootfs}/usr/bin" SECURITYFS_MNT="${SECURITYFS_MNT}" \
-    "$@"
-  rc=$?
+  if [ -n "${IMA_TEST_UML}" ]; then
+    stdoutlog="${rootfs}/.stdoutlog"
+    stderrlog="${rootfs}/.stderrlog"
+    verbosity=$(get_verbosity)
+    [ "${verbosity}" -gt 0 ] && redir=/dev/stdout || redir=/dev/null
+
+    # shellcheck disable=SC2145
+    ${IMA_TEST_UML} \
+      SUCCESS="${SUCCESS:-0}" FAIL="${FAIL:-1}" SKIP="${SKIP:-3}" \
+      PATH="/bin:/usr/bin:/usr/sbin:${rootfs}/bin:${rootfs}/usr/bin" SECURITYFS_MNT="/mnt" \
+      UML_SCRIPT="$@" \
+      "$(set | grep -E "^(G|IMA_TEST)_.*=.*")" \
+      rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh" mem=256M \
+      1> >(tee "${stdoutlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir}) \
+      2> >(tee "${stderrlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir})
+    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" "${verbosity}"
+    rc=$?
+  else
+    SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
+    PATH="${rootfs}/bin:${rootfs}/usr/bin" SECURITYFS_MNT="${SECURITYFS_MNT}" \
+      "$@"
+    rc=$?
+  fi
 
   popd 1>/dev/null || exit "${FAIL:-1}"
 
@@ -336,17 +438,38 @@ function run_busybox_host()
 }
 
 # Run the given executable or script in the busybox container
+# @param1...: Executable and parameters
+#
+# Note: Only global/environment variables with the prefixes 'G_' & 'IMA_TEST_'
+# will be passed through to bash in UML.
 function run_busybox_container()
 {
-  local rootfs
+  local rootfs rc stdoutlog
 
   rootfs="$(get_busybox_container_root)"
 
-  SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
-  PATH=/bin:/usr/bin SECURITYFS_MNT="/mnt" IN_NAMESPACE="1" \
-  unshare --user --map-root-user --mount-proc --pid --fork \
-    --root "${rootfs}" "$@"
-  return $?
+  if [ -n "${IMA_TEST_UML}" ]; then
+    stdoutlog="${rootfs}/.stdoutlog"
+    # shellcheck disable=SC2145
+    ${IMA_TEST_UML} \
+      SUCCESS="${SUCCESS:-0}" FAIL="${FAIL:-1}" SKIP="${SKIP:-3}" \
+      PATH="/bin:/usr/bin:/usr/sbin:${rootfs}/bin:${rootfs}/usr/bin" SECURITYFS_MNT="/mnt" \
+      UML_SCRIPT="$@" \
+      "$(set | grep -E "^(G|IMA_TEST)_.*=.*")" \
+      rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh" mem=256M \
+      2>/dev/null \
+      1>"${stdoutlog}"
+    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" 0
+    rc=$?
+  else
+    SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
+    PATH=/bin:/usr/bin SECURITYFS_MNT="/mnt" IN_NAMESPACE="1" \
+    unshare --user --map-root-user --mount-proc --pid --fork \
+      --root "${rootfs}" "$@"
+    rc=$?
+  fi
+
+  return $rc
 }
 
 # Run the given executable or script in the busybox container and
@@ -479,16 +602,31 @@ function run_busybox_container_set_policy()
 # @param1...: Executable and parameters
 function run_busybox_container_key_session()
 {
-  local rootfs
+  local rootfs rc stdoutlog
 
   rootfs="$(get_busybox_container_root)"
 
-  SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
-  PATH=/bin:/usr/bin SECURITYFS_MNT="/mnt" IN_NAMESPACE="1" \
-  unshare --user --map-root-user --mount-proc --pid --fork \
-    --root "${rootfs}" keyctl session - "$@" \
-    2> >(sed '/^Joined session.*/d')
-  return $?
+  if [ -n "${IMA_TEST_UML}" ]; then
+    stdoutlog="${rootfs}/.stdoutlog"
+    # shellcheck disable=SC2145
+    ${IMA_TEST_UML} \
+      SUCCESS="${SUCCESS:-0}" FAIL="${FAIL:-1}" SKIP="${SKIP:-3}" \
+      PATH="/bin:/usr/bin:/usr/sbin:${rootfs}/bin:${rootfs}/usr/bin" SECURITYFS_MNT="/mnt" \
+      IMA_TEST_UML="${IMA_TEST_UML}" UML_SCRIPT="$@" \
+      rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh keyctl session -" mem=256M \
+      2>/dev/null \
+      1>"${stdoutlog}"
+    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" 0
+    rc=$?
+  else
+    SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
+    PATH=/bin:/usr/bin SECURITYFS_MNT="/mnt" IN_NAMESPACE="1" \
+    unshare --user --map-root-user --mount-proc --pid --fork \
+      --root "${rootfs}" keyctl session - "$@" \
+      2> >(sed '/^Joined session.*/d')
+    rc=$?
+  fi
+  return $rc
 }
 
 
@@ -603,12 +741,14 @@ function check_ns_measure_support()
 # Check whether the namespace has IMA-appraise support
 function check_ns_appraise_support()
 {
+  [ -n "${IMA_TEST_UML}" ] && return 0
   run_busybox_container ./check.sh appraise
 }
 
 # Check whether the namespace has IMA-appraise hash support
 function check_ns_hash_support()
 {
+  [ -n "${IMA_TEST_UML}" ] && return 0
   run_busybox_container ./check.sh hash
 }
 
@@ -627,6 +767,7 @@ function check_ns_vtpm_support()
 # Check whether EVM is supported in namespace (current not at all)
 function check_ns_evm_support()
 {
+  [ -n "${IMA_TEST_UML}" ] && return 0
   run_busybox_container ./check.sh evm
 }
 

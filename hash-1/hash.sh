@@ -12,7 +12,7 @@ policy='hash func=FILE_CHECK mask=MAY_READ \n'
 
 printf "${policy}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set appraise+hash policy. Does IMA-ns support IMA-appraise and hash rules?"
-  exit "${SKIP:-3}"
+  exit_test "${SKIP:-3}"
 }
 
 printf "Hello " >> testfile
@@ -24,7 +24,7 @@ printf "world\n" >> testfile
 # Now we must have the hash in security.ima
 if [ -z "$(getfattr -m ^security.ima -e hex --dump testfile | grep ima)" ]; then
   echo " Error: File should have a hash now but it does NOT have one"
-  exit "${FAIL:-1}"
+  exit_test "${FAIL:-1}"
 fi
 
-exit "${SUCCESS:-0}"
+exit_test "${SUCCESS:-0}"

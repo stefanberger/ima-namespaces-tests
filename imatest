@@ -156,7 +156,7 @@ function imatest()
             reboot
           fi
           ;;
-        *) logit "${logfile}" ">>>>>>>>> Unhandled return code";;
+        *) logit "${logfile}" ">>>>>>>>> Unhandled return code: ${rc}";;
         esac
 
         popd &>/dev/null || exit 1
