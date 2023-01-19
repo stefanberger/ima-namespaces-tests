@@ -18,4 +18,4 @@ if [ "${ctr}" -ne 1 ]; then
   exit "${FAIL:-1}"
 fi
 
-exit "${SUCCESS:-0}"
+exit_test "${SUCCESS:-0}"

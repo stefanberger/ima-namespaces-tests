@@ -28,7 +28,7 @@ G_ALGOS=${G_ALGOS:-1}
 KEY=./rsakey.pem
 
 algos_str=$(get_hash_algo_strings "${G_ALGOS}")
-[ -z "${algos_str}" ] && exit "${SUCCESS:-0}"
+[ -z "${algos_str}" ] && exit_test "${SUCCESS:-0}"
 
 policy="appraise func=SETXATTR_CHECK appraise_algos=${algos_str} \n"
 
@@ -53,7 +53,7 @@ while [ "${algo}" -le 4 ]; do
     *)
       echo " Error: Could not write xattr for file signed with hash ${algo_str} even though it should be possible"
       echo " policy: |${policy}|"
-      exit "${FAIL:-1}"
+      exit_test "${FAIL:-1}"
       ;;
     esac
     ;;
@@ -62,7 +62,7 @@ while [ "${algo}" -le 4 ]; do
     0)
       echo " Error: Could write xattr for file signed with hash ${algo_str} even though it should NOT be possible"
       echo " policy: |${policy}|"
-      exit "${FAIL:-1}"
+      exit_test "${FAIL:-1}"
       ;;
     *)
       # echo " GOOD: Could sign file with hash ${algo_str} since it is in ${algos_str}"
@@ -73,4 +73,6 @@ while [ "${algo}" -le 4 ]; do
   algo=$((algo * 2))
 done
 
-exit "${SUCCESS:-0}"
+echo "Test with ${algos_str}: PASSED"
+
+exit_test "${SUCCESS:-0}"

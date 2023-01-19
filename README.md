@@ -235,3 +235,45 @@ unnecessary reboots.
 | host-measure-1/test.sh         | Measuring an executed file |
 | host-measure-1/test2.sh        | Re-measuring after modification of a file |
 | host-measure-2/test.sh         | Testing of BPRM_CHECK and MMAP_CHECK using different templates for logging |
+
+
+## Test cases using User Mode Linux (UML)
+
+For compiling UML Linux you have to use the provided config/config.uml as
+Linux .config file so IMA is available and has a
+(`make ARCH=um -j$(nproc)`).
+
+**Some** tests can also be run using User Model Linux (UML). In this mode the user
+has to set the IMA_TEST_UML environment variable and have it point to the
+UML 'linux' executable. Since the test cases are running in a chroot
+environment and devices such as /dev/null have to be created for it, it is
+necessary to run the UML tests as root.
+
+The following command line can be used to run UML tests. The UML `linux`
+executable it assumed to be located at /usr/local/bin/linux.
+
+```
+sudo IMA_TEST_UML=/usr/local/bin/linux ./imatest --testcases uml-testcases --clear
+```
+
+To run a single test case use this command line in verbose mode:
+
+```
+sudo IMA_TEST_UML=/usr/local/bin/linux IMA_TEST_VERBOSE=1 ./host-measure-1/test.sh
+```
+
+The following test cases are supported:
+
+| Testcase                       | What it Covers                                                             |
+|--------------------------------|----------------------------------------------------------------------------|
+| appraise-1/test.sh             | see above |
+| appraise-5/test.sh             | - " - |
+| appraise-6/test.sh             | - " - |
+| appraise-9/test.sh             | - " - |
+| evm-3/test.sh                  | - " - |
+| evm-4/test.sh                  | - " - |
+| hash-1/test.sh                 | - " - |
+| host-measure-1/test.sh         | - " - |
+| host-measure-1/test2.sh        | - " - |
+| host-measure-2/test.sh         | - " - |
+| selftest-1/test.sh             | - " - |

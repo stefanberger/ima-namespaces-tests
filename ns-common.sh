@@ -11,6 +11,19 @@ EVM_SETUP_COMPLETE=$((0x80000000))
 
 # Common functions for the test scripts running in the namespace
 
+# Exit test wraps 'exit' but also allows to write the exit code into a
+# well known file on UML.
+exit_test()
+{
+  local val="$1"
+
+  if [ -n "${IMA_TEST_UML}" ]; then
+    echo "${val}" > /__exitcode
+  fi
+
+  exit "${val}"
+}
+
 # Mount the securityfs with IMA support; if it doesn't work or 
 # the ima directory doesn't show up exit with ${SKIP:-3}
 # @param1: mount directory
@@ -32,7 +45,7 @@ mnt_securityfs()
   local msg dmsgmsg timeout tmp
 
   # Skip mount if already mounted
-  tmp="$(mount -t securityfs | sed -n 's/^securityfs on \(.*\) type .*/\1/p')"
+  tmp="$(mount -t securityfs 2>/dev/null | sed -n 's/^securityfs on \(.*\) type .*/\1/p')"
   if [ "${tmp}" = "${mntdir}" ]; then
     return
   fi
@@ -82,7 +95,9 @@ mnt_securityfs()
     fi
   fi
 
-  echo 1 > "${mntdir}/ima/active"
+  if [ -f "${mntdir}/ima/active" ]; then
+    echo 1 > "${mntdir}/ima/active"
+  fi
 
   if [ -f "${mntdir}/integrity/evm/active" ]; then
     echo 1 > "${mntdir}/integrity/evm/active"

@@ -15,7 +15,7 @@ busybox2 cat "${SECURITYFS_MNT}/ima/policy" 1>/dev/null 2>/dev/null
 ctr=$(grep -c busybox2 "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
 if [ "${ctr}" -ne 1 ]; then
   echo " Error: Could not find 1 measurement of busybox2 in container, found ${ctr}."
-  exit "${FAIL:-1}"
+  exit_test "${FAIL:-1}"
 fi
 
 echo >> "$(which busybox2)"
@@ -27,9 +27,9 @@ while [ "$loop" -le 1 ]; do
   ctr="$(grep -c busybox2 "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")"
   if [ "${ctr}" -ne 2 ]; then
     echo " Error: Could not find 2 measurements of busybox2 in container, found ${ctr}."
-    exit "${FAIL:-1}"
+    exit_test "${FAIL:-1}"
   fi
   loop=$((loop+1))
 done
 
-exit "${SUCCESS:-0}"
+exit_test "${SUCCESS:-0}"

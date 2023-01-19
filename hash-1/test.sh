@@ -14,6 +14,7 @@ check_ima_support
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
+	"${ROOT}/uml_chroot.sh" \
 	"${ROOT}/check.sh" \
 	"${DIR}/hash.sh"
 
