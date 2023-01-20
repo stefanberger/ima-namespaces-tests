@@ -10,6 +10,7 @@ source "${ROOT}/common.sh"
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
+	"${ROOT}/uml_chroot.sh" \
 	"${ROOT}/check.sh" \
 	"${DIR}/selftest.sh" \
 	"${DIR}/selftest-env.sh"
@@ -46,7 +47,7 @@ do
   echo " ${func}: success"
 done
 
-if [ "$(id -u)" -eq 0 ] && [ -e "${VTPM_EXEC}" ]; then
+if [ "$(id -u)" -eq 0 ] && [ -e "${VTPM_EXEC}" ] && [ -z "${IMA_TEST_UML}" ]; then
   if [ ! -c /dev/vtpmx ]; then
     modprobe tpm_vtpm_proxy &>/dev/null
   fi
@@ -74,7 +75,7 @@ do
   echo " ${func}: success"
 done
 
-if [ "$(id -u)" -eq 0 ] && [ -e "${VTPM_EXEC}" ]; then
+if [ "$(id -u)" -eq 0 ] && [ -e "${VTPM_EXEC}" ] && [ -z "${IMA_TEST_UML}" ]; then
   copy_elf_busybox_container "${VTPM_EXEC}" "bin/"
   func="run_busybox_container_vtpm"
   G_FOO=5 ${func} 1 ./selftest-env.sh

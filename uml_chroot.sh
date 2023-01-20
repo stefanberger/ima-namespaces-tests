@@ -2,7 +2,7 @@
 
 # This script copies the filesystem contents setup for UML
 # into a loopback-mounted ext4-formatted filesystem that
-# can then be used for a chroot environment.
+# can then be used for a chroot or unshare environment.
 
 exit_test()
 {
@@ -83,7 +83,8 @@ fi
 
 ./bin/busybox rm -f __exitcode
 
-busybox chroot ./ "$@" ${UML_SCRIPT:+${UML_SCRIPT}}
+mount -t proc proc /proc
+"$@" ${UML_SCRIPT:+${UML_SCRIPT}} ${UML_SCRIPT_P1:+${UML_SCRIPT_P1}}
 
 ./bin/busybox cp __exitcode ..
 
