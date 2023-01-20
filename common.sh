@@ -12,7 +12,9 @@ else
   WORKDIR="${IMA_TEST_WORKDIR:-/var/lib/imatest}"
 fi
 
-SECURITYFS_MNT="$(mount  | sed -n 's/^securityfs on \(.*\) type .*/\1/p')"
+SECURITYFS_MNT="$(mount \
+		  | sed -n 's/.* on \(.*\) type securityfs .*/\1/p' \
+		  | sed -n 1p)"
 if [ -z "${SECURITYFS_MNT}" ]; then
   echo "Error: Could not determine securityfs mount point."
   exit "${FAIL:-1}"
