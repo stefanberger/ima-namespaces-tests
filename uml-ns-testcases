@@ -1,0 +1,13 @@
+# sudo IMA_TEST_UML=/usr/local/bin/linux IMA_TEST_ENV=container ./imatest --testcases uml-ns-testcases --clear
+selftest-1/test.sh
+appraise-1/test.sh
+appraise-5/test.sh
+appraise-6/test.sh
+appraise-8/test.sh
+appraise-9/test.sh
+evm-3/test.sh
+evm-4/test.sh
+hash-1/test.sh
+host-measure-1/test.sh
+host-measure-1/test2.sh
+host-measure-2/test.sh

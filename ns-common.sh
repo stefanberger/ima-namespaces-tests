@@ -44,6 +44,13 @@ mnt_securityfs()
 
   local msg dmsgmsg timeout tmp
 
+  if [ -n "${imahash}" ] || [ -n "${imatemplate}" ]; then
+    if [ -n "${IMA_TEST_UML}" ] && [ "${IMA_TEST_ENV}" != container ]; then
+      echo " Error: The IMA hash and/or template can only be passed to this function when using UML for containers"
+      exit ${FAIL:-1}
+    fi
+  fi
+
   # Skip mount if already mounted
   tmp="$(mount -t securityfs 2>/dev/null | sed -n 's/^securityfs on \(.*\) type .*/\1/p')"
   if [ "${tmp}" = "${mntdir}" ]; then

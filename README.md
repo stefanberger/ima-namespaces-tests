@@ -277,3 +277,37 @@ The following test cases are supported:
 | host-measure-1/test2.sh        | - " - |
 | host-measure-2/test.sh         | - " - |
 | selftest-1/test.sh             | - " - |
+
+**Some** IMA-namespacing related test cases can also be run by UML.
+In this case UML is started which then creates an IMA-namespace to run the
+test case.
+
+```
+sudo IMA_TEST_UML=/usr/local/bin/linux IMA_TEST_ENV=container ./imatest --testcases uml-ns-testcases --clear
+```
+
+To run a single test case in verbose mode use this command line:
+
+```
+sudo IMA_TEST_UML=/usr/local/bin/linux IMA_TEST_ENV=container IMA_TEST_VERBOSE=1 ./host-measure-1/test.sh
+```
+
+Note that you must always set the `IMA_TEST_UML` and `IMA_TEST_ENV=container`
+environment variables to run UML tests for containers.
+
+The following namespacing-related test cases are supported:
+
+| Testcase                       | What it Covers                                                             |
+|--------------------------------|----------------------------------------------------------------------------|
+| appraise-1/test.sh             | see above |
+| appraise-5/test.sh             | - " - |
+| appraise-6/test.sh             | - " - |
+| appraise-8/test.sh             | - " - |
+| appraise-9/test.sh             | - " - |
+| evm-3/test.sh                  | - " - |
+| evm-4/test.sh                  | - " - |
+| hash-1/test.sh                 | - " - |
+| host-measure-1/test.sh         | - " - |
+| host-measure-1/test2.sh        | - " - |
+| host-measure-2/test.sh         | - " - |
+| selftest-1/test.sh             | - " - |

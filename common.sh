@@ -43,6 +43,15 @@ else
   fi
 fi
 
+case "${IMA_TEST_ENV}" in
+""|container)
+  ;;
+*)
+  echo " Error: IMA_TEST_ENV must be either unset or have value 'container'"
+  exit "${FAIL:-1}"
+  ;;
+esac
+
 # Check whether current user is root
 function check_root()
 {
@@ -402,13 +411,19 @@ function get_verbosity()
 # will be passed through to bash in UML.
 function run_busybox_host()
 {
-  local rootfs rc stdoutlog stderrlog redir verbosity
+  local rootfs rc stdoutlog stderrlog redir verbosity cmd
 
   rootfs="$(get_busybox_container_root)"
 
   pushd "${rootfs}" 1>/dev/null || exit "${FAIL:-1}"
 
   if [ -n "${IMA_TEST_UML}" ]; then
+    if [ "${IMA_TEST_ENV}" = "container" ]; then
+      cmd="unshare --user --map-root-user --mount-proc --pid --fork --root ${rootfs}/mntpoint"
+    else
+      cmd="chroot ${rootfs}/mntpoint"
+    fi
+
     stdoutlog="${rootfs}/.stdoutlog"
     stderrlog="${rootfs}/.stderrlog"
     verbosity=$(get_verbosity)
@@ -418,9 +433,9 @@ function run_busybox_host()
     ${IMA_TEST_UML} \
       SUCCESS="${SUCCESS:-0}" FAIL="${FAIL:-1}" SKIP="${SKIP:-3}" \
       PATH="/bin:/usr/bin:/usr/sbin:${rootfs}/bin:${rootfs}/usr/bin" SECURITYFS_MNT="/mnt" \
-      UML_SCRIPT="$@" \
+      UML_SCRIPT="$1" UML_SCRIPT_P1="$2" \
       "$(set | grep -E "^(G|IMA_TEST)_.*=.*")" \
-      rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh" mem=256M \
+      rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh ${cmd}" mem=256M \
       1> >(tee "${stdoutlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir}) \
       2> >(tee "${stderrlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir})
     __post_uml_run "$?" "${rootfs}" "${stdoutlog}" "${verbosity}"
@@ -444,22 +459,32 @@ function run_busybox_host()
 # will be passed through to bash in UML.
 function run_busybox_container()
 {
-  local rootfs rc stdoutlog
+  local rootfs rc stdoutlog stderrlog redir verbosity cmd
 
   rootfs="$(get_busybox_container_root)"
 
   if [ -n "${IMA_TEST_UML}" ]; then
+    if [ "${IMA_TEST_ENV}" = "container" ]; then
+      cmd="unshare --user --map-root-user --mount-proc --pid --fork --root ${rootfs}/mntpoint"
+    else
+      cmd="chroot ${rootfs}/mntpoint"
+    fi
+
     stdoutlog="${rootfs}/.stdoutlog"
+    stderrlog="${rootfs}/.stderrlog"
+    verbosity=$(get_verbosity)
+    [ "${verbosity}" -gt 0 ] && redir=/dev/stdout || redir=/dev/null
+
     # shellcheck disable=SC2145
     ${IMA_TEST_UML} \
       SUCCESS="${SUCCESS:-0}" FAIL="${FAIL:-1}" SKIP="${SKIP:-3}" \
       PATH="/bin:/usr/bin:/usr/sbin:${rootfs}/bin:${rootfs}/usr/bin" SECURITYFS_MNT="/mnt" \
-      UML_SCRIPT="$@" \
+      UML_SCRIPT="$1" UML_SCRIPT_P1="$2" \
       "$(set | grep -E "^(G|IMA_TEST)_.*=.*")" \
-      rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh" mem=256M \
-      2>/dev/null \
-      1>"${stdoutlog}"
-    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" 0
+      rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh ${cmd}" mem=256M \
+      1> >(tee "${stdoutlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir}) \
+      2> >(tee "${stderrlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir})
+    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" "${verbosity}"
     rc=$?
   else
     SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
@@ -600,23 +625,37 @@ function run_busybox_container_set_policy()
 # Run the given executable or script in the busybox container and create a key
 # session. Filter out output from 'keyctl session' starting with 'Joined session'.
 # @param1...: Executable and parameters
+#
+# Note: Only global/environment variables with the prefixes 'G_' & 'IMA_TEST_'
+# will be passed through to bash in UML.
 function run_busybox_container_key_session()
 {
-  local rootfs rc stdoutlog
+  local rootfs rc stdoutlog stderrlog redir verbosity cmd
 
   rootfs="$(get_busybox_container_root)"
 
   if [ -n "${IMA_TEST_UML}" ]; then
+    if [ "${IMA_TEST_ENV}" = "container" ]; then
+      cmd="unshare --user --map-root-user --mount-proc --pid --fork --root ${rootfs}/mntpoint keyctl session - "
+    else
+      cmd="chroot ${rootfs}/mntpoint keyctl session - "
+    fi
+
     stdoutlog="${rootfs}/.stdoutlog"
+    stderrlog="${rootfs}/.stderrlog"
+    verbosity=$(get_verbosity)
+    [ "${verbosity}" -gt 0 ] && redir=/dev/stdout || redir=/dev/null
+
     # shellcheck disable=SC2145
     ${IMA_TEST_UML} \
       SUCCESS="${SUCCESS:-0}" FAIL="${FAIL:-1}" SKIP="${SKIP:-3}" \
       PATH="/bin:/usr/bin:/usr/sbin:${rootfs}/bin:${rootfs}/usr/bin" SECURITYFS_MNT="/mnt" \
-      IMA_TEST_UML="${IMA_TEST_UML}" UML_SCRIPT="$@" \
-      rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh keyctl session -" mem=256M \
-      2>/dev/null \
-      1>"${stdoutlog}"
-    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" 0
+      UML_SCRIPT="$1" UML_SCRIPT_P1="$2" \
+      "$(set | grep -E "^(G|IMA_TEST)_.*=.*")" \
+      rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh ${cmd}" mem=256M \
+      1> >(tee "${stdoutlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir}) \
+      2> >(tee "${stderrlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir})
+    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" "${verbosity}"
     rc=$?
   else
     SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
@@ -729,33 +768,36 @@ function get_max_number_keys()
 # Check whether the namespace has IMA-audit support
 function check_ns_audit_support()
 {
-  run_busybox_container ./check.sh audit
+  [ -n "${IMA_TEST_UML}" ] && [ "${IMA_TEST_ENV}" != "container" ] && return 0
+  run_busybox_container ./check.sh audit &>/dev/null
 }
 
 # Check whether the namespace has IMA-measure support
 function check_ns_measure_support()
 {
-  run_busybox_container ./check.sh measure
+  [ -n "${IMA_TEST_UML}" ] && [ "${IMA_TEST_ENV}" != "container" ] && return 0
+  run_busybox_container ./check.sh measure &>/dev/null
 }
 
 # Check whether the namespace has IMA-appraise support
 function check_ns_appraise_support()
 {
-  [ -n "${IMA_TEST_UML}" ] && return 0
-  run_busybox_container ./check.sh appraise
+  [ -n "${IMA_TEST_UML}" ] && [ "${IMA_TEST_ENV}" != "container" ] && return 0
+  run_busybox_container ./check.sh appraise &>/dev/null
 }
 
 # Check whether the namespace has IMA-appraise hash support
 function check_ns_hash_support()
 {
-  [ -n "${IMA_TEST_UML}" ] && return 0
-  run_busybox_container ./check.sh hash
+  [ -n "${IMA_TEST_UML}" ] && [ "${IMA_TEST_ENV}" != "container" ] && return 0
+  run_busybox_container ./check.sh hash &>/dev/null
 }
 
 # Check whether there is SELinux support
 function check_ns_selinux_support()
 {
-  run_busybox_container ./check.sh selinux
+  [ -n "${IMA_TEST_UML}" ] && [ "${IMA_TEST_ENV}" != "container" ] && return 0
+  run_busybox_container ./check.sh selinux &>/dev/null
 }
 
 # Check whether there is vtpm support
@@ -767,8 +809,8 @@ function check_ns_vtpm_support()
 # Check whether EVM is supported in namespace (current not at all)
 function check_ns_evm_support()
 {
-  [ -n "${IMA_TEST_UML}" ] && return 0
-  run_busybox_container ./check.sh evm
+  [ -n "${IMA_TEST_UML}" ] && [ "${IMA_TEST_ENV}" != "container" ] && return 0
+  run_busybox_container ./check.sh evm &>/dev/null
 }
 
 # Ensure that the host does not have a rule like the given one

@@ -116,4 +116,7 @@ fi
 
 umount "${MNT}" 2>/dev/null
 
+if [ -n "${IMA_TEST_UML}" ]; then
+  echo "${rc}" > __exitcode
+fi
 exit "${rc}"
