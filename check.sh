@@ -71,6 +71,9 @@ if [ "${rc}" -eq 0 ]; then
       fi
     fi
     ;;
+  selftest)
+    rc=90
+    ;;
   esac
 fi
 
