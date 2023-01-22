@@ -30,7 +30,7 @@ copy_elf_busybox_container "$(type -P evmctl)"
 echo "INFO: Testing appraisal policy with SETXATTR_CHECK rules inside container"
 
 for ((algos = 1; algos <= 15; algos++)) {
-  ALGOS=${algos} run_busybox_container ./setxattr-check.sh
+  G_ALGOS=${algos} run_busybox_container ./setxattr-check.sh
   rc=$?
   if [ "${rc}" -ne 0 ] ; then
     echo " Error: Test failed in IMA namespace."

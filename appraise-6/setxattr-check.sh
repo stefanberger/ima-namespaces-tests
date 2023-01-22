@@ -24,10 +24,10 @@ get_hash_algo_strings()
 
 mnt_securityfs "${SECURITYFS_MNT}"
 
-ALGOS=${ALGOS:-1}
+G_ALGOS=${G_ALGOS:-1}
 KEY=./rsakey.pem
 
-algos_str=$(get_hash_algo_strings "${ALGOS}")
+algos_str=$(get_hash_algo_strings "${G_ALGOS}")
 [ -z "${algos_str}" ] && exit "${SUCCESS:-0}"
 
 policy="appraise func=SETXATTR_CHECK appraise_algos=${algos_str} \n"
@@ -42,8 +42,8 @@ while [ "${algo}" -le 4 ]; do
 
   evmctl ima_sign --imasig --key "${KEY}" -a "${algo_str}" testfile 1>/dev/null 2>&1 && pass=1
 
-  # if algo is a bit set in ALGOS, then the test must pass, since algo is in policy
-  mustpass=$((ALGOS & algo))
+  # if algo is a bit set in G_ALGOS, then the test must pass, since algo is in policy
+  mustpass=$((G_ALGOS & algo))
   case "${pass}" in
   0)
     case "${mustpass}" in
