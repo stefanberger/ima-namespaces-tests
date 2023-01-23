@@ -187,7 +187,7 @@ Concerns for the testing are:
 | vtpm-many-1     | Concurrently running IMA namespaces with measurement policy; check IMA measurement list against PCR_Extends; use TPM 1.2 (swtpm) |
 | vtpm-many-2     | Concurrently running IMA namespaces with measurement policy; check IMA measurement list against PCR_Extends; use TPM 2 (swtpm) |
 | vtpm-many-3     | Concurrently running IMA namespaces with measurement policy using different PCRs; check IMA measurement list against PCR_Extends; use TPM 2 (swtpm) |
-
+| selftest-1      | Checks return of error codes and availability of environment variables in scripts |
 
 ## Test cases for IMA on the host
 
