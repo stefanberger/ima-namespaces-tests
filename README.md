@@ -276,7 +276,8 @@ The following test cases are supported:
 | host-measure-1/test.sh         | - " - |
 | host-measure-1/test2.sh        | - " - |
 | host-measure-2/test.sh         | - " - |
-| selftest-1/test.sh             | - " - |
+| kernel-cmd-1/test.sh           | Pass different parameters to ima_hash=,ima_template=,ima_policy= boot parameters and check resulting log |
+| selftest-1/test.sh             | see above |
 
 **Some** IMA-namespacing related test cases can also be run by UML.
 In this case UML is started which then creates an IMA-namespace to run the
