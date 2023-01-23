@@ -47,7 +47,7 @@ mnt_securityfs()
   if [ -n "${imahash}" ] || [ -n "${imatemplate}" ]; then
     if [ -n "${IMA_TEST_UML}" ] && [ "${IMA_TEST_ENV}" != container ]; then
       echo " Error: The IMA hash and/or template can only be passed to this function when using UML for containers"
-      exit ${FAIL:-1}
+      exit_test "${FAIL:-1}"
     fi
   fi
 
@@ -59,18 +59,18 @@ mnt_securityfs()
 
   if ! msg=$(mount -t securityfs "${mntdir}" "${mntdir}" 2>&1); then
     echo " Error: Could not mount securityfs: ${msg}"
-    exit "${SKIP:-3}"
+    exit_test "${SKIP:-3}"
   fi
 
   if [ ! -d "${mntdir}/ima" ]; then
     echo " Error: SecurityFS does not have the ima directory"
-    exit "${SKIP:-3}"
+    exit_test "${SKIP:-3}"
   fi
 
   if [ -n "${imahash}" ]; then
     if [ ! -f "${mntdir}/ima/hash" ]; then
       echo " Error: IMA's SecurityFS does not have the hash config file"
-      exit "${SKIP:-3}"
+      exit_test "${SKIP:-3}"
     fi
     echo "${imahash}" > "${mntdir}/ima/hash"
   fi
@@ -78,7 +78,7 @@ mnt_securityfs()
   if [ -n "${imatemplate}" ]; then
     if [ ! -f "${mntdir}/ima/template_name" ]; then
       echo " Error: IMA's SecurityFS does not have the template_name config file"
-      exit "${SKIP:-3}"
+      exit_test "${SKIP:-3}"
     fi
     echo "${imatemplate}" > "${mntdir}/ima/template_name"
   fi
@@ -98,7 +98,7 @@ mnt_securityfs()
         echo -e " $(date): vtpm-exec on /dev/tpm${VTPM_DEVICE_NUM}: ${msg}" \
                 " ==> It's not clear what caused the TPM failure on /dev/tpm${VTPM_DEVICE_NUM}"
       fi
-      exit "${FAIL:-1}"
+      exit_test "${FAIL:-1}"
     fi
   fi
 
@@ -146,7 +146,7 @@ set_policy_from_string()
   if [ "${nspolicy}" != "$(printf "${policy}")" ]; then
     if ! busybox printf "${policy}" > "${mntdir}/ima/policy"; then
       echo " Error: Could not set ${policytype} policy. Does IMA-ns support IMA-${policytype}?"
-      exit "${SKIP:-3}"
+      exit_test "${SKIP:-3}"
     fi
     if [ "${readback}" -ne 0 ]; then
       nspolicy=$(cat "${mntdir}/ima/policy" 2>/dev/null)
@@ -158,9 +158,9 @@ set_policy_from_string()
           echo > "${failfile}"
         fi
         if [ -n "${IN_NAMESPACE}" ]; then
-          exit "${FAIL:-1}"
+          exit_test "${FAIL:-1}"
         else
-          exit "${RETRY_AFTER_REBOOT:-1}"
+          exit_test "${RETRY_AFTER_REBOOT:-1}"
         fi
       fi
     fi
@@ -181,11 +181,11 @@ set_policy_from_file()
   if ! diff "${policyfile}" "${mntdir}/ima/policy" 1>/dev/null 2>/dev/null; then
     if ! cat "${policyfile}" > "${mntdir}/ima/policy"; then
       echo " Error: Could not load policy."
-      exit "${RETRY_AFTER_REBOOT:-1}"
+      exit_test "${RETRY_AFTER_REBOOT:-1}"
     fi
     if ! diff "${policyfile}" "${mntdir}/ima/policy" 1>/dev/null 2>/dev/null; then
       echo " Error: Could not replace existing policy with new policy. Need to reboot."
-      exit "${RETRY_AFTER_REBOOT:-1}"
+      exit_test "${RETRY_AFTER_REBOOT:-1}"
     fi
   fi
 }
@@ -241,7 +241,7 @@ measurementlog_find()
   ctr=$(grep -cE "${regex}" "${mntdir}/ima/ascii_runtime_measurements")
   if [ "${ctr}" -ne "${exp}" ]; then
     echo " Error: Could not find '${regex}' ${exp} times in IMA measurement log, found it ${ctr} times."
-    exit "${FAIL:-1}"
+    exit_test "${FAIL:-1}"
   fi
 }
 

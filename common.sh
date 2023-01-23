@@ -418,6 +418,8 @@ function get_verbosity()
 #
 # Note: Only global/environment variables with the prefixes 'G_' & 'IMA_TEST_'
 # will be passed through to bash in UML.
+# The global variable UML_KERNEL_CMD may be used to pass Linux kernel command
+# line parameter to UML Linux.
 function run_busybox_host()
 {
   local rootfs rc stdoutlog stderrlog redir verbosity cmd
@@ -444,6 +446,7 @@ function run_busybox_host()
       PATH="/bin:/usr/bin:/usr/sbin:${rootfs}/bin:${rootfs}/usr/bin" SECURITYFS_MNT="/mnt" \
       UML_SCRIPT="$1" UML_SCRIPT_P1="$2" \
       "$(set | grep -E "^(G|IMA_TEST)_.*=.*")" \
+      ${UML_KERNEL_CMD:+${UML_KERNEL_CMD}} \
       rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh ${cmd}" mem=256M \
       1> >(tee "${stdoutlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir}) \
       2> >(tee "${stderrlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir})
