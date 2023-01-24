@@ -277,7 +277,7 @@ function __setup_busybox()
   for prg in \
       cat chmod cut cp date dirname echo env find grep head ls mkdir mount mv printf rm \
       sed sh sha1sum sha256sum sha384sum sha512sum sleep sync \
-      tail time which; do
+      tail time uname which; do
     ln -s busybox ${prg}
   done
   popd 1>/dev/null || exit "${FAIL:-1}"
@@ -823,6 +823,87 @@ function check_ns_evm_support()
 {
   [ -n "${IMA_TEST_UML}" ] && [ "${IMA_TEST_ENV}" != "container" ] && return 0
   run_busybox_container ./check.sh evm &>/dev/null
+}
+
+# Check whether the given kernel version string is valid
+function is_valid_kernel_version()
+{
+  local version="$1"
+
+  local micro
+
+  # shellcheck disable=SC2001
+  micro=$(sed 's/^\([[:digit:]]\+\)\.\([[:digit:]]\+\)\.\([[:digit:]]\+\).*/\3/p' <<< "${version}")
+  [ -n "${micro}" ] && return 0
+  return 1
+}
+
+# Test kernel version 1 >= kernel version 2
+# @param1: Kernel version 1
+# @param2: Kernel version 2
+function kernel_version_ge()
+{
+  local v1="$1"
+  local v2="$2"
+
+  local t1 t2 regex
+
+  regex='s/^\([[:digit:]]\+\)\.\([[:digit:]]\+\)\.\([[:digit:]]\+\).*/'
+
+  # compare major
+  t1=$(sed -n "${regex}\1/p" <<< "${v1}")
+  t2=$(sed -n "${regex}\1/p" <<< "${v2}")
+  if [ -z "$t1" ] || [ -z "$t2" ]; then
+    return 2
+  fi
+  [ "$t1" -lt "$t2" ] && return 1
+  [ "$t1" -gt "$t2" ] && return 0
+
+  # compare minor
+  t1=$(sed -n "${regex}\2/p" <<< "${v1}")
+  t2=$(sed -n "${regex}\2/p" <<< "${v2}")
+  if [ -z "$t1" ] || [ -z "$t2" ]; then
+    return 2
+  fi
+  [ "$t1" -lt "$t2" ] && return 1
+  [ "$t1" -gt "$t2" ] && return 0
+
+  # compare micro
+  t1=$(sed -n "${regex}\3/p" <<< "${v1}")
+  t2=$(sed -n "${regex}\3/p" <<< "${v2}")
+  if [ -z "$t1" ] || [ -z "$t2" ]; then
+    return 2
+  fi
+  [ "$t1" -lt "$t2" ] && return 1
+
+  return 0
+}
+
+# Get the kernel version of the kernel we will run on, such as the
+# UML kernel or the local kernel
+# @param1: Kernel version string with in format <major>.<minor>.<micro>...
+function get_kernel_version()
+{
+  local v rc ver temp
+
+  # temporarily turn off vebose mode
+  temp=${IMA_TEST_VERBOSE};IMA_TEST_VERBOSE=0
+
+  v=$(run_busybox_host ./check.sh get-kernel-version)
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    echo "Error: Could not determine kernel version"
+    exit "${FAIL:-1}"
+  fi
+
+  IMA_TEST_VERBOSE=${temp}
+
+  ver=$(sed -n 's/KERNELVERSION: \(.*\)/\1/p' <<< "${v}")
+  if ! is_valid_kernel_version "${ver}"; then
+    echo "Error: The kernel version ${ver} was not found to be valid."
+    exit "${FAIL:-1}"
+  fi
+  echo "${ver}"
 }
 
 # Ensure that the host does not have a rule like the given one
