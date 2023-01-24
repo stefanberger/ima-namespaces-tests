@@ -357,6 +357,7 @@ function __post_uml_run()
   local rootfs="$2"
   local stdoutlog="$3"
   local verbosity="$4"
+  local stderrlog="$5"
 
   case "${rc}" in
   0)
@@ -370,7 +371,15 @@ function __post_uml_run()
   127) # binary is missing
     rc="${FAIL:-1}";;
   134) # binary aborted
-    rc="${FAIL:-1}";;
+    rc="${FAIL:-1}"
+    echo "=============== stdout ==============="
+    cat "${stdoutlog}"
+    if [ -r "${stderrlog}" ]; then
+      echo "=============== stderr ==============="
+      cat "${stderrlog}"
+    fi
+    echo "======================================"
+    ;;
   esac
   # Generate audit log from stdoutlog
   sed -n "/^audit:/p" < "${stdoutlog}" > "${AUDITLOG}"
@@ -438,7 +447,7 @@ function run_busybox_host()
       rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh ${cmd}" mem=256M \
       1> >(tee "${stdoutlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir}) \
       2> >(tee "${stderrlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir})
-    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" "${verbosity}"
+    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" "${verbosity}" "${stderrlog}"
     rc=$?
   else
     SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
@@ -484,7 +493,7 @@ function run_busybox_container()
       rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh ${cmd}" mem=256M \
       1> >(tee "${stdoutlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir}) \
       2> >(tee "${stderrlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir})
-    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" "${verbosity}"
+    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" "${verbosity}" "${stderrlog}"
     rc=$?
   else
     SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
@@ -655,7 +664,7 @@ function run_busybox_container_key_session()
       rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh ${cmd}" mem=256M \
       1> >(tee "${stdoutlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir}) \
       2> >(tee "${stderrlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir})
-    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" "${verbosity}"
+    __post_uml_run "$?" "${rootfs}" "${stdoutlog}" "${verbosity}" "${stderrlog}"
     rc=$?
   else
     SUCCESS=${SUCCESS:-0} FAIL=${FAIL:-1} SKIP=${SKIP:-3} \
