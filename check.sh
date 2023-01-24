@@ -74,6 +74,10 @@ if [ "${rc}" -eq 0 ]; then
   selftest)
     rc=90
     ;;
+  get-kernel-version)
+    printf "KERNELVERSION: "
+    uname -r
+    ;;
   esac
 fi
 

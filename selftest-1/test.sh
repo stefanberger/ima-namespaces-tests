@@ -61,7 +61,7 @@ if [ "$(id -u)" -eq 0 ] && [ -e "${VTPM_EXEC}" ] && [ -z "${IMA_TEST_UML}" ]; th
 fi
 
 echo "INFO: Return/exit codes test passed"
-
+echo
 echo "INFO: Testing availability of environment vars inside test script"
 
 # Expecting return code 90 + $G_FOO = 95
@@ -84,5 +84,21 @@ if [ "$(id -u)" -eq 0 ] && [ -e "${VTPM_EXEC}" ] && [ -z "${IMA_TEST_UML}" ]; th
 fi
 
 echo "INFO: Environment variables test passed"
+echo
+echo "INFO: Calling function get_kernel_version and comparing against other kernel version"
+
+kv1=$(get_kernel_version)
+
+for kv2 in "1.2.3-10" "1.2.3";
+do
+  if ! kernel_version_ge "${kv1}" "${kv2}"; then
+    echo "ERROR: ${kv1} >= ${kv2} test did not pass"
+    exit "${FAIL:-1}"
+  fi
+done
+
+echo "kernel version: ${kv1}"
+
+echo "INFO: Test passed"
 
 exit "${SUCCESS:-0}"
