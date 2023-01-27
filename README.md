@@ -247,7 +247,8 @@ Linux .config file so IMA is available and has a
 has to set the IMA_TEST_UML environment variable and have it point to the
 UML 'linux' executable. Since the test cases are running in a chroot
 environment and devices such as /dev/null have to be created for it, it is
-necessary to run the UML tests as root.
+necessary to run the UML tests as root. A list of supported test can be
+found in the file `uml-testcases`.
 
 The following command line can be used to run UML tests. The UML `linux`
 executable it assumed to be located at /usr/local/bin/linux.
@@ -282,7 +283,7 @@ The following test cases are supported:
 
 **Some** IMA-namespacing related test cases can also be run by UML.
 In this case UML is started which then creates an IMA-namespace to run the
-test case.
+test case. A list of supported tests can be found in the file `uml-ns-testcases`.
 
 ```
 sudo IMA_TEST_UML=/usr/local/bin/linux IMA_TEST_ENV=container ./imatest --testcases uml-ns-testcases --clear
@@ -292,6 +293,12 @@ To run a single test case in verbose mode use this command line:
 
 ```
 sudo IMA_TEST_UML=/usr/local/bin/linux IMA_TEST_ENV=container IMA_TEST_VERBOSE=1 ./host-measure-1/test.sh
+```
+
+Some of the tests have to be run with the run-in-uml.sh wrapper like this:
+
+```
+sudo IMA_TEST_UML=/usr/local/bin/linux IMA_TEST_ENV=container IMA_TEST_VERBOSE=1 ./run-in-uml.sh measure-4/test.sh
 ```
 
 Note that you must always set the `IMA_TEST_UML` and `IMA_TEST_ENV=container`
@@ -313,3 +320,10 @@ The following namespacing-related test cases are supported:
 | host-measure-1/test2.sh        | - " - |
 | host-measure-2/test.sh         | - " - |
 | selftest-1/test.sh             | - " - |
+| measure-1/test.sh              | - " - ; requires run-in-uml.sh |
+| measure-4/test.sh              | - " - ; requires run-in-uml.sh |
+| measure-many-1/test.sh         | - " - ; requires run-in-uml.sh |
+| measure-many-2/test.sh         | - " - ; requires run-in-uml.sh |
+| measure-many-3/test.sh         | - " - ; requires run-in-uml.sh |
+| measure-many-4/test.sh         | - " - ; requires run-in-uml.sh |
+| measure-many-5/test.sh         | - " - ; requires run-in-uml.sh |

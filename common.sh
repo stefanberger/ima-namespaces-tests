@@ -275,7 +275,8 @@ function __setup_busybox()
   fi
   pushd "${rootfs}/bin" 1>/dev/null || exit "${FAIL:-1}"
   for prg in \
-      cat chmod cut cp date dirname echo env find grep head ls mkdir mount mv printf rm \
+      cat chmod cut cp date dirname echo env find grep head id \
+      ls ln mkdir mknod mount mv printf rm \
       sed sh sha1sum sha256sum sha384sum sha512sum sleep sync \
       tail time uname which; do
     ln -s busybox ${prg}
@@ -386,7 +387,7 @@ function __post_uml_run()
   # Display linux & test output other than audit messages
   if [ "${verbosity}" -eq 0 ]; then
     # Filter-out a couple of known Linux dmesg lines
-    sed -e '1,/uml_chroot.sh as init process$/ d' \
+    sed -e '1,/\.sh as init process$/ d' \
         -e '/^audit:/d' \
         -e '/^ima:/d' \
         -e '/^integrity:/d' \

@@ -36,16 +36,17 @@ function bannerit()
 
 function run_testcase()
 {
-  local testcasefile="$1"
-  local output="$2"
+  local wrapper="$1"
+  local testcase="$2"
+  local output="$3"
 
   local rc
 
   if [ "${output}" == "-" ] || [ -z "${output}" ]; then
-    ./"${testcasefile}"
+    ${wrapper:+./${wrapper}} ./"${testcase}"
     rc=$?
   else
-    ./"${testcasefile}" >> "${output}" 2>&1
+    ${wrapper:+./${wrapper}} ./"${testcase}" >> "${output}" 2>&1
     rc=$?
   fi
 
@@ -61,7 +62,7 @@ function imatest()
   local testcasedir
   local line=0 is_retry=0
   local testcases_lines
-  local testcase rc
+  local commandline rc
   local stats_pass=0 stats_fail=0 stats_skip=0
 
   testcases_lines=$(wc -l < "${testcases}")
@@ -99,22 +100,28 @@ function imatest()
     line=$((line + 1))
     echo "line=${line}" > "${statefile}"
 
-    testcase=$(sed -n "${line}p" "${testcases}")
-    if [ "${testcase:0:1}" != "#" ] && [ -n "$(echo "${testcase}" | tr -d " ")" ]; then
-      local testcase_dir
+    commandline=$(sed -n "${line}p" "${testcases}")
+    if [ "${commandline:0:1}" != "#" ] && [ -n "$(echo "${commandline}" | tr -d " ")" ]; then
+      local testcase testcase_dir wrapper
+
+      wrapper=$(cut -d" " -f1 <<< "${commandline}")
+      case "${wrapper}" in
+      run-in-uml.sh)
+        testcase=$(cut -d" " -f2 <<< "${commandline}")
+        ;;
+      *)
+        testcase=${commandline}
+        wrapper=""
+        ;;
+      esac
 
       testcase_dir=$(dirname "${testcase}")
 
       if [ -d "${testcase_dir}" ]; then
-        local testcasefile
-
-        testcasefile=$(basename "${testcase}")
-
-        pushd "${testcase_dir}" &>/dev/null || exit 1
         logit "${logfile}" "---------------------------------------------------------------------------------"
         logit "${logfile}" "Running testcase ${testcase} on $(uname -sr)"
 
-        run_testcase "${testcasefile}" "${logfile}"
+        run_testcase "${wrapper}" "${testcase}" "${logfile}"
         rc=$?
 
         logit "${logfile}" "Result from ${testcase}: $rc"
@@ -158,8 +165,6 @@ function imatest()
           ;;
         *) logit "${logfile}" ">>>>>>>>> Unhandled return code: ${rc}";;
         esac
-
-        popd &>/dev/null || exit 1
       fi
       is_retry=0
 
