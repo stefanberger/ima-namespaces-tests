@@ -3,7 +3,12 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 # shellcheck disable=SC1091
-#set -x
+# set -x
+
+mount -t proc proc /proc
+mkdir /sys
+mount -t sysfs sysfsc /sys
+mount -t securityfs securityfs /sys/kernel/security
 
 DIR="$(dirname "$0")"
 ROOT="${DIR}/.."
@@ -20,6 +25,7 @@ setup_busybox_container \
 	"${ROOT}/keys/rsa.crt"
 
 # requires check.sh
+set -x
 if ! check_ns_appraise_support; then
   echo " Error: IMA-ns does not support IMA-appraise"
   exit "${SKIP:-3}"

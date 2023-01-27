@@ -242,10 +242,10 @@ function __setup_busybox()
     echo "Error: Could not find busybox."
     exit "${FAIL:-1}"
   fi
-  if ! file "${busybox}" | grep -q "statically"; then
-    echo "Error: busybox must be statically linked."
-    exit "${FAIL:-1}"
-  fi
+  #if ! file "${busybox}" | grep -q "statically"; then
+  #  echo "Error: busybox must be statically linked."
+  #  exit "${FAIL:-1}"
+  #fi
 
   create_workdir
 
@@ -275,7 +275,7 @@ function __setup_busybox()
   fi
   pushd "${rootfs}/bin" 1>/dev/null || exit "${FAIL:-1}"
   for prg in \
-      cat chmod cut cp date dirname echo env find grep head ls mkdir mount mv printf rm \
+      cat chmod cut cp date dirname echo env find grep head id ls ln mkdir mknod mount mv printf rm \
       sed sh sha1sum sha256sum sha384sum sha512sum sleep sync \
       tail time uname which; do
     ln -s busybox ${prg}
@@ -795,7 +795,7 @@ function check_ns_measure_support()
 function check_ns_appraise_support()
 {
   [ -n "${IMA_TEST_UML}" ] && [ "${IMA_TEST_ENV}" != "container" ] && return 0
-  run_busybox_container ./check.sh appraise &>/dev/null
+  run_busybox_container ./check.sh appraise # &>/dev/null
 }
 
 # Check whether the namespace has IMA-appraise hash support
@@ -922,4 +922,20 @@ function check_host_ima_has_no_rule_like()
   fi
 
   return 0
+}
+
+# Run the passed executable under UML
+# @param1: Executable to run under UML
+# @param2:
+function uml_run_script()
+{
+  local rootfs cmd
+
+  rootfs="$(get_busybox_container_root)"
+  cmd="chroot ${rootfs}/mntpoint"
+
+  ${IMA_TEST_UML} \
+    PATH=$PATH:/usr/sbin \
+    UML_SCRIPT="$1" UML_SCRIPT_P1="$2" UML_SCRIPT_P2="$3" \
+    rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh ${cmd}" mem=256M
 }

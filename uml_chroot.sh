@@ -15,7 +15,7 @@ cd "$(dirname "$0")" || exit_test 1
 
 # We need to copy the filesystem into an image so UML can set xattrs
 if [ ! -f .myimage ]; then
-  if ! err=$(dd if=/dev/zero of=.myimage bs=1M count=20 2>&1); then
+  if ! err=$(dd if=/dev/zero of=.myimage bs=1M count=100 2>&1); then
     echo "Error: dd failed: ${err}"
     exit_test 1
   fi
@@ -84,7 +84,10 @@ fi
 ./bin/busybox rm -f __exitcode
 
 mount -t proc proc /proc
-"$@" ${UML_SCRIPT:+${UML_SCRIPT}} ${UML_SCRIPT_P1:+${UML_SCRIPT_P1}}
+"$@" \
+  ${UML_SCRIPT:+${UML_SCRIPT}} \
+  ${UML_SCRIPT_P1:+${UML_SCRIPT_P1}} \
+  ${UML_SCRIPT_P2:+${UML_SCRIPT_P2}}
 
 ./bin/busybox cp __exitcode ..
 
