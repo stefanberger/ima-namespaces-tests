@@ -76,11 +76,13 @@ do
 done
 
 if [ "$(id -u)" -eq 0 ] && [ -e "${VTPM_EXEC}" ] && [ -z "${IMA_TEST_UML}" ]; then
-  copy_elf_busybox_container "${VTPM_EXEC}" "bin/"
-  func="run_busybox_container_vtpm"
-  G_FOO=5 ${func} 1 ./selftest-env.sh
-  check_errcode "$?" 95 "${func} ./selftest-env.sh"
-  echo " ${func}: success"
+  if [ -c /dev/vtpmx ]; then
+    copy_elf_busybox_container "${VTPM_EXEC}" "bin/"
+    func="run_busybox_container_vtpm"
+    G_FOO=5 ${func} 1 ./selftest-env.sh
+    check_errcode "$?" 95 "${func} ./selftest-env.sh"
+    echo " ${func}: success"
+  fi
 fi
 
 echo "INFO: Environment variables test passed"
