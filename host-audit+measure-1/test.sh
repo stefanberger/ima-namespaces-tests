@@ -36,7 +36,15 @@ mv "${TESTFILE}" "${TESTFILE}.renamed"
 auditlog_find ".*file=\"${TESTFILE}\" hash=\".*${filehash}\" .*" 1 10
 measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}\s+\$" 1
 
-auditlog_find ".*file=\"${TESTFILE}.renamed\" hash=\".*${filehash}\" .*" 0 10
+if [ -z "${IMA_TEST_UML}" ]; then
+  auditlog_find ".*file=\"${TESTFILE}.renamed\" hash=\".*${filehash}\" .*" 0 10
+else
+  # UML: The reason for this is that inside Linux the file pointer has changed
+  # (due to file renaming) and with this the inode and iint also change
+  # and file flags seem to be reset (IMA_AUDITED for example) and therefore
+  # UML behaves differently and audits again!
+  auditlog_find ".*file=\"${TESTFILE}.renamed\" hash=\".*${filehash}\" .*" 1 10
+fi
 measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}renamed\s+\$" 0
 
 echo "INFO: Success"

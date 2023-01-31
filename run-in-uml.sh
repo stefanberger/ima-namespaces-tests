@@ -92,7 +92,7 @@ function setup_filesystem_for_uml()
   setup_busybox_container
 
   # Set up a minimal environment that most test cases can work with
-  for prg in busybox unshare bash file; do
+  for prg in busybox unshare bash file auditd true; do
     copy_elf_busybox_container "$(type -P "${prg}")" "bin/"
   done
 
@@ -116,6 +116,17 @@ _EOF_
 
   # Copy common.sh ns-common.sh etc. (*.sh) and test case directory
   cp -rpH ./*.sh "$(dirname "${testscript}")" "${rootfs}"
+
+
+  # auditd:
+  # don't copy host's /etc/audit/ since auditd won't run anymore at all then
+
+  # fake systemctl for checking on auditd
+  cat <<_EOF_ >> "${rootfs}/bin/systemctl"
+#!/bin/bash
+exit 0
+_EOF_
+  chmod 755 "${rootfs}/bin/systemctl"
 }
 
 DIR="$(dirname "$0")"
