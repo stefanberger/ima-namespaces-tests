@@ -38,12 +38,12 @@ filehash=$(hash_file "${imahash}" "${TESTFILE}")
 cat "${TESTFILE}" &>/dev/null
 
 auditlog_find ".*file=\"${TESTFILE}\" hash=\".*${filehash}\" .*" 0 10
-measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}\s+\$" 0
+measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}\s?\$" 0
 
 runuser -u nobody -- cat "${TESTFILE}" &>/dev/null
 
 auditlog_find ".*file=\"${TESTFILE}\" hash=\".*${filehash}\" .*" 1 10
-measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}\s+\$" 1
+measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}\s?\$" 1
 
 echo "INFO: Success"
 
