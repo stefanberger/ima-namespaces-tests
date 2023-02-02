@@ -8,9 +8,6 @@ appraise-9/test.sh
 evm-3/test.sh
 evm-4/test.sh
 hash-1/test.sh
-host-measure-1/test.sh
-host-measure-1/test2.sh
-host-measure-2/test.sh
 run-in-uml.sh measure-1/test.sh
 run-in-uml.sh measure-4/test.sh
 run-in-uml.sh measure-many-1/test.sh

@@ -317,9 +317,6 @@ The following namespacing-related test cases are supported:
 | evm-3/test.sh                  | - " - |
 | evm-4/test.sh                  | - " - |
 | hash-1/test.sh                 | - " - |
-| host-measure-1/test.sh         | - " - |
-| host-measure-1/test2.sh        | - " - |
-| host-measure-2/test.sh         | - " - |
 | selftest-1/test.sh             | - " - |
 | measure-1/test.sh              | - " - ; requires run-in-uml.sh |
 | measure-4/test.sh              | - " - ; requires run-in-uml.sh |
