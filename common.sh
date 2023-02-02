@@ -924,3 +924,12 @@ function check_host_ima_has_no_rule_like()
 
   return 0
 }
+
+# Check whether we are running under UML; return 0 if under UML, 1 otherwise
+function in_uml()
+{
+  if [ -r /proc/cpuinfo ] && grep -c -q "User Mode Linux" < /proc/cpuinfo; then
+    return 0
+  fi
+  return 1
+}

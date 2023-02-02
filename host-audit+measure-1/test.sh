@@ -36,7 +36,7 @@ mv "${TESTFILE}" "${TESTFILE}.renamed"
 auditlog_find ".*file=\"${TESTFILE}\" hash=\".*${filehash}\" .*" 1 10
 measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}\s+\$" 1
 
-if [ -z "${IMA_TEST_UML}" ]; then
+if ! in_uml; then
   auditlog_find ".*file=\"${TESTFILE}.renamed\" hash=\".*${filehash}\" .*" 0 10
 else
   # UML: The reason for this is that inside Linux the file pointer has changed
