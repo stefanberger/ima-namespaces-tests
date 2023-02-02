@@ -28,13 +28,15 @@ filehash=$(hash_file "${imahash}" "${TESTFILE}")
 "${TESTFILE}" &>/dev/null
 
 auditlog_find ".*file=\"${TESTFILE}\" hash=\".*${filehash}\" .*" 1 10
-measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}\s+\$" 1
+measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}\s?\$" 1
+
+echo "INFO: Renaming ${TESTFILE} to ${TESTFILE}.renamed"
 
 mv "${TESTFILE}" "${TESTFILE}.renamed"
 "${TESTFILE}.renamed" &>/dev/null
 
 auditlog_find ".*file=\"${TESTFILE}\" hash=\".*${filehash}\" .*" 1 10
-measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}\s+\$" 1
+measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}\s?\$" 1
 
 if ! in_uml; then
   auditlog_find ".*file=\"${TESTFILE}.renamed\" hash=\".*${filehash}\" .*" 0 10
@@ -45,7 +47,7 @@ else
   # UML behaves differently and audits again!
   auditlog_find ".*file=\"${TESTFILE}.renamed\" hash=\".*${filehash}\" .*" 1 10
 fi
-measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}renamed\s+\$" 0
+measurementlog_find "${SECURITYFS_MNT}" "${filehash}\s+${TESTFILE}renamed\s?\$" 0
 
 echo "INFO: Success"
 
