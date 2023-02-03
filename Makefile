@@ -5,7 +5,8 @@ TESTDIRS = \
 	host-audit+measure-1 \
 	host-audit+measure-2 \
 	host-measure-1 \
-	host-measure-2
+	host-measure-2 \
+	host-ns-measure-1
 
 DESTS := $(patsubst %,$(INSTDIR)/%,$(TESTDIRS))
 
@@ -29,6 +30,7 @@ install: all $(DESTS)
 	install -m 644 common.sh $(INSTDIR)
 	install -m 644 ns-common.sh $(INSTDIR)
 	install -m 644 uml_chroot.sh $(INSTDIR)
+	install -m 644 check.sh $(INSTDIR)
 
 uninstall:
 	rm -rf /usr/bin/imatest /usr/lib/systemd/system/imatest.service $(INSTDIR)

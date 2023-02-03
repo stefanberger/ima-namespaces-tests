@@ -235,6 +235,7 @@ unnecessary reboots.
 | host-measure-1/test.sh         | Measuring an executed file |
 | host-measure-1/test2.sh        | Re-measuring after modification of a file |
 | host-measure-2/test.sh         | Testing of BPRM_CHECK and MMAP_CHECK using different templates for logging |
+| host-ns-measure-1/test.sh      | The same file executed by multiple IMA-ns must be logged for each IMA-ns once on the host. Requires CONFIG_IMA_NS_LOG_CHILD_DUPLICATES=y |
 
 
 ## Test cases using User Mode Linux (UML)
