@@ -112,7 +112,7 @@ _EOF_
   cp "/etc/magic" "${rootfs}/etc"
 
   mkdir -p "${rootfs}/usr/share/misc"
-  cp -rp /usr/share/misc/ "${rootfs}/usr/share/"
+  cp -rLp /usr/share/misc/ "${rootfs}/usr/share/"
 
   # Copy common.sh ns-common.sh etc. (*.sh) and test case directory
   cp -rpH ./*.sh "$(dirname "${testscript}")" "${rootfs}"
