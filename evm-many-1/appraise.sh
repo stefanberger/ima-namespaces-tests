@@ -88,8 +88,16 @@ if ${BUSYBOX2} cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
   exit "${FAIL:-1}"
 fi
 
-evmctl sign --imasig --portable --key "${KEY}" -a sha256 "${BUSYBOX2}"        >/dev/null 2>&1
-evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(type -P busybox)" >/dev/null 2>&1
+if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "${BUSYBOX2}" 2>&1); then
+  echo " Error: Could not sign busybox2: ${err}"
+  echo > "${FAILFILE}"
+  exit_test "${FAIL:-1}"
+fi
+if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(which busybox)"  2>&1); then
+  echo " Error: Could not sign busybox: ${err}"
+  echo > "${FAILFILE}"
+  exit_test "${FAIL:-1}"
+fi
 
 template=$(get_template_from_log "${SECURITYFS_MNT}")
 case "${template}" in
@@ -119,7 +127,7 @@ fi
 
 if ! evmsig="$(getfattr -m ^security.evm -e hex --dump "${BUSYBOX2}" 2>/dev/null |
               sed  -n 's/^security.evm=//p')"; then
-  echo " Error: Could not get EVM sigature from $(type -P busybox2)"
+  echo " Error: Could not get EVM signature from $(type -P busybox2)"
   exit "${FAIL:-1}"
 fi
 
