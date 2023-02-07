@@ -14,6 +14,9 @@ CERT=./rsa.crt
 keyctl newring _ima @s >/dev/null 2>&1
 keyctl newring _evm @s >/dev/null 2>&1
 
+BUSYBOX2=$(which busybox2)
+BUSYBOX=$(which busybox)
+
 prepolicy1="measure func=KEY_CHECK keyrings=_evm|_ima \n"
 printf "${prepolicy1}" > "${SECURITYFS_MNT}/ima/policy" || {
   echo " Error: Could not set key measurement policy."
@@ -70,11 +73,11 @@ if busybox2 cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
   exit_test "${FAIL:-1}"
 fi
 
-if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(which busybox2)" 2>&1); then
+if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "${BUSYBOX2}" 2>&1); then
   echo " Error: Could not sign busybox2: ${err}"
   exit_test "${FAIL:-1}"
 fi
-if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(which busybox)"  2>&1); then
+if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "${BUSYBOX}"  2>&1); then
   echo " Error: Could not sign busybox: ${err}"
   exit_test "${FAIL:-1}"
 fi
@@ -103,14 +106,14 @@ if [ "${expected}" -ne "${after}" ]; then
   exit_test "${FAIL:-1}"
 fi
 
-if ! evmsig="$(getfattr -m ^security.evm -e hex --dump "$(type -P busybox2)" 2>/dev/null |
+if ! evmsig="$(getfattr -m ^security.evm -e hex --dump "${BUSYBOX2}" 2>/dev/null |
               sed  -n 's/^security.evm=//p')"; then
-  echo " Error: Could not get EVM sigature from $(type -P busybox2)"
+  echo " Error: Could not get EVM sigature from ${BUSYBOX2}"
   exit_test "${FAIL:-1}"
 fi
 
 # Remove security.evm
-if ! setfattr -x security.evm "$(type -P busybox2)"; then
+if ! setfattr -x security.evm "${BUSYBOX2}"; then
   echo " Error: Removing security.evm must work"
   exit_test "${FAIL:-1}"
 fi
@@ -132,7 +135,7 @@ if ! busybox2 cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
 fi
 
 # Apply previously read EVM signature now
-if ! setfattr -n security.evm -v "${evmsig}" "$(type -P busybox2)"; then
+if ! setfattr -n security.evm -v "${evmsig}" "${BUSYBOX2}"; then
   echo " Error: Setting security.evm must work"
   exit_test "${FAIL:-1}"
 fi
@@ -145,7 +148,7 @@ fi
 
 # A bad EVM signature (unknown key) that must not allow the file to execute anymore
 EVMSIG="0x050204f55d1ddc01007edb34de4276aa03ff00de1f1d3510f4f96310a6a03a3f1e526a211db6746d95e66f5eca1b4165a50d0cd9a70866ee531bde43164a35c27e18c3cc22203d6fb99162017318d73700210aa9b55668b111a66915650bfc6be50f4697145d87249d71c86b851a3c592b28e6f2b5a736d64c020c2131591b003c7633fcbc9de9dc15486cc7a32256bade1f68eb10cee77fd01dc0dc549ba1b90187368619bf36beac7669a674c022471ac8b271acccd182db9f468cd671d1b2c780dbbc9eddf41d44d20fb4f341a4fd32dedc1082db9e14eba320954fe147d0638cb90a11161aa0dc2e22eb89a0623db4058cf5fe0458245db7d0626b2d71f8fe13139240431c21e9"
-if ! setfattr -n security.evm -v "${EVMSIG}" "$(type -P busybox2)"; then
+if ! setfattr -n security.evm -v "${EVMSIG}" "${BUSYBOX2}"; then
   echo " Error: Setting security.evm must work"
   exit_test "${FAIL:-1}"
 fi
@@ -153,13 +156,13 @@ fi
 # Using busybox2 must not work since the EVM signature is bad
 if busybox2 cat "${SECURITYFS_MNT}/ima/policy" >/dev/null 2>&1; then
   echo " Error: Could execute busybox2 with bad EVM signature"
-  getfattr -m ^security.evm -e hex --dump "$(type -P busybox2)"
+  getfattr -m ^security.evm -e hex --dump "${BUSYBOX2}"
   exit_test "${FAIL:-1}"
 fi
 
 # Remove both signatures
-setfattr -x security.evm "$(type -P busybox2)"
-if ! setfattr -x security.ima "$(type -P busybox2)"; then
+setfattr -x security.evm "${BUSYBOX2}"
+if ! setfattr -x security.ima "${BUSYBOX2}"; then
   echo " Error: Removing security.ima must work"
   exit_test "${FAIL:-1}"
 fi

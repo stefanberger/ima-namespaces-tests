@@ -30,6 +30,9 @@ mnt_securityfs "${SECURITYFS_MNT}"
 KEY=./rsakey.pem
 CERT=./rsa.crt
 
+BUSYBOX=$(which busybox)
+BUSYBOX2=$(which busybox2)
+
 keyctl newring _ima @s >/dev/null 2>&1
 keyctl newring _evm @s >/dev/null 2>&1
 
@@ -107,11 +110,11 @@ fi
 # Using busybox2 must fail since it's not signed
 check_busybox2_not_running "without signature even though appraise policy is active"
 
-if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(which busybox2)" 2>&1); then
+if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "${BUSYBOX2}" 2>&1); then
   echo " Error: Could not sign busybox2: ${err}"
   exit_test "${FAIL:-1}"
 fi
-if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(which busybox)"  2>&1); then
+if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "${BUSYBOX}"  2>&1); then
   echo " Error: Could not sign busybox: ${err}"
   exit_test "${FAIL:-1}"
 fi
@@ -147,8 +150,8 @@ cat "${SECURITYFS_MNT}/evm" ; echo
 
 # Add security.capability to it, which now must prevent busybox2 from running since
 # signature does not cover this xattr
-setcap cap_kill+eip "$(type -P busybox2)"
-if [ -z "$(getfattr -m ^security.capability -e hex --dump "$(type -P busybox2)" 2>/dev/null)" ]; then
+setcap cap_kill+eip "${BUSYBOX2}"
+if [ -z "$(getfattr -m ^security.capability -e hex --dump "${BUSYBOX2}" 2>/dev/null)" ]; then
   echo " Error: cap_kill capability was not set on busybox2"
   exit_test "${FAIL:-1}"
 fi
@@ -157,7 +160,7 @@ fi
 check_busybox2_not_running "after security.capability was added"
 
 # Remove security.capability
-if ! setfattr -x security.capability "$(type -P busybox2)"; then
+if ! setfattr -x security.capability "${BUSYBOX2}"; then
   echo " Error: Removing security.capability must work"
   exit_test "${FAIL:-1}"
 fi
@@ -166,19 +169,19 @@ fi
 check_busybox2_running "after removing security.capability"
 
 # change mode on the file
-busybox chmod o=w "$(type -P busybox2)"
+busybox chmod o=w "${BUSYBOX2}"
 
 # Using busybox2 must NOT work since mode was changed
 check_busybox2_not_running "after security.capability was added"
 
 # change back mode on file
-busybox chmod o=rx "$(type -P busybox2)"
+busybox chmod o=rx "${BUSYBOX2}"
 
 # Using busybox2 must work again since mode was reverted
 check_busybox2_running "after removing security.capability"
 
 if [ -f "${SECURITYFS_MNT}/integrity/evm/evm_xattrs" ]; then
-  if ! setfattr -n "security.test" -v "0x050204" "$(type -P busybox2)"; then
+  if ! setfattr -n "security.test" -v "0x050204" "${BUSYBOX2}"; then
     echo " Error: Could not set security.test special security xattr"
     exit_test "${FAIL:-1}"
   fi
@@ -186,7 +189,7 @@ if [ -f "${SECURITYFS_MNT}/integrity/evm/evm_xattrs" ]; then
   check_busybox2_not_running "after security.test was added"
 
   # Remove security.capability
-  if ! setfattr -x security.test "$(type -P busybox2)"; then
+  if ! setfattr -x security.test "${BUSYBOX2}"; then
     echo " Error: Removing security.test must work"
     exit_test "${FAIL:-1}"
   fi
@@ -194,7 +197,7 @@ if [ -f "${SECURITYFS_MNT}/integrity/evm/evm_xattrs" ]; then
   check_busybox2_running "after security.test was removed"
 fi
 
-if ! setfattr -n "security.foo" -v "0x050204" "$(type -P busybox2)"; then
+if ! setfattr -n "security.foo" -v "0x050204" "${BUSYBOX2}"; then
   echo " Error: Could not set security.foo special security xattr"
   exit_test "${FAIL:-1}"
 fi
@@ -204,7 +207,7 @@ check_busybox2_running "after setting security.foo"
 
 # A bad EVM signature (unknown key) that must not allow the file to execute anymore
 EVMSIG="0x050204f55d1ddc01007edb34de4276aa03ff00de1f1d3510f4f96310a6a03a3f1e526a211db6746d95e66f5eca1b4165a50d0cd9a70866ee531bde43164a35c27e18c3cc22203d6fb99162017318d73700210aa9b55668b111a66915650bfc6be50f4697145d87249d71c86b851a3c592b28e6f2b5a736d64c020c2131591b003c7633fcbc9de9dc15486cc7a32256bade1f68eb10cee77fd01dc0dc549ba1b90187368619bf36beac7669a674c022471ac8b271acccd182db9f468cd671d1b2c780dbbc9eddf41d44d20fb4f341a4fd32dedc1082db9e14eba320954fe147d0638cb90a11161aa0dc2e22eb89a0623db4058cf5fe0458245db7d0626b2d71f8fe13139240431c21e9"
-if ! setfattr -n security.evm -v "${EVMSIG}" "$(type -P busybox2)"; then
+if ! setfattr -n security.evm -v "${EVMSIG}" "${BUSYBOX2}"; then
   echo " Error: Setting security.evm must work"
   exit_test "${FAIL:-1}"
 fi
@@ -213,8 +216,8 @@ fi
 check_busybox2_not_running "with bad EVM signature"
 
 # Remove both signatures
-setfattr -x security.evm "$(type -P busybox2)"
-if ! setfattr -x security.ima "$(type -P busybox2)"; then
+setfattr -x security.evm "${BUSYBOX2}"
+if ! setfattr -x security.ima "${BUSYBOX2}"; then
   echo " Error: Removing security.ima must work"
   exit_test "${FAIL:-1}"
 fi

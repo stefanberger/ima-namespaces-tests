@@ -24,6 +24,7 @@ printf "${prepolicy1}" > "${SECURITYFS_MNT}/ima/policy" || {
 
 # Each namespace needs its own busybox2 test file
 NSID=${NSID:-1} # for shellcheck
+BUSYBOX="$(which busybox)"
 BUSYBOX2="$(which busybox2)-${NSID}"
 cp "$(which busybox2)" "${BUSYBOX2}"
 
@@ -93,7 +94,7 @@ if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "${BUSYBOX2}
   echo > "${FAILFILE}"
   exit_test "${FAIL:-1}"
 fi
-if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(which busybox)"  2>&1); then
+if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "${BUSYBOX}"  2>&1); then
   echo " Error: Could not sign busybox: ${err}"
   echo > "${FAILFILE}"
   exit_test "${FAIL:-1}"
@@ -127,7 +128,7 @@ fi
 
 if ! evmsig="$(getfattr -m ^security.evm -e hex --dump "${BUSYBOX2}" 2>/dev/null |
               sed  -n 's/^security.evm=//p')"; then
-  echo " Error: Could not get EVM signature from $(type -P busybox2)"
+  echo " Error: Could not get EVM signature from ${BUSYBOX2}"
   exit "${FAIL:-1}"
 fi
 
