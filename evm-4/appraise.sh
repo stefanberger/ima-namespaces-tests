@@ -39,8 +39,14 @@ printf "${prepolicy1}" > "${SECURITYFS_MNT}/ima/policy" || {
   exit_test "${FAIL:-1}"
 }
 
-keyctl padd asymmetric "" %keyring:_ima < "${CERT}" >/dev/null 2>&1
-keyctl padd asymmetric "" %keyring:_evm < "${CERT}" >/dev/null 2>&1
+if ! err=$(keyctl padd asymmetric "" %keyring:_ima < "${CERT}" 2>&1); then
+  echo " Error: Could not load key onto _ima keyring: ${err}"
+  exit_test "${FAIL:-1}"
+fi
+if ! err=$(keyctl padd asymmetric "" %keyring:_evm < "${CERT}" 2>&1); then
+  echo " Error: Could not load key onto _evm keyring: ${err}"
+  exit_test "${FAIL:-1}"
+fi
 
 # Expecting measurement of both keys
 ctr=$(grep -c -E " _(ima|evm) " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
@@ -101,8 +107,14 @@ fi
 # Using busybox2 must fail since it's not signed
 check_busybox2_not_running "without signature even though appraise policy is active"
 
-evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(type -P busybox2)" >/dev/null 2>&1
-evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(type -P busybox)"  >/dev/null 2>&1
+if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(which busybox2)" 2>&1); then
+  echo " Error: Could not sign busybox2: ${err}"
+  exit_test "${FAIL:-1}"
+fi
+if ! err=$(evmctl sign --imasig --portable --key "${KEY}" -a sha256 "$(which busybox)"  2>&1); then
+  echo " Error: Could not sign busybox: ${err}"
+  exit_test "${FAIL:-1}"
+fi
 
 template=$(get_template_from_log "${SECURITYFS_MNT}")
 case "${template}" in
