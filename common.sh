@@ -393,6 +393,7 @@ function __post_uml_run()
         -e '/^integrity:/d' \
         -e '/^loop0:/d' \
         -e '/^EXT4-fs/d' \
+        -e '/^ext4 filesystem/d' \
         -e '/^Joined session/d' \
         -e '/^reboot:/d' \
         -e '/^[[:space:]]*$/d' \
