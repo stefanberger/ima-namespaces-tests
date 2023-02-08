@@ -152,6 +152,7 @@ Concerns for the testing are:
 | appraise-7      | Testing of setxattr success on files with proper ownership in namespace, failures on files without proper ownership in namespace |
 | appraise-8      | Testing of BPRM_CHECK and MMAP_CHECK; test removal and restoring of signature on library |
 | appraise-9      | Testing of BPRM_CHECK and MMAP_CHECK using different templates for logging |
+| appraise-10     | Testing that a newly created session keyring with _ima keyring and new key does not allow to run an executable signed with this new key |
 | appraise-many-1 | Concurrently running IMA namespaces with own keyrings appraise executables |
 | appraise-many-2 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications |
 | appraise-many-3 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications and signing with their own private key |
@@ -315,6 +316,7 @@ The following namespacing-related test cases are supported:
 | appraise-6/test.sh             | - " - |
 | appraise-8/test.sh             | - " - |
 | appraise-9/test.sh             | - " - |
+| appraise-10/test.sh            | - " - |
 | evm-3/test.sh                  | - " - |
 | evm-4/test.sh                  | - " - |
 | hash-1/test.sh                 | - " - |
