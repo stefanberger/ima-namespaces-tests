@@ -934,3 +934,19 @@ function in_uml()
   fi
   return 1
 }
+
+# Get a test user
+function get_test_user()
+{
+  local test_user
+
+  for test_user in ftp apache tss nobody; do
+    if id -u "${test_user}" &>/dev/null && \
+       id -g "${test_user}" &>/dev/null; then
+      echo "${test_user}"
+      return 0
+    fi
+  done
+
+  return 1
+}

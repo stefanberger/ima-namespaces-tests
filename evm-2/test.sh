@@ -24,17 +24,9 @@ if ! check_ns_evm_support; then
   echo " Error: IMA-ns does not support EVM"
   exit "${SKIP:-3}"
 fi
-test_users="ftp apache tss nobody"
-found=0
-for TEST_USER in ${test_users}; do
-  if id -u "${TEST_USER}" &>/dev/null && \
-     id -g "${TEST_USER}" &>/dev/null; then
-    found=1
-    break
-  fi
-done
-if [ "${found}" -eq 0 ]; then
-  echo " Error: Could not find a suitable user to run test with"
+
+if ! TEST_USER=$(get_test_user); then
+  echo " Skip: Could not find a suitable user to run test with"
   exit "${SKIP:-3}"
 fi
 
