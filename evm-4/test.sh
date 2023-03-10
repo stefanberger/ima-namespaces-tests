@@ -21,11 +21,11 @@ setup_busybox_container \
 	"${ROOT}/keys/rsa.crt"
 
 if ! check_ns_evm_support; then
-  echo " Error: IMA-ns does not support EVM in namespaces"
+  echo " Skip: IMA-ns does not support EVM in namespaces"
   exit "${SKIP:-3}"
 fi
 if ! check_ns_appraise_support; then
-  echo " Error: IMA-ns does not support IMA-appraisal in namespaces"
+  echo " Skip: IMA-ns does not support IMA-appraisal in namespaces"
   exit "${SKIP:-3}"
 fi
 

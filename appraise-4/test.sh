@@ -12,7 +12,7 @@ source "${ROOT}/common.sh"
 
 # FIXME: Check why dd circumvents the check on O_DIRECT
 if [ "$(id -u)" -eq 0 ]; then
-  echo " Error: Cannot run this test as root"
+  echo " Skip: Cannot run this test as root"
   exit "${SKIP:-3}"
 fi
 
@@ -27,7 +27,7 @@ setup_busybox_container \
 	"$(type -P ldd)"
 
 if ! check_ns_appraise_support; then
-  echo " Error: IMA-ns does not support IMA-appraise"
+  echo " Skip: IMA-ns does not support IMA-appraise"
   exit "${SKIP:-3}"
 fi
 

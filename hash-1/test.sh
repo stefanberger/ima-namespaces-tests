@@ -19,7 +19,7 @@ setup_busybox_container \
 	"${DIR}/hash.sh"
 
 if ! check_ns_hash_support; then
-  echo " Error: IMA-ns does not support IMA-appraise hash rules"
+  echo " Skip: IMA-ns does not support IMA-appraise hash rules"
   exit "${SKIP:-3}"
 fi
 

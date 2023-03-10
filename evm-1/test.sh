@@ -20,7 +20,7 @@ setup_busybox_container \
 	"${DIR}/setxattr.sh"
 
 if check_ns_evm_support; then
-  echo " Error: IMA-ns does support EVM"
+  echo " Skip: IMA-ns does support EVM"
   exit "${SKIP:-3}"
 fi
 

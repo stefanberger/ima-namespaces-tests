@@ -21,11 +21,11 @@ setup_busybox_container \
 
 # requires check.sh
 if ! check_ns_evm_support; then
-  echo " Error: IMA-ns does not support EVM in namespaces"
+  echo " Skip: IMA-ns does not support EVM in namespaces"
   exit "${SKIP:-3}"
 fi
 if ! check_ns_appraise_support; then
-  echo " Error: IMA-ns does not support IMA-appraise"
+  echo " Skip: IMA-ns does not support IMA-appraise"
   exit "${SKIP:-3}"
 fi
 

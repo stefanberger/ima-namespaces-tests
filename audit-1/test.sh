@@ -23,7 +23,7 @@ setup_busybox_container \
 	"${DIR}/reaudit.sh"
 
 if ! check_ns_audit_support; then
-  echo " Error: IMA-ns does not support IMA-audit"
+  echo " Skip: IMA-ns does not support IMA-audit"
   exit "${SKIP:-3}"
 fi
 

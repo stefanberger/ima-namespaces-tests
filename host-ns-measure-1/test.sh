@@ -24,13 +24,13 @@ if in_uml; then
   # Due to changing inode pointers under UML this test passes very easily.
   # Therefore, skip it when detecting UML.
   # Otherwise CONFIG_IMA_NS_LOG_CHILD_DUPLICATES=y must be set.
-  echo "Error: Skipping this test when run under UML since it passes 'easily'."
+  echo "Skip: Skipping this test when run under UML since it passes 'easily'."
   exit "${SKIP:-3}"
 fi
 
 # Check for IMA-ns measurement support; this then also includes template=ima-ns support
 if ! check_ns_measure_support; then
-  echo "Error: IMA-ns does not support IMA-measure"
+  echo "Skip: IMA-ns does not support IMA-measure"
   exit "${SKIP:-3}"
 fi
 

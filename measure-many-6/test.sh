@@ -20,7 +20,7 @@ check_root
 check_selinux_enabled
 
 if ! type -p semodule | grep -q ^; then
-  echo " Error: semodule tool is not installed"
+  echo " Skip: semodule tool is not installed"
   exit "${SKIP:-3}"
 fi
 
@@ -28,7 +28,7 @@ SELINUX_LABEL="vmtools_exec_t"
 SELINUX_MODULE="vmtools"
 
 if ! semodule -l | grep -q "${SELINUX_MODULE}"; then
-  echo " Error: SELinux module ${SELINUX_MODULE} is not available"
+  echo " Skip: SELinux module ${SELINUX_MODULE} is not available"
   exit "${SKIP:-3}"
 fi
 
@@ -41,7 +41,7 @@ setup_busybox_container \
 
 # requires check.sh
 if ! check_ns_selinux_support; then
-  echo " Error: IMA does not support SELinux labels"
+  echo " Skip: IMA does not support SELinux labels"
   exit "${SKIP:-3}"
 fi
 
