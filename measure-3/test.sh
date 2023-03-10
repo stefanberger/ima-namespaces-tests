@@ -15,18 +15,12 @@ check_root
 
 check_ima_support
 
-for test_user in ftp apache tss nobody; do
-  TEST_USER=${test_user}
-  if TEST_USER_UID=$(id -u "${TEST_USER}" 2>/dev/null) && \
-     TEST_USER_GID=$(id -g "${TEST_USER}" 2>/dev/null); then
-    break
-  fi
-done
-
-if [ -z "${TEST_USER_UID}" ]; then
-  echo " Error: Could not find a suitable user to test with"
+if ! TEST_USER=$(get_test_user); then
+  echo " Skip: Could not find a suitable user to test with"
   exit "${SKIP:-3}"
 fi
+TEST_USER_UID=$(id -u "${TEST_USER}")
+TEST_USER_GID=$(id -g "${TEST_USER}")
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
