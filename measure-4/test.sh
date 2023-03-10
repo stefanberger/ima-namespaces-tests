@@ -19,7 +19,7 @@ setup_busybox_container \
 	"${DIR}/feed-many-rules.sh"
 
 if ! check_ns_audit_support; then
-  echo " Error: IMA-ns does not support IMA-audit"
+  echo " Skip: IMA-ns does not support IMA-audit"
   exit "${SKIP:-3}"
 fi
 

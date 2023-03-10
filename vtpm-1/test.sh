@@ -27,7 +27,7 @@ setup_busybox_container \
 	"${DIR}/measure.sh"
 
 if ! check_ns_measure_support; then
-  echo " Error: IMA-ns does not support IMA-measurement"
+  echo " Skip: IMA-ns does not support IMA-measurement"
   exit "${SKIP:-3}"
 fi
 
@@ -38,7 +38,7 @@ copy_elf_busybox_container "$(which dmesg)" "bin/"
 
 # The following test needs swtpm and ${VTPM_EXEC} copied
 if ! check_ns_vtpm_support; then
-  echo " Error: IMA-ns does not support vTPM"
+  echo " Skip: IMA-ns does not support vTPM"
   exit "${SKIP:-3}"
 fi
 

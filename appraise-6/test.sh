@@ -20,7 +20,7 @@ setup_busybox_container \
 	"${ROOT}/keys/rsakey.pem"
 
 if ! check_ns_appraise_support; then
-  echo " Error: IMA-ns does not support IMA-appraise"
+  echo " Skip: IMA-ns does not support IMA-appraise"
   exit "${SKIP:-3}"
 fi
 

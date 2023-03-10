@@ -29,7 +29,7 @@ setup_busybox_container \
 
 # Requires check.sh
 if ! check_ns_measure_support; then
-  echo " Error: IMA-ns does not support IMA-measure"
+  echo " Skip: IMA-ns does not support IMA-measure"
   exit "${SKIP:-3}"
 fi
 
