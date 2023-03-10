@@ -781,6 +781,13 @@ function get_max_number_keys()
   fi
 }
 
+# Check whether IMA-ns is generally supported
+function check_ns_ima_ns_support()
+{
+  [ -n "${IMA_TEST_UML}" ] && [ "${IMA_TEST_ENV}" != "container" ] && return 0
+  run_busybox_container ./check.sh ima-ns &>/dev/null
+}
+
 # Check whether the namespace has IMA-audit support
 function check_ns_audit_support()
 {
