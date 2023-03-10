@@ -153,6 +153,7 @@ Concerns for the testing are:
 | appraise-8      | Testing of BPRM_CHECK and MMAP_CHECK; test removal and restoring of signature on library |
 | appraise-9      | Testing of BPRM_CHECK and MMAP_CHECK using different templates for logging |
 | appraise-10     | Testing that a newly created session keyring with _ima keyring and new key does not allow to run an executable signed with this new key |
+| appraise-11     | Check that security.ima cannot be written by a user when IMA-ns is not supported (CONFIG_IMA_NS) |
 | appraise-many-1 | Concurrently running IMA namespaces with own keyrings appraise executables |
 | appraise-many-2 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications |
 | appraise-many-3 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications and signing with their own private key |
