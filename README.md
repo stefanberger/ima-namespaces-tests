@@ -168,8 +168,10 @@ Concerns for the testing are:
 | au+me+app-1     | Host modifies file that namespace must re-audit and re-measure and re-appraise |
 | evm-1           | Check that security.evm cannot be written while EVM is not namespaced |
 | evm-2           | Check that security.evm can be written and removed when EVM is namespaced and files' uid and gid are mapped |
-| evm-3           | Test appraisal with IMA and EVM signaturs and failures when signatures are removed |
+| evm-3           | Test appraisal with IMA and EVM signatures and failures when signatures are removed |
 | evm-4           | Test evm_xattrs securityfs file and modification of file metadata (xattrs, mode etc.) to check execution prevention |
+| evm-5           | Test appraisal with IMA and EVM signatures and failures when file on overlayfs is modified |
+| evm-6           | Like evm-5 but use squashfs as lower filesystem (OpenBMC case) |
 | evm-many-1      | Concurrently running IMA namespaces test appraisal with IMA and EVM signaturs and failures when signatures are removed |
 | evm+overlayfs-1 | Test with overlayfs and HMAC |
 | evm+overlayfs-2 | Test with overlayfs and portable RSA signatures |

@@ -959,3 +959,14 @@ function get_test_user()
 
   return 1
 }
+
+# Check whether OverlayFS is available
+function check_overlayfs()
+{
+  if ! grep -q -E "\s+overlay$" /proc/filesystems ; then
+    if ! sudo modprobe overlay; then
+      return 1
+    fi
+  fi
+  return 0
+}
