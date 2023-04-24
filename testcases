@@ -28,6 +28,7 @@ evm-3/test.sh
 evm-4/test.sh
 evm-5/test.sh
 evm-6/test.sh
+evm-7/test.sh
 evm+overlayfs-1/test.sh
 evm+overlayfs-2/test.sh
 evm-many-1/test.sh

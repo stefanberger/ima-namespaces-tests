@@ -24,6 +24,9 @@ future for the testing to make any sense. If you know of one compile time option
 'doesn't matter' whether it is set, let me know and we can mark it as such.
 
 ```
+CONFIG_TRUSTED_KEYS=y
+CONFIG_ENCRYPTED_KEYS=y
+CONFIG_USER_DECRYPTED_DATA=y
 CONFIG_IMA_NS=y
 CONFIG_IMA=y
 CONFIG_IMA_MEASURE_PCR_IDX=10
@@ -172,6 +175,7 @@ Concerns for the testing are:
 | evm-4           | Test evm_xattrs securityfs file and modification of file metadata (xattrs, mode etc.) to check execution prevention |
 | evm-5           | Test appraisal with IMA and EVM signatures and failures when file on overlayfs is modified |
 | evm-6           | Like evm-5 but use squashfs as lower filesystem (OpenBMC case) |
+| evm-7           | Use an HMAC key for EVM signature and check that security.evm changes (CONFIG_EVM_ATTR_FSUUID must not be enabled) |
 | evm-many-1      | Concurrently running IMA namespaces test appraisal with IMA and EVM signaturs and failures when signatures are removed |
 | evm+overlayfs-1 | Test with overlayfs and HMAC |
 | evm+overlayfs-2 | Test with overlayfs and portable RSA signatures |
