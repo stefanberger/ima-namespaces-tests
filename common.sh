@@ -275,6 +275,7 @@ function __setup_busybox()
   fi
   pushd "${rootfs}/bin" 1>/dev/null || exit "${FAIL:-1}"
   for prg in \
+      basename \
       cat chmod chown cut cp date dirname diff echo env find grep head id \
       ls ln mkdir mknod mount mv printf rm \
       sed sh sha1sum sha256sum sha384sum sha512sum sleep stat sync \

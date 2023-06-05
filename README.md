@@ -176,6 +176,7 @@ Concerns for the testing are:
 | evm-5           | Test appraisal with IMA and EVM signatures and failures when file on overlayfs is modified |
 | evm-6           | Like evm-5 but use squashfs as lower filesystem (OpenBMC case) |
 | evm-7           | Use an HMAC key for EVM signature and check that security.evm changes (CONFIG_EVM_ATTR_FSUUID must not be enabled) |
+| evm-8           | Enforce EVM (RSA) signatures and use evm-sig template |
 | evm-many-1      | Concurrently running IMA namespaces test appraisal with IMA and EVM signaturs and failures when signatures are removed |
 | evm+overlayfs-1 | Test with overlayfs and HMAC |
 | evm+overlayfs-2 | Test with overlayfs and portable RSA signatures |
@@ -286,6 +287,7 @@ The following test cases are supported:
 | appraise-9/test.sh             | - " - |
 | evm-3/test.sh                  | - " - |
 | evm-4/test.sh                  | - " - |
+| evm-8/test.sh                  | - " - |
 | evm+kernel-cmd-1/test.sh       | Test EVM HMAC creation when passing evm=fix on kernel command line |
 | evm+overlayfs-1/test.sh        | - " - |
 | evm+overlayfs-2/test.sh        | - " - |
@@ -334,6 +336,7 @@ The following namespacing-related test cases are supported:
 | appraise-10/test.sh            | - " - |
 | evm-3/test.sh                  | - " - |
 | evm-4/test.sh                  | - " - |
+| evm-8/test.sh                  | - " - |
 | hash-1/test.sh                 | - " - |
 | selftest-1/test.sh             | - " - |
 | measure-1/test.sh              | - " - ; requires run-in-uml.sh |
