@@ -16,3 +16,4 @@ run-in-uml.sh measure-many-2/test.sh
 run-in-uml.sh measure-many-3/test.sh
 run-in-uml.sh measure-many-4/test.sh
 run-in-uml.sh measure-many-5/test.sh
+run-in-uml.sh measure-many-7/test.sh

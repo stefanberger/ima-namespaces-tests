@@ -183,6 +183,7 @@ Concerns for the testing are:
 | measure-many-4  | One control container modifies a file that other containers are running and expecting new measurements in containers every time |
 | measure-many-5  | Concurrently running IMA namespaces with different hash and template configurations repeatedly run an executable that's being modified |
 | measure-many-6  | Concurrently running IMA namespaces test disabling and enabling of SELinux labels |
+| measure-many-7  | Concurrently running IMA namespaces permanently modify 5 files and execute them |
 | vtpm-1          | Check IMA measurement list against PCR_Extends; use TPM 1.2 (swtpm) |
 | vtpm-2          | Check IMA measurement list against PCR_Extends; use TPM 2 (swtpm) |
 | vtpm-many-1     | Concurrently running IMA namespaces with measurement policy; check IMA measurement list against PCR_Extends; use TPM 1.2 (swtpm) |
@@ -328,3 +329,4 @@ The following namespacing-related test cases are supported:
 | measure-many-3/test.sh         | - " - ; requires run-in-uml.sh |
 | measure-many-4/test.sh         | - " - ; requires run-in-uml.sh |
 | measure-many-5/test.sh         | - " - ; requires run-in-uml.sh |
+| measure-many-7/test.sh         | - " - ; requires run-in-uml.sh |

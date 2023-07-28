@@ -39,6 +39,7 @@ measure-many-3/test.sh
 measure-many-4/test.sh
 measure-many-5/test.sh
 measure-many-6/test.sh
+measure-many-7/test.sh
 vtpm-1/test.sh
 vtpm-2/test.sh
 vtpm-many-1/test.sh
