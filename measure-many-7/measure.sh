@@ -14,7 +14,18 @@ FAILFILE=${FAILFILE:-failfile}
 . ./ns-common.sh
 
 cmdfile="cmdfile"
-NUM_ITER=1000
+
+if [ ! -r /proc/cpuinfo ]; then
+  echo " Error: Need /proc/cpuinfo inside container"
+  echo > "${FAILFILE}"
+  exit_test "${FAIL:-1}"
+fi
+
+# UML is too slow to support many iterations.
+NUM_ITER=500
+if grep -c -q "User Mode Linux" < /proc/cpuinfo >/dev/null; then
+  NUM_ITER=50
+fi
 
 stage=0
 
@@ -47,7 +58,7 @@ while [ "${stage}" -le 2 ]; do
       printf "${policy}" > "${SECURITYFS_MNT}/ima/policy"
       if [ "${policy}" != "$(cat "${SECURITYFS_MNT}/ima/policy")" ]; then
         echo "ERROR: Could not set policy"
-        echo 1 >> "${FAILFILE}"
+        echo > "${FAILFILE}"
       fi
       ;;
     start)
@@ -77,7 +88,7 @@ while [ "${stage}" -le 2 ]; do
       if [ "${num}" -eq 0 ]; then
         echo " Error: Could not find testfile measurements in log"
         cat "${SECURITYFS_MNT}/ima/ascii_runtime_measurements"
-        echo 1 >> "${FAILFILE}"
+        echo > "${FAILFILE}"
       fi
       ;;
     esac
@@ -86,4 +97,4 @@ while [ "${stage}" -le 2 ]; do
   stage=$((stage + 1))
 done
 
-exit "${SUCCESS:-0}"
+exit_test "${SUCCESS:-0}"
