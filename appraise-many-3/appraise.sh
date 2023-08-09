@@ -164,13 +164,18 @@ while [ "${stage}" -le 14 ]; do
     load-own-key)
       load_key "${own_cert}" >/dev/null
       ctr=$(grep -c " _ima " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
-      if [ "${ctr}" -ne 1 ]; then
-        echo " Error: Expected to find key in measurement list."
+      if [ "${ctr}" -ne 2 ]; then
+        echo " Error: Expected to find 2nd key in measurement list."
         echo > "${FAILFILE}"
       fi
       ;;
     load-policy)
       load_policy
+      ctr=$(grep -c " _ima " "${SECURITYFS_MNT}/ima/ascii_runtime_measurements")
+      if [ "${ctr}" -ne 1 ]; then
+        echo " Error: Expected to find 1st key in measurement list."
+        echo > "${FAILFILE}"
+      fi
       ;;
     execute-fail)
       if "${BUSYBOX2}" echo >/dev/null 2>/dev/null; then
