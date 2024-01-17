@@ -372,6 +372,7 @@ function __post_uml_run()
   127) # binary is missing
     rc="${FAIL:-1}";;
   134) # binary aborted
+    reset
     rc="${FAIL:-1}"
     echo "=============== stdout ==============="
     cat "${stdoutlog}"
