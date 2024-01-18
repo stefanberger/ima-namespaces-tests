@@ -108,7 +108,7 @@ fi
 
 if ! evmsig="$(getfattr -m ^security.evm -e hex --dump "${BUSYBOX2}" 2>/dev/null |
               sed  -n 's/^security.evm=//p')"; then
-  echo " Error: Could not get EVM sigature from ${BUSYBOX2}"
+  echo " Error: Could not get EVM signature from ${BUSYBOX2}"
   exit_test "${FAIL:-1}"
 fi
 

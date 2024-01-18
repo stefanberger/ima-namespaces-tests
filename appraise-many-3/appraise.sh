@@ -68,7 +68,7 @@ create_own_key()
   # Sanity check
   msg=$(openssl x509 -inform der -in "${certfile}" -text | grep "X509v3 Subject Key Identifier")
   if [ -z "${msg}" ]; then
-    echo " Error: Missing Subject Key Idenitfier in created cert"
+    echo " Error: Missing Subject Key Identifier in created cert"
     echo > "${FAILFILE}"
   fi
 }

@@ -30,7 +30,7 @@ cp "$(which busybox2)" "${BUSYBOX2}"
 
 for keyring in _ima _evm; do
   if ! keyctl padd asymmetric "" "%keyring:${keyring}" < "${CERT}" >/dev/null 2>&1; then
-    echo " Error: Could not load key onto ${keyring} keyring likley due to key quota restrictions"
+    echo " Error: Could not load key onto ${keyring} keyring likely due to key quota restrictions"
     echo > "${FAILFILE}"
     exit "${FAIL:-1}"
   fi
