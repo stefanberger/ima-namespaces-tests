@@ -24,7 +24,7 @@ fi
 
 copy_elf_busybox_container "$(type -P evmctl)"
 
-# Test meassurements caused by executables and libraries run in namespace
+# Test measurements caused by executables and libraries run in namespace
 
 echo "INFO: Testing measuring (BPRM_CHECK + MMAP_CHECK) with different templates inside container"
 

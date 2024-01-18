@@ -47,6 +47,6 @@ check: install
 syntax-check:
 	# Must pass shellcheck 0.7.2 or later
 	shellcheck *.sh */*.sh imatest
-	codespell *.sh */*.sh imatest *.md
+	codespell -L padd *.sh */*.sh imatest *.md
 
 .PHONY: .FORCE
