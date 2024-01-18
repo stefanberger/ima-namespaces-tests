@@ -454,3 +454,28 @@ evm_setup_keyrings_hmac()
   fi
   return 0
 }
+
+# IMA-sign the files with the given key and EVM-sign them with the default HMAC key
+# @param1: the private key to use for signing
+# @parma2 ...: the files to sign
+evm_sign_files_hmac()
+{
+  local key="${1}"; shift
+
+  local fn err
+
+  for fn in "$@"; do
+    evmctl sign --imasig --portable --key "${key}" --uuid -a sha256 "${fn}" >/dev/null 2>&1
+    if [ -z "$(getfattr -m ^security.ima -e hex --dump "${fn}" 2>/dev/null)" ]; then
+      echo " Error: security.ima should be there now for ${fn}."
+      return 1
+    fi
+
+    if ! err=$(evmctl hmac --uuid -a sha1 -v "${fn}" 2>&1); then
+      echo "Error: Could not sign ${fn}"
+      echo "${err}"
+      return 1
+    fi
+  done
+}
+
