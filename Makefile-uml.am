@@ -1,0 +1,17 @@
+check_PROGRAMS =
+
+AM_MAKEFLAGS = -f Makefile-uml
+
+TESTS = \
+	selftest-1/test.sh \
+	evm-3/test.sh \
+	evm-4/test.sh \
+	evm+kernel-cmd-1/test.sh \
+	hash-1/test.sh \
+	host-measure-1/test.sh \
+	host-measure-1/test2.sh \
+	host-measure-2/test.sh \
+	kernel-cmd-1/test.sh \
+	kernel-cmd-2/test.sh
+
+LOG_COMPILER = bash scripts/parallel-run.sh

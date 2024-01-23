@@ -1,4 +1,14 @@
 *~
+*.log
+*.trs
+aclocal.m4
+autom4te.cache
+config.status
+configure
+install-sh
+missing
+test-driver
+Makefile-uml*
 keys/*.crt
 keys/*.pem
 vtpm-exec/vtpm-exec
