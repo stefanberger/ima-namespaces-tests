@@ -67,7 +67,7 @@ function uml_run_script()
     SUCCESS="${SUCCESS:-0}" FAIL="${FAIL:-1}" SKIP="${SKIP:-3}" \
     "$(set | grep -E "^(G_|IMA_TEST_EXPENSIVE).*=.*")" \
     UML_SCRIPT="${script}" \
-    rootfstype=hostfs rootflags="${rootfs}/mntpoint" rw init="uml_run.sh" mem=256M \
+    rootfstype=hostfs rootflags="${rootfs}/mntpoint" rw init="scripts/uml_run.sh" mem=256M \
     1> >(tee "${stdoutlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir}) \
     2> >(tee "${stderrlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir})
   __post_uml_run "$?" "${rootfs}/mntpoint" "${stdoutlog}" "${verbosity}" "${stderrlog}"
@@ -115,7 +115,7 @@ _EOF_
   cp -rLp /usr/share/misc/ "${rootfs}/usr/share/"
 
   # Copy common.sh ns-common.sh etc. (*.sh) and test case directory
-  cp -rpH ./*.sh "$(dirname "${testscript}")" "${rootfs}"
+  cp -rpH ./*.sh "$(dirname "${testscript}")" scripts "${rootfs}"
 
 
   # auditd:
@@ -130,7 +130,7 @@ _EOF_
 }
 
 DIR="$(dirname "$0")"
-ROOT="${DIR}"
+ROOT="${DIR}/.."
 
 source "${ROOT}/common.sh"
 

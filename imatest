@@ -106,7 +106,7 @@ function imatest()
 
       wrapper=$(cut -d" " -f1 <<< "${commandline}")
       case "${wrapper}" in
-      run-in-uml.sh)
+      scripts/run-in-uml.sh)
         testcase=$(cut -d" " -f2 <<< "${commandline}")
         ;;
       *)
