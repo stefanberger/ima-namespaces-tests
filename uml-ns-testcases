@@ -8,6 +8,8 @@ appraise-9/test.sh
 appraise-10/test.sh
 evm-3/test.sh
 evm-4/test.sh
+evm-7/test.sh
+evm-8/test.sh
 hash-1/test.sh
 scripts/run-in-uml.sh measure-1/test.sh
 scripts/run-in-uml.sh measure-4/test.sh

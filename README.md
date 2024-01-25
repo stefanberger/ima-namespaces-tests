@@ -24,6 +24,9 @@ future for the testing to make any sense. If you know of one compile time option
 'doesn't matter' whether it is set, let me know and we can mark it as such.
 
 ```
+CONFIG_TRUSTED_KEYS=y
+CONFIG_ENCRYPTED_KEYS=y
+CONFIG_USER_DECRYPTED_DATA=y
 CONFIG_IMA_NS=y
 CONFIG_IMA=y
 CONFIG_IMA_MEASURE_PCR_IDX=10
@@ -153,6 +156,7 @@ Concerns for the testing are:
 | appraise-8      | Testing of BPRM_CHECK and MMAP_CHECK; test removal and restoring of signature on library |
 | appraise-9      | Testing of BPRM_CHECK and MMAP_CHECK using different templates for logging |
 | appraise-10     | Testing that a newly created session keyring with _ima keyring and new key does not allow to run an executable signed with this new key |
+| appraise-11     | Check that security.ima cannot be written by a user when IMA-ns is not supported (CONFIG_IMA_NS) |
 | appraise-many-1 | Concurrently running IMA namespaces with own keyrings appraise executables |
 | appraise-many-2 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications |
 | appraise-many-3 | Concurrently running IMA namespaces test appraisal and re-appraisal of files after file and signature modifications and signing with their own private key |
@@ -167,8 +171,12 @@ Concerns for the testing are:
 | au+me+app-1     | Host modifies file that namespace must re-audit and re-measure and re-appraise |
 | evm-1           | Check that security.evm cannot be written while EVM is not namespaced |
 | evm-2           | Check that security.evm can be written and removed when EVM is namespaced and files' uid and gid are mapped |
-| evm-3           | Test appraisal with IMA and EVM signaturs and failures when signatures are removed |
+| evm-3           | Test appraisal with IMA and EVM signatures and failures when signatures are removed |
 | evm-4           | Test evm_xattrs securityfs file and modification of file metadata (xattrs, mode etc.) to check execution prevention |
+| evm-5           | Test appraisal with IMA and EVM signatures and failures when file on overlayfs is modified |
+| evm-6           | Like evm-5 but use squashfs as lower filesystem (OpenBMC case) |
+| evm-7           | Use an HMAC key for EVM signature and check that security.evm changes (CONFIG_EVM_ATTR_FSUUID must not be enabled) |
+| evm-8           | Enforce EVM (RSA) signatures and use evm-sig template |
 | evm-many-1      | Concurrently running IMA namespaces test appraisal with IMA and EVM signaturs and failures when signatures are removed |
 | hash-1          | Ensuring that a xattr hash is generated on a file following hash policy rule |
 | hash-2          | Ensuring that a xattr hash is generated on a file following hash policy rule and that the host, that has no hash rule, will not modify the hash |
@@ -276,6 +284,7 @@ The following test cases are supported:
 | appraise-9/test.sh             | - " - |
 | evm-3/test.sh                  | - " - |
 | evm-4/test.sh                  | - " - |
+| evm-8/test.sh                  | - " - |
 | hash-1/test.sh                 | - " - |
 | host-measure-1/test.sh         | - " - |
 | host-measure-1/test2.sh        | - " - |
@@ -320,6 +329,7 @@ The following namespacing-related test cases are supported:
 | appraise-10/test.sh            | - " - |
 | evm-3/test.sh                  | - " - |
 | evm-4/test.sh                  | - " - |
+| evm-8/test.sh                  | - " - |
 | hash-1/test.sh                 | - " - |
 | selftest-1/test.sh             | - " - |
 | measure-1/test.sh              | - " - ; requires run-in-uml.sh |
