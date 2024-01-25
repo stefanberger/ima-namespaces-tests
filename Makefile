@@ -29,7 +29,7 @@ install: all $(DESTS)
 	install -m 644 host-testcases $(INSTDIR)
 	install -m 644 common.sh $(INSTDIR)
 	install -m 644 ns-common.sh $(INSTDIR)
-	install -m 644 uml_chroot.sh $(INSTDIR)
+	install -m 644 scripts/uml_chroot.sh $(INSTDIR)
 	install -m 644 check.sh $(INSTDIR)
 
 uninstall:

@@ -16,7 +16,7 @@ check_ima_support
 
 setup_busybox_host \
 	"${ROOT}/ns-common.sh" \
-	"${ROOT}/uml_chroot.sh" \
+	"${ROOT}/scripts/uml_chroot.sh" \
 	"${DIR}/remeasure.sh"
 
 # Test measurements caused by executable run on host

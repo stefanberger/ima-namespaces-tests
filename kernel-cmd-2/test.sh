@@ -14,7 +14,7 @@ check_allow_expensive_test
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
-	"${ROOT}/uml_chroot.sh" \
+	"${ROOT}/scripts/uml_chroot.sh" \
 	"${ROOT}/check.sh"
 
 kv=$(get_kernel_version)
@@ -51,7 +51,7 @@ do
       # Recreate the container on every loop
       setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
-	"${ROOT}/uml_chroot.sh" \
+	"${ROOT}/scripts/uml_chroot.sh" \
 	"${DIR}/check_log_template.sh"
 
       UML_KERNEL_CMD="ima_policy=${policy} ima_template_fmt=${template_fmt} ima_hash=${hash}" \

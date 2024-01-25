@@ -10,7 +10,7 @@ source "${ROOT}/common.sh"
 
 setup_busybox_container \
 	"${ROOT}/ns-common.sh" \
-	"${ROOT}/uml_chroot.sh" \
+	"${ROOT}/scripts/uml_chroot.sh" \
 	"${ROOT}/check.sh" \
 	"${DIR}/selftest.sh" \
 	"${DIR}/selftest-env.sh"
