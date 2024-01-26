@@ -172,6 +172,7 @@ Concerns for the testing are:
 | evm-many-1      | Concurrently running IMA namespaces test appraisal with IMA and EVM signaturs and failures when signatures are removed |
 | evm+overlayfs-1 | Test with overlayfs and HMAC |
 | evm+overlayfs-2 | Test with overlayfs and portable RSA signatures |
+| evm+overlayfs-3 | Test with overlayfs and portable RSA signatures with FILE_CHECK policy |
 | hash-1          | Ensuring that a xattr hash is generated on a file following hash policy rule |
 | hash-2          | Ensuring that a xattr hash is generated on a file following hash policy rule and that the host, that has no hash rule, will not modify the hash |
 | measure-1       | Measuring of an executed file and re-measuring after modification of the file|
@@ -281,6 +282,7 @@ The following test cases are supported:
 | evm+kernel-cmd-1/test.sh       | Test EVM HMAC creation when passing evm=fix on kernel command line |
 | evm+overlayfs-1/test.sh        | - " - |
 | evm+overlayfs-2/test.sh        | - " - |
+| evm+overlayfs-3/test.sh        | - " - |
 | hash-1/test.sh                 | - " - |
 | host-measure-1/test.sh         | - " - |
 | host-measure-1/test2.sh        | - " - |
