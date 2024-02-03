@@ -417,3 +417,40 @@ stop_swtpm()
 {
   swtpm_ioctl -s --unix "/swtpm-${nsid}/ctrl"
 }
+
+# Get the a given xattr from a file; this must be an exact xattr and
+# not a pattern.
+# @param1: The name of the xattr, e.g. security.ima
+# @param2: The name of the file
+get_xattr()
+{
+  local xattr="$1"
+  local fn="$2"
+
+  getfattr -m "^${xattr}" -e hex --dump "${fn}" 2>/dev/null|\
+    sed -n "s/${xattr}=//p"
+}
+
+# Setup the EVM keyrings for HMAC support using hard coded keys
+# The key to use with evmctl will be written into /etc/keys/evm-key-plain
+evm_setup_keyrings_hmac()
+{
+  local kmk_user evmkey evmkey_ascii
+
+  # Setup master key
+  kmk_user="\xB3\x74\xA2\x6A\x71\x49\x04\x37\xAA\x02\x4E\x4F\xAD\xD5\xB4\x97\xFD\xFF\x1A\x8E\xA6\xFF\x12\xF6\xFB\x65\xAF\x27\x20\xB5\x9C\xCF"
+  if ! keyctl add user kmk-user "${kmk_user}" @s >/dev/null; then
+    echo " Error: Could not create key on session keyring"
+    return 1
+  fi
+
+  evmkey="\xB3\x74\xA2\x6A\x71\x49\x04\x37\xAA\x02\x4E\x4F\xAD\xD5\xB4\x97\xFD\xFF\x1A\x8E\xA6\xFF\x12\xF6\xFB\x65\xAF\x27\x20\xB5\x9C\xCF"
+  mkdir -p /etc/keys
+  echo -en "${evmkey}" > /etc/keys/evm-key-plain
+  evmkey_ascii=$(echo -en "${evmkey}"| xxd -c32 -p)
+  if ! keyctl add encrypted evm-key "new default user:kmk-user 32 ${evmkey_ascii}" @s >/dev/null; then
+    echo " Error: Could not create evm-key. Was kernel compiled with CONFIG_USER_DECRYPTED_DATA?"
+    return 1
+  fi
+  return 0
+}
