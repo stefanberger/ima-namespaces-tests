@@ -275,10 +275,10 @@ function __setup_busybox()
   fi
   pushd "${rootfs}/bin" 1>/dev/null || exit "${FAIL:-1}"
   for prg in \
-      cat chmod cut cp date dirname diff echo env find grep head id \
+      cat chmod chown cut cp date dirname diff echo env find grep head id \
       ls ln mkdir mknod mount mv printf rm \
       sed sh sha1sum sha256sum sha384sum sha512sum sleep stat sync \
-      tail time uname which; do
+      tail time uname which xxd; do
     ln -s busybox ${prg}
   done
   popd 1>/dev/null || exit "${FAIL:-1}"
@@ -668,6 +668,7 @@ function run_busybox_container_key_session()
       UML_SCRIPT="$1" UML_SCRIPT_P1="$2" \
       "$(set | grep -E "^(G|IMA_TEST)_.*=.*")" \
       rootfstype=hostfs rw init="${rootfs}/uml_chroot.sh ${cmd}" mem=256M \
+      ${UML_KERNEL_CMD:+${UML_KERNEL_CMD}} \
       1> >(tee "${stdoutlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir}) \
       2> >(tee "${stderrlog}" 2>/dev/null | sed -z 's/\n/\n\r/g' >${redir})
     __post_uml_run "$?" "${rootfs}" "${stdoutlog}" "${verbosity}" "${stderrlog}"

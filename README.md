@@ -276,6 +276,7 @@ The following test cases are supported:
 | appraise-9/test.sh             | - " - |
 | evm-3/test.sh                  | - " - |
 | evm-4/test.sh                  | - " - |
+| evm+kernel-cmd-1/test.sh       | Test EVM HMAC creation when passing evm=fix on kernel command line |
 | hash-1/test.sh                 | - " - |
 | host-measure-1/test.sh         | - " - |
 | host-measure-1/test2.sh        | - " - |
