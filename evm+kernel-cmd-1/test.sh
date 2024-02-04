@@ -33,7 +33,7 @@ copy_elf_busybox_container "$(type -P keyctl)"
 copy_elf_busybox_container "$(type -P evmctl)"
 copy_elf_busybox_container "$(type -P getfattr)"
 
-echo "INFO: Testing EVM symmetric signature appraisal"
+echo "INFO: Testing EVM HMAC creation when passing evm=fix on kernel command line"
 
 UML_KERNEL_CMD="evm=fix ima_appraise=log" \
   run_busybox_container_key_session ./appraise.sh
