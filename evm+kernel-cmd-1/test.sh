@@ -20,15 +20,6 @@ setup_busybox_container \
 	"${ROOT}/keys/rsakey.pem" \
 	"${ROOT}/keys/rsa.crt"
 
-if ! check_ns_evm_support; then
-  echo " Skip: IMA-ns does not support EVM in namespaces"
-  exit "${SKIP:-3}"
-fi
-if ! check_ns_appraise_support; then
-  echo " Skip: IMA-ns does not support IMA-appraisal in namespaces"
-  exit "${SKIP:-3}"
-fi
-
 copy_elf_busybox_container "$(type -P keyctl)"
 copy_elf_busybox_container "$(type -P evmctl)"
 copy_elf_busybox_container "$(type -P getfattr)"
