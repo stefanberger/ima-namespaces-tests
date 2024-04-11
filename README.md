@@ -175,6 +175,7 @@ Concerns for the testing are:
 | evm+overlayfs-3 | Test with overlayfs and portable RSA signatures with FILE_CHECK policy |
 | hash-1          | Ensuring that a xattr hash is generated on a file following hash policy rule |
 | hash-2          | Ensuring that a xattr hash is generated on a file following hash policy rule and that the host, that has no hash rule, will not modify the hash |
+| ima+overlayfs-1 | Test with overlayfs and writers violations |
 | measure-1       | Measuring of an executed file and re-measuring after modification of the file|
 | measure-2       | Configure namespace with hash algorithm and template |
 | measure-3       | Verification that uid/gid values when viewed from another user namespace are showing expected values relative to that user namespace |
@@ -288,6 +289,7 @@ The following test cases are supported:
 | host-measure-1/test2.sh        | - " - |
 | host-measure-2/test.sh         | - " - |
 | host-audit+measure-1/test.sh   | - " - ; requires run-in-uml.sh |
+| ima+overlayfs-1                | - " - |
 | kernel-cmd-1/test.sh           | Pass different parameters to ima_hash=,ima_template=,ima_policy= boot parameters and check resulting log |
 | kernel-cmd-2/test.sh           | Pass different parameters to ima_hash=,ima_template_fmt=,ima_policy= boot parameters and check resulting log |
 | selftest-1/test.sh             | see above |

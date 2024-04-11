@@ -15,5 +15,6 @@ scripts/run-in-uml.sh host-audit+measure-1/test.sh
 host-measure-1/test.sh
 host-measure-1/test2.sh
 host-measure-2/test.sh
+ima+overlayfs-1/test.sh
 kernel-cmd-1/test.sh
 kernel-cmd-2/test.sh
