@@ -92,7 +92,7 @@ function setup_filesystem_for_uml()
   setup_busybox_container
 
   # Set up a minimal environment that most test cases can work with
-  for prg in busybox unshare bash file auditd true; do
+  for prg in busybox unshare bash file auditd true keyctl evmctl; do
     copy_elf_busybox_container "$(type -P "${prg}")" "bin/"
   done
 
@@ -114,9 +114,8 @@ _EOF_
   mkdir -p "${rootfs}/usr/share/misc"
   cp -rLp /usr/share/misc/ "${rootfs}/usr/share/"
 
-  # Copy common.sh ns-common.sh etc. (*.sh) and test case directory
+  # Copy common.sh, ns-common.sh, keys, etc. (*.sh) and test case directory
   cp -rpH ./*.sh "$(dirname "${testscript}")" scripts "${rootfs}"
-
 
   # auditd:
   # don't copy host's /etc/audit/ since auditd won't run anymore at all then

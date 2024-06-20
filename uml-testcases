@@ -6,6 +6,8 @@ appraise-6/test.sh
 appraise-9/test.sh
 evm-3/test.sh
 evm-4/test.sh
+evm-7/test.sh
+evm-8/test.sh
 evm+kernel-cmd-1/test.sh
 evm+overlayfs-1/test.sh
 evm+overlayfs-2/test.sh

@@ -9,6 +9,7 @@ appraise-7/test.sh
 appraise-8/test.sh
 appraise-9/test.sh
 appraise-10/test.sh
+appraise-11/test.sh
 appraise-many-1/test.sh
 appraise-many-2/test.sh
 appraise-many-3/test.sh
@@ -25,6 +26,10 @@ evm-1/test.sh
 evm-2/test.sh
 evm-3/test.sh
 evm-4/test.sh
+evm-5/test.sh
+evm-6/test.sh
+evm-7/test.sh
+evm-8/test.sh
 evm+overlayfs-1/test.sh
 evm+overlayfs-2/test.sh
 evm-many-1/test.sh
